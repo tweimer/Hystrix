@@ -51,26 +51,26 @@ public interface HystrixThreadPool {
      *
      * @return ThreadPoolExecutor
      */
-    public ExecutorService getExecutor();
+    ExecutorService getExecutor();
 
-    public Scheduler getScheduler();
+    Scheduler getScheduler();
 
-    public Scheduler getScheduler(Func0<Boolean> shouldInterruptThread);
+    Scheduler getScheduler(Func0<Boolean> shouldInterruptThread);
 
     /**
      * Mark when a thread begins executing a command.
      */
-    public void markThreadExecution();
+    void markThreadExecution();
 
     /**
      * Mark when a thread completes executing a command.
      */
-    public void markThreadCompletion();
+    void markThreadCompletion();
 
     /**
      * Mark when a command gets rejected from the threadpool
      */
-    public void markThreadRejection();
+    void markThreadRejection();
 
     /**
      * Whether the queue will allow adding an item to it.
@@ -80,17 +80,17 @@ public interface HystrixThreadPool {
      *
      * @return boolean whether there is space on the queue
      */
-    public boolean isQueueSpaceAvailable();
+    boolean isQueueSpaceAvailable();
 
     /**
      * @ExcludeFromJavadoc
      */
-    /* package */static class Factory {
+    class Factory {
         /*
          * Use the String from HystrixThreadPoolKey.name() instead of the HystrixThreadPoolKey instance as it's just an interface and we can't ensure the object
          * we receive implements hashcode/equals correctly and do not want the default hashcode/equals which would create a new threadpool for every object we get even if the name is the same
          */
-        /* package */final static ConcurrentHashMap<String, HystrixThreadPool> threadPools = new ConcurrentHashMap<String, HystrixThreadPool>();
+        final static ConcurrentHashMap<String, HystrixThreadPool> threadPools = new ConcurrentHashMap<>();
 
         /**
          * Get the {@link HystrixThreadPool} instance for a given {@link HystrixThreadPoolKey}.
@@ -99,7 +99,7 @@ public interface HystrixThreadPool {
          *
          * @return {@link HystrixThreadPool} instance
          */
-        /* package */static HystrixThreadPool getInstance(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolProperties.Setter propertiesBuilder) {
+        static HystrixThreadPool getInstance(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolProperties.Setter propertiesBuilder) {
             // get the key to use instead of using the object itself so that if people forget to implement equals/hashcode things will still work
             String key = threadPoolKey.name();
 
@@ -125,7 +125,7 @@ public interface HystrixThreadPool {
          * and causing thread-pools to initialize while also trying to shutdown.
          * </p>
          */
-        /* package */static synchronized void shutdown() {
+        static synchronized void shutdown() {
             for (HystrixThreadPool pool : threadPools.values()) {
                 pool.getExecutor().shutdown();
             }
@@ -139,7 +139,7 @@ public interface HystrixThreadPool {
          * and causing thread-pools to initialize while also trying to shutdown.
          * </p>
          */
-        /* package */static synchronized void shutdown(long timeout, TimeUnit unit) {
+        static synchronized void shutdown(long timeout, TimeUnit unit) {
             for (HystrixThreadPool pool : threadPools.values()) {
                 pool.getExecutor().shutdown();
             }
@@ -159,7 +159,7 @@ public interface HystrixThreadPool {
      * @ExcludeFromJavadoc
      * @ThreadSafe
      */
-    /* package */static class HystrixThreadPoolDefault implements HystrixThreadPool {
+    class HystrixThreadPoolDefault implements HystrixThreadPool {
         private static final Logger logger = LoggerFactory.getLogger(HystrixThreadPoolDefault.class);
 
         private final HystrixThreadPoolProperties properties;
@@ -227,8 +227,8 @@ public interface HystrixThreadPool {
                             dynamicCoreSize + " and maximumSize = " + configuredMaximumSize + ".  Maximum size will be set to " +
                             dynamicMaximumSize + ", the coreSize value, since it must be equal to or greater than the coreSize value");
                 }
-                threadPool.setCorePoolSize(dynamicCoreSize);
                 threadPool.setMaximumPoolSize(dynamicMaximumSize);
+                threadPool.setCorePoolSize(dynamicCoreSize);
             }
 
             threadPool.setKeepAliveTime(properties.keepAliveTimeMinutes().get(), TimeUnit.MINUTES);
