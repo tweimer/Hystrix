@@ -46,11 +46,10 @@ public class RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> {
     private final int maxBatchSize;
     private final AtomicBoolean batchStarted = new AtomicBoolean();
 
-    private final ConcurrentMap<RequestArgumentType, CollapsedRequest<ResponseType, RequestArgumentType>> argumentMap =
-            new ConcurrentHashMap<RequestArgumentType, CollapsedRequest<ResponseType, RequestArgumentType>>();
+    private final ConcurrentMap<RequestArgumentType, CollapsedRequest<ResponseType, RequestArgumentType>> argumentMap = new ConcurrentHashMap<>();
     private final HystrixCollapserProperties properties;
 
-    private ReentrantReadWriteLock batchLock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock batchLock = new ReentrantReadWriteLock();
 
     public RequestBatch(HystrixCollapserProperties properties, HystrixCollapserBridge<BatchReturnType, ResponseType, RequestArgumentType> commandCollapser, int maxBatchSize) {
         this.properties = properties;
@@ -80,8 +79,7 @@ public class RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> {
                 if (argumentMap.size() >= maxBatchSize) {
                     return null;
                 } else {
-                    CollapsedRequestSubject<ResponseType, RequestArgumentType> collapsedRequest =
-                            new CollapsedRequestSubject<ResponseType, RequestArgumentType>(arg, this);
+                    CollapsedRequestSubject<ResponseType, RequestArgumentType> collapsedRequest = new CollapsedRequestSubject<>(arg, this);
                     final CollapsedRequestSubject<ResponseType, RequestArgumentType> existing = (CollapsedRequestSubject<ResponseType, RequestArgumentType>) argumentMap.putIfAbsent(arg, collapsedRequest);
                     /**
                      * If the argument already exists in the batch, then there are 2 options:
@@ -171,7 +169,7 @@ public class RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> {
                         // create a new command to handle this batch of requests
                         Observable<BatchReturnType> o = commandCollapser.createObservableCommand(shardRequests);
 
-                        commandCollapser.mapResponseToRequests(o, shardRequests).doOnError(new Action1<Throwable>() {
+                        commandCollapser.mapResponseToRequests(o, shardRequests).doOnError(new Action1<>() {
 
                             /**
                              * This handles failed completions
@@ -255,7 +253,7 @@ public class RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> {
             batchLock.writeLock().lock();
             try {
                 // if we win the 'start' and once we have the lock we can now shut it down otherwise another thread will finish executing this batch
-                if (argumentMap.size() > 0) {
+                if (!argumentMap.isEmpty()) {
                     logger.warn("Requests still exist in queue but will not be executed due to RequestCollapser shutdown: " + argumentMap.size(), new IllegalStateException());
                     /*
                      * In the event that there is a concurrency bug or thread scheduling prevents the timer from ticking we need to handle this so the Future.get() calls do not block.

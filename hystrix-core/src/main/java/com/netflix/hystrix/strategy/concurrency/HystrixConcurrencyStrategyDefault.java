@@ -22,7 +22,7 @@ package com.netflix.hystrix.strategy.concurrency;
  */
 public class HystrixConcurrencyStrategyDefault extends HystrixConcurrencyStrategy {
 
-    private static HystrixConcurrencyStrategyDefault INSTANCE = new HystrixConcurrencyStrategyDefault();
+    private static final HystrixConcurrencyStrategyDefault INSTANCE = new HystrixConcurrencyStrategyDefault();
 
     public static HystrixConcurrencyStrategy getInstance() {
         return INSTANCE;

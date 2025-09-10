@@ -24,11 +24,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HystrixCounters {
     private static final AtomicInteger concurrentThreadsExecuting = new AtomicInteger(0);
 
-    /* package-private */ static int incrementGlobalConcurrentThreads() {
+    static int incrementGlobalConcurrentThreads() {
         return concurrentThreadsExecuting.incrementAndGet();
     }
 
-    /* package-private */ static int decrementGlobalConcurrentThreads() {
+    static int decrementGlobalConcurrentThreads() {
         return concurrentThreadsExecuting.decrementAndGet();
     }
 

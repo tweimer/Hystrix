@@ -29,15 +29,15 @@ public interface HystrixCollapserKey {
      * 
      * @return String
      */
-    public String name();
+    String name();
 
-    public static class Factory {
+    class Factory {
 
         private Factory() {
         }
 
         // used to intern instances so we don't keep re-creating them millions of times for the same key
-        private static ConcurrentHashMap<String, HystrixCollapserKey> intern = new ConcurrentHashMap<String, HystrixCollapserKey>();
+        private static final ConcurrentHashMap<String, HystrixCollapserKey> intern = new ConcurrentHashMap<>();
 
         /**
          * Retrieve (or create) an interned HystrixCollapserKey instance for a given name.
@@ -55,7 +55,7 @@ public interface HystrixCollapserKey {
 
         private static class HystrixCollapserKeyDefault implements HystrixCollapserKey {
 
-            private String name;
+            private final String name;
 
             private HystrixCollapserKeyDefault(String name) {
                 this.name = name;

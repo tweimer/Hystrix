@@ -38,10 +38,10 @@ public class HystrixContextRunnable implements Runnable {
     }
 
     public HystrixContextRunnable(final HystrixConcurrencyStrategy concurrencyStrategy, final HystrixRequestContext hystrixRequestContext, final Runnable actual) {
-        this.actual = concurrencyStrategy.wrapCallable(new Callable<Void>() {
+        this.actual = concurrencyStrategy.wrapCallable(new Callable<>() {
 
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 actual.run();
                 return null;
             }

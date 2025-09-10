@@ -32,14 +32,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @param <Output> type of data emitted to stream subscribers (often is the same as A but does not have to be)
  */
 public abstract class BucketedRollingCounterStream<Event extends HystrixEvent, Bucket, Output> extends BucketedCounterStream<Event, Bucket, Output> {
-    private Observable<Output> sourceStream;
+    private final Observable<Output> sourceStream;
     private final AtomicBoolean isSourceCurrentlySubscribed = new AtomicBoolean(false);
 
     protected BucketedRollingCounterStream(HystrixEventStream<Event> stream, final int numBuckets, int bucketSizeInMs,
                                            final Func2<Bucket, Event, Bucket> appendRawEventToBucket,
                                            final Func2<Output, Bucket, Output> reduceBucket) {
         super(stream, numBuckets, bucketSizeInMs, appendRawEventToBucket);
-        Func1<Observable<Bucket>, Observable<Output>> reduceWindowToSummary = new Func1<Observable<Bucket>, Observable<Output>>() {
+        Func1<Observable<Bucket>, Observable<Output>> reduceWindowToSummary = new Func1<>() {
             @Override
             public Observable<Output> call(Observable<Bucket> window) {
                 return window.scan(getEmptyOutputValue(), reduceBucket).skip(numBuckets);
@@ -69,7 +69,7 @@ public abstract class BucketedRollingCounterStream<Event extends HystrixEvent, B
         return sourceStream;
     }
 
-    /* package-private */ boolean isSourceCurrentlySubscribed() {
+    boolean isSourceCurrentlySubscribed() {
         return isSourceCurrentlySubscribed.get();
     }
 }

@@ -24,7 +24,7 @@ package com.netflix.hystrix.strategy.metrics;
  */
 public class HystrixMetricsPublisherDefault extends HystrixMetricsPublisher {
 
-    private static HystrixMetricsPublisherDefault INSTANCE = new HystrixMetricsPublisherDefault();
+    private static final HystrixMetricsPublisherDefault INSTANCE = new HystrixMetricsPublisherDefault();
 
     public static HystrixMetricsPublisher getInstance() {
         return INSTANCE;

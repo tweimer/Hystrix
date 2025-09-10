@@ -24,5 +24,5 @@ import com.netflix.hystrix.util.HystrixTimer.TimerListener;
  */
 public interface CollapserTimer {
 
-    public Reference<TimerListener> addListener(TimerListener collapseTask);
+    Reference<TimerListener> addListener(TimerListener collapseTask);
 }

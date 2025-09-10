@@ -58,7 +58,7 @@ public interface HystrixObservable<R> extends HystrixInvokable<R> {
      * @throws IllegalStateException
      *             if invoked more than once
      */
-    public Observable<R> observe();
+    Observable<R> observe();
 
     /**
      * Used for asynchronous execution of command with a callback by subscribing to the {@link Observable}.
@@ -89,6 +89,6 @@ public interface HystrixObservable<R> extends HystrixInvokable<R> {
      * @throws IllegalStateException
      *             if invoked more than once
      */
-    public Observable<R> toObservable();
+    Observable<R> toObservable();
     
 }

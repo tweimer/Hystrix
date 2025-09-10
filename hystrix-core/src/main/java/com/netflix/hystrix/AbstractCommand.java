@@ -51,13 +51,14 @@ import rx.subscriptions.CompositeSubscription;
 import java.lang.ref.Reference;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-/* package */abstract class AbstractCommand<R> implements HystrixInvokableInfo<R>, HystrixObservable<R> {
+abstract class AbstractCommand<R> implements HystrixInvokableInfo<R>, HystrixObservable<R> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
     protected final HystrixCircuitBreaker circuitBreaker;
     protected final HystrixThreadPool threadPool;
@@ -91,19 +92,19 @@ import java.util.concurrent.atomic.AtomicReference;
     /* FALLBACK Semaphore */
     protected final TryableSemaphore fallbackSemaphoreOverride;
     /* each circuit has a semaphore to restrict concurrent fallback execution */
-    protected static final ConcurrentHashMap<String, TryableSemaphore> fallbackSemaphorePerCircuit = new ConcurrentHashMap<String, TryableSemaphore>();
+    protected static final ConcurrentMap<String, TryableSemaphore> fallbackSemaphorePerCircuit = new ConcurrentHashMap<>();
     /* END FALLBACK Semaphore */
 
     /* EXECUTION Semaphore */
     protected final TryableSemaphore executionSemaphoreOverride;
     /* each circuit has a semaphore to restrict concurrent fallback execution */
-    protected static final ConcurrentHashMap<String, TryableSemaphore> executionSemaphorePerCircuit = new ConcurrentHashMap<String, TryableSemaphore>();
+    protected static final ConcurrentMap<String, TryableSemaphore> executionSemaphorePerCircuit = new ConcurrentHashMap<>();
     /* END EXECUTION Semaphore */
 
-    protected final AtomicReference<Reference<TimerListener>> timeoutTimer = new AtomicReference<Reference<TimerListener>>();
+    protected final AtomicReference<Reference<TimerListener>> timeoutTimer = new AtomicReference<>();
 
-    protected AtomicReference<CommandState> commandState = new AtomicReference<CommandState>(CommandState.NOT_STARTED);
-    protected AtomicReference<ThreadState> threadState = new AtomicReference<ThreadState>(ThreadState.NOT_USING_THREAD);
+    protected AtomicReference<CommandState> commandState = new AtomicReference<>(CommandState.NOT_STARTED);
+    protected AtomicReference<ThreadState> threadState = new AtomicReference<>(ThreadState.NOT_USING_THREAD);
 
     /*
      * {@link ExecutionResult} refers to what happened as the user-provided code ran.  If request-caching is used,
@@ -117,12 +118,12 @@ import java.util.concurrent.atomic.AtomicReference;
      */
     protected volatile ExecutionResult executionResult = ExecutionResult.EMPTY; //state on shared execution
 
-    protected volatile boolean isResponseFromCache = false;
+    protected volatile boolean isResponseFromCache;
     protected volatile ExecutionResult executionResultAtTimeOfCancellation;
     protected volatile long commandStartTimestamp = -1L;
 
     /* If this command executed and timed-out */
-    protected final AtomicReference<TimedOutStatus> isCommandTimedOut = new AtomicReference<TimedOutStatus>(TimedOutStatus.NOT_EXECUTED);
+    protected final AtomicReference<TimedOutStatus> isCommandTimedOut = new AtomicReference<>(TimedOutStatus.NOT_EXECUTED);
     protected volatile Action0 endCurrentThreadExecutingCommand;
 
     /**
@@ -133,11 +134,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
     // this is a micro-optimization but saves about 1-2microseconds (on 2011 MacBook Pro) 
     // on the repetitive string processing that will occur on the same classes over and over again
-    private static ConcurrentHashMap<Class<?>, String> defaultNameCache = new ConcurrentHashMap<Class<?>, String>();
+    private static final ConcurrentMap<Class<?>, String> defaultNameCache = new ConcurrentHashMap<>();
 
-    protected static ConcurrentHashMap<HystrixCommandKey, Boolean> commandContainsFallback = new ConcurrentHashMap<HystrixCommandKey, Boolean>();
+    protected static ConcurrentMap<HystrixCommandKey, Boolean> commandContainsFallback = new ConcurrentHashMap<>();
 
-    /* package */static String getDefaultNameFromClass(Class<?> cls) {
+    static String getDefaultNameFromClass(Class<?> cls) {
         String fromCache = defaultNameCache.get(cls);
         if (fromCache != null) {
             return fromCache;
@@ -145,10 +146,10 @@ import java.util.concurrent.atomic.AtomicReference;
         // generate the default
         // default HystrixCommandKey to use if the method is not overridden
         String name = cls.getSimpleName();
-        if (name.equals("")) {
+        if (name.isEmpty()) {
             // we don't have a SimpleName (anonymous inner class) so use the full class name
             name = cls.getName();
-            name = name.substring(name.lastIndexOf('.') + 1, name.length());
+            name = name.substring(name.lastIndexOf('.') + 1);
         }
         defaultNameCache.put(cls, name);
         return name;
@@ -192,7 +193,7 @@ import java.util.concurrent.atomic.AtomicReference;
     }
 
     private static HystrixCommandKey initCommandKey(final HystrixCommandKey fromConstructor, Class<?> clazz) {
-        if (fromConstructor == null || fromConstructor.name().trim().equals("")) {
+        if (fromConstructor == null || fromConstructor.name().isBlank()) {
             final String keyName = getDefaultNameFromClass(clazz);
             return HystrixCommandKey.Factory.asKey(keyName);
         } else {
@@ -294,7 +295,7 @@ import java.util.concurrent.atomic.AtomicReference;
      * 
      * @param sizeOfBatch number of commands in request batch
      */
-    /* package */void markAsCollapsedCommand(HystrixCollapserKey collapserKey, int sizeOfBatch) {
+    void markAsCollapsedCommand(HystrixCollapserKey collapserKey, int sizeOfBatch) {
         eventNotifier.markEvent(HystrixEventType.COLLAPSED, this.commandKey);
         executionResult = executionResult.markCollapsed(collapserKey, sizeOfBatch);
     }
@@ -411,7 +412,7 @@ import java.util.concurrent.atomic.AtomicReference;
             }
         };
 
-        final Func0<Observable<R>> applyHystrixSemantics = new Func0<Observable<R>>() {
+        final Func0<Observable<R>> applyHystrixSemantics = new Func0<>() {
             @Override
             public Observable<R> call() {
                 if (commandState.get().equals(CommandState.UNSUBSCRIBED)) {
@@ -421,7 +422,7 @@ import java.util.concurrent.atomic.AtomicReference;
             }
         };
 
-        final Func1<R, R> wrapWithAllOnNextHooks = new Func1<R, R>() {
+        final Func1<R, R> wrapWithAllOnNextHooks = new Func1<>() {
             @Override
             public R call(R r) {
                 R afterFirstApplication = r;
@@ -452,7 +453,7 @@ import java.util.concurrent.atomic.AtomicReference;
             }
         };
 
-        return Observable.defer(new Func0<Observable<R>>() {
+        return Observable.defer(new Func0<>() {
             @Override
             public Observable<R> call() {
                  /* this is a stateful object so can only be used once */
@@ -533,7 +534,7 @@ import java.util.concurrent.atomic.AtomicReference;
                 }
             };
 
-            final Action1<Throwable> markExceptionThrown = new Action1<Throwable>() {
+            final Action1<Throwable> markExceptionThrown = new Action1<>() {
                 @Override
                 public void call(Throwable t) {
                     eventNotifier.markEvent(HystrixEventType.EXCEPTION_THROWN, commandKey);
@@ -569,7 +570,7 @@ import java.util.concurrent.atomic.AtomicReference;
     private Observable<R> executeCommandAndObserve(final AbstractCommand<R> _cmd) {
         final HystrixRequestContext currentRequestContext = HystrixRequestContext.getContextForCurrentThread();
 
-        final Action1<R> markEmits = new Action1<R>() {
+        final Action1<R> markEmits = new Action1<>() {
             @Override
             public void call(R r) {
                 if (shouldOutputOnNextEvents()) {
@@ -599,7 +600,7 @@ import java.util.concurrent.atomic.AtomicReference;
             }
         };
 
-        final Func1<Throwable, Observable<R>> handleFallback = new Func1<Throwable, Observable<R>>() {
+        final Func1<Throwable, Observable<R>> handleFallback = new Func1<>() {
             @Override
             public Observable<R> call(Throwable t) {
                 circuitBreaker.markNonSuccess();
@@ -625,7 +626,7 @@ import java.util.concurrent.atomic.AtomicReference;
             }
         };
 
-        final Action1<Notification<? super R>> setRequestContext = new Action1<Notification<? super R>>() {
+        final Action1<Notification<? super R>> setRequestContext = new Action1<>() {
             @Override
             public void call(Notification<? super R> rNotification) {
                 setRequestContextIfNeeded(currentRequestContext);
@@ -635,7 +636,7 @@ import java.util.concurrent.atomic.AtomicReference;
         Observable<R> execution;
         if (properties.executionTimeoutEnabled().get()) {
             execution = executeCommandWithSpecifiedIsolation(_cmd)
-                    .lift(new HystrixObservableTimeoutOperator<R>(_cmd));
+                    .lift(new HystrixObservableTimeoutOperator<>(_cmd));
         } else {
             execution = executeCommandWithSpecifiedIsolation(_cmd);
         }
@@ -776,14 +777,14 @@ import java.util.concurrent.atomic.AtomicReference;
             if (properties.fallbackEnabled().get()) {
                 /* fallback behavior is permitted so attempt */
 
-                final Action1<Notification<? super R>> setRequestContext = new Action1<Notification<? super R>>() {
+                final Action1<Notification<? super R>> setRequestContext = new Action1<>() {
                     @Override
                     public void call(Notification<? super R> rNotification) {
                         setRequestContextIfNeeded(requestContext);
                     }
                 };
 
-                final Action1<R> markFallbackEmit = new Action1<R>() {
+                final Action1<R> markFallbackEmit = new Action1<>() {
                     @Override
                     public void call(R r) {
                         if (shouldOutputOnNextEvents()) {
@@ -802,7 +803,7 @@ import java.util.concurrent.atomic.AtomicReference;
                     }
                 };
 
-                final Func1<Throwable, Observable<R>> handleFallbackError = new Func1<Throwable, Observable<R>>() {
+                final Func1<Throwable, Observable<R>> handleFallbackError = new Func1<>() {
                     @Override
                     public Observable<R> call(Throwable t) {
                         /* executionHook for all errors */
@@ -1177,7 +1178,7 @@ import java.util.concurrent.atomic.AtomicReference;
             /**
              * If this subscriber receives values it means the parent succeeded/completed
              */
-            Subscriber<R> parent = new Subscriber<R>() {
+            Subscriber<R> parent = new Subscriber<>() {
 
                 @Override
                 public void onCompleted() {
@@ -1310,7 +1311,7 @@ import java.util.concurrent.atomic.AtomicReference;
         return threadPoolKey;
     }
 
-    /* package */HystrixCircuitBreaker getCircuitBreaker() {
+    HystrixCircuitBreaker getCircuitBreaker() {
         return circuitBreaker;
     }
 
@@ -1347,7 +1348,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
         @Override
         public Subscriber<? super R> call(final Subscriber<? super R> subscriber) {
-            return new Subscriber<R>(subscriber) {
+            return new Subscriber<>(subscriber) {
                 @Override
                 public void onCompleted() {
                     try {
@@ -1382,7 +1383,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
         @Override
         public Subscriber<? super R> call(final Subscriber<? super R> subscriber) {
-            return new Subscriber<R>(subscriber) {
+            return new Subscriber<>(subscriber) {
                 @Override
                 public void onCompleted() {
                     try {
@@ -1419,7 +1420,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
         @Override
         public Subscriber<? super R> call(final Subscriber<? super R> subscriber) {
-            return new Subscriber<R>(subscriber) {
+            return new Subscriber<>(subscriber) {
                 @Override
                 public void onCompleted() {
                     subscriber.onCompleted();
@@ -1462,7 +1463,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
         @Override
         public Subscriber<? super R> call(final Subscriber<? super R> subscriber) {
-            return new Subscriber<R>(subscriber) {
+            return new Subscriber<>(subscriber) {
                 @Override
                 public void onCompleted() {
                     subscriber.onCompleted();
@@ -1560,26 +1561,26 @@ import java.util.concurrent.atomic.AtomicReference;
      */
     protected Throwable decomposeException(Exception e) {
         if (e instanceof IllegalStateException) {
-            return (IllegalStateException) e;
+            return e;
         }
         if (e instanceof HystrixBadRequestException) {
             if (shouldNotBeWrapped(e.getCause())) {
                 return e.getCause();
             }
-            return (HystrixBadRequestException) e;
+            return e;
         }
         if (e.getCause() instanceof HystrixBadRequestException) {
             if(shouldNotBeWrapped(e.getCause().getCause())) {
                 return e.getCause().getCause();
             }
-            return (HystrixBadRequestException) e.getCause();
+            return e.getCause();
         }
         if (e instanceof HystrixRuntimeException) {
-            return (HystrixRuntimeException) e;
+            return e;
         }
         // if we have an exception we know about we'll throw it directly without the wrapper exception
         if (e.getCause() instanceof HystrixRuntimeException) {
-            return (HystrixRuntimeException) e.getCause();
+            return e.getCause();
         }
         if (shouldNotBeWrapped(e)) {
             return e;
@@ -1606,7 +1607,7 @@ import java.util.concurrent.atomic.AtomicReference;
      * Using AtomicInteger increment/decrement instead of java.util.concurrent.Semaphore since we don't need blocking and need a custom implementation to get the dynamic permit count and since
      * AtomicInteger achieves the same behavior and performance without the more complex implementation of the actual Semaphore class using AbstractQueueSynchronizer.
      */
-    /* package */static class TryableSemaphoreActual implements TryableSemaphore {
+    static class TryableSemaphoreActual implements TryableSemaphore {
         protected final HystrixProperty<Integer> numberOfPermits;
         private final AtomicInteger count = new AtomicInteger(0);
 
@@ -1637,7 +1638,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
     }
 
-    /* package */static class TryableSemaphoreNoOp implements TryableSemaphore {
+    static class TryableSemaphoreNoOp implements TryableSemaphore {
 
         public static final TryableSemaphore DEFAULT = new TryableSemaphoreNoOp();
 
@@ -1658,7 +1659,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
     }
 
-    /* package */static interface TryableSemaphore {
+    interface TryableSemaphore {
 
         /**
          * Use like this:
@@ -1676,7 +1677,7 @@ import java.util.concurrent.atomic.AtomicReference;
          * 
          * @return boolean
          */
-        public abstract boolean tryAcquire();
+        boolean tryAcquire();
 
         /**
          * ONLY call release if tryAcquire returned true.
@@ -1692,9 +1693,9 @@ import java.util.concurrent.atomic.AtomicReference;
          * }
          * </pre>
          */
-        public abstract void release();
+        void release();
 
-        public abstract int getNumberOfPermitsUsed();
+        int getNumberOfPermitsUsed();
 
     }
 

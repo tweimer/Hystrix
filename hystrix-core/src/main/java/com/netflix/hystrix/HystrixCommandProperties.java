@@ -97,7 +97,7 @@ public abstract class HystrixCommandProperties {
      * <li>SEMAPHORE: Execute the {@link HystrixCommand#run()} method on the calling thread and restrict concurrent executions using the semaphore permit count.</li>
      * </ul>
      */
-    public static enum ExecutionIsolationStrategy {
+    public enum ExecutionIsolationStrategy {
         THREAD, SEMAPHORE
     }
 
@@ -561,7 +561,7 @@ public abstract class HystrixCommandProperties {
         private Boolean requestCacheEnabled = null;
         private Boolean requestLogEnabled = null;
 
-        /* package */ Setter() {
+        Setter() {
         }
 
         public Boolean getCircuitBreakerEnabled() {

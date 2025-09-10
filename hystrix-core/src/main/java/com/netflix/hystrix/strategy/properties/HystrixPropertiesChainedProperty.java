@@ -44,7 +44,7 @@ public abstract class HystrixPropertiesChainedProperty {
 
         private final AtomicReference<ChainLink<T>> pReference;
         private final ChainLink<T> next;
-        private final List<Runnable> callbacks;
+        private final List<Runnable> callbacks = new ArrayList<>();
 
         /**
          * @return String
@@ -66,8 +66,7 @@ public abstract class HystrixPropertiesChainedProperty {
          */
         public ChainLink() {
             next = null;
-            pReference = new AtomicReference<ChainLink<T>>(this);
-            callbacks = new ArrayList<Runnable>();
+            pReference = new AtomicReference<>(this);
         }
 
         /**
@@ -75,8 +74,7 @@ public abstract class HystrixPropertiesChainedProperty {
          */
         public ChainLink(ChainLink<T> nextProperty) {
             next = nextProperty;
-            pReference = new AtomicReference<ChainLink<T>>(next);
-            callbacks = new ArrayList<Runnable>();
+            pReference = new AtomicReference<>(next);
         }
 
         protected void checkAndFlip() {
@@ -128,12 +126,10 @@ public abstract class HystrixPropertiesChainedProperty {
     public static abstract class ChainBuilder<T> {
         
         private ChainBuilder() {
-            super();        
+
         }
         
-        private List<HystrixDynamicProperty<T>> properties = 
-                new ArrayList<HystrixDynamicProperty<T>>();
-        
+        private final List<HystrixDynamicProperty<T>> properties = new ArrayList<>();
         
         public ChainBuilder<T> add(HystrixDynamicProperty<T> property) {
             properties.add(property);
@@ -146,22 +142,21 @@ public abstract class HystrixPropertiesChainedProperty {
         }
         
         public HystrixDynamicProperty<T> build() {
-            if (properties.size() < 1) throw new IllegalArgumentException();
+            if (properties.isEmpty()) throw new IllegalArgumentException();
             if (properties.size() == 1) return properties.get(0);
-            List<HystrixDynamicProperty<T>> reversed = 
-                    new ArrayList<HystrixDynamicProperty<T>>(properties);
+            List<HystrixDynamicProperty<T>> reversed = new ArrayList<>(properties);
             Collections.reverse(reversed);
             ChainProperty<T> current = null;
             for (HystrixDynamicProperty<T> p : reversed) {
                 if (current == null) {
-                    current = new ChainProperty<T>(p);
+                    current = new ChainProperty<>(p);
                 }
                 else {
-                    current = new ChainProperty<T>(p, current);
+                    current = new ChainProperty<>(p, current);
                 }
             }
             
-            return new ChainHystrixProperty<T>(current);
+            return new ChainHystrixProperty<>(current);
             
         }
         
@@ -170,7 +165,7 @@ public abstract class HystrixPropertiesChainedProperty {
     }
 
     private static <T> ChainBuilder<T> forType(final Class<T> type) {
-        return new ChainBuilder<T>() {
+        return new ChainBuilder<>() {
             @Override
             protected Class<T> getType() {
                 return type;
@@ -195,7 +190,6 @@ public abstract class HystrixPropertiesChainedProperty {
         private final ChainProperty<T> property;
         
         public ChainHystrixProperty(ChainProperty<T> property) {
-            super();
             this.property = property;
         }
         
@@ -221,7 +215,6 @@ public abstract class HystrixPropertiesChainedProperty {
         private final HystrixDynamicProperty<T> sProp;
 
         public ChainProperty(HystrixDynamicProperty<T> sProperty) {
-            super();
             sProp = sProperty;
         }
 

@@ -62,10 +62,10 @@ public class ExecutionResult {
         private final int numCollapsed;
 
         EventCounts() {
-            this.events = new BitSet(NUM_EVENT_TYPES);
-            this.numEmissions = 0;
-            this.numFallbackEmissions = 0;
-            this.numCollapsed = 0;
+            events = new BitSet(NUM_EVENT_TYPES);
+            numEmissions = 0;
+            numFallbackEmissions = 0;
+            numCollapsed = 0;
         }
 
         EventCounts(BitSet events, int numEmissions, int numFallbackEmissions, int numCollapsed) {

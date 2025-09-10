@@ -25,7 +25,7 @@ public class PlatformSpecific {
         STANDARD, APPENGINE_STANDARD, APPENGINE_FLEXIBLE
     }
 
-    private static PlatformSpecific INSTANCE = new PlatformSpecific();
+    private static final PlatformSpecific INSTANCE = new PlatformSpecific();
 
     private PlatformSpecific() {
         platform = determinePlatformReflectively();

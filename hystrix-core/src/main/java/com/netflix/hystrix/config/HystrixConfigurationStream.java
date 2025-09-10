@@ -49,8 +49,7 @@ public class HystrixConfigurationStream {
             DynamicPropertyFactory.getInstance().getIntProperty("hystrix.stream.config.intervalInMilliseconds", 5000);
 
 
-    private static final Func1<Long, HystrixConfiguration> getAllConfig =
-            new Func1<Long, HystrixConfiguration>() {
+    private static final Func1<Long, HystrixConfiguration> getAllConfig = new Func1<>() {
                 @Override
                 public HystrixConfiguration call(Long timestamp) {
                     return HystrixConfiguration.from(
@@ -138,12 +137,11 @@ public class HystrixConfigurationStream {
         return HystrixCollapserConfiguration.sample(collapserKey, collapserProperties);
     }
 
-    private static final Func1<Long, Map<HystrixCommandKey, HystrixCommandConfiguration>> getAllCommandConfig =
-            new Func1<Long, Map<HystrixCommandKey, HystrixCommandConfiguration>>() {
+    private static final Func1<Long, Map<HystrixCommandKey, HystrixCommandConfiguration>> getAllCommandConfig = new Func1<>() {
                 @Override
                 public Map<HystrixCommandKey, HystrixCommandConfiguration> call(Long timestamp) {
                     Map<HystrixCommandKey, HystrixCommandConfiguration> commandConfigPerKey = new HashMap<HystrixCommandKey, HystrixCommandConfiguration>();
-                    for (HystrixCommandMetrics commandMetrics: HystrixCommandMetrics.getInstances()) {
+                    for (HystrixCommandMetrics commandMetrics : HystrixCommandMetrics.getInstances()) {
                         HystrixCommandKey commandKey = commandMetrics.getCommandKey();
                         HystrixThreadPoolKey threadPoolKey = commandMetrics.getThreadPoolKey();
                         HystrixCommandGroupKey groupKey = commandMetrics.getCommandGroup();
@@ -153,12 +151,11 @@ public class HystrixConfigurationStream {
                 }
             };
 
-    private static final Func1<Long, Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration>> getAllThreadPoolConfig =
-            new Func1<Long, Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration>>() {
+    private static final Func1<Long, Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration>> getAllThreadPoolConfig = new Func1<>() {
                 @Override
                 public Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration> call(Long timestamp) {
-                    Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration> threadPoolConfigPerKey = new HashMap<HystrixThreadPoolKey, HystrixThreadPoolConfiguration>();
-                    for (HystrixThreadPoolMetrics threadPoolMetrics: HystrixThreadPoolMetrics.getInstances()) {
+                    Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration> threadPoolConfigPerKey = new HashMap<>();
+                    for (HystrixThreadPoolMetrics threadPoolMetrics : HystrixThreadPoolMetrics.getInstances()) {
                         HystrixThreadPoolKey threadPoolKey = threadPoolMetrics.getThreadPoolKey();
                         threadPoolConfigPerKey.put(threadPoolKey, sampleThreadPoolConfiguration(threadPoolKey, threadPoolMetrics.getProperties()));
                     }
@@ -166,11 +163,10 @@ public class HystrixConfigurationStream {
                 }
             };
 
-    private static final Func1<Long, Map<HystrixCollapserKey, HystrixCollapserConfiguration>> getAllCollapserConfig =
-            new Func1<Long, Map<HystrixCollapserKey, HystrixCollapserConfiguration>>() {
+    private static final Func1<Long, Map<HystrixCollapserKey, HystrixCollapserConfiguration>> getAllCollapserConfig = new Func1<>() {
                 @Override
                 public Map<HystrixCollapserKey, HystrixCollapserConfiguration> call(Long timestamp) {
-                    Map<HystrixCollapserKey, HystrixCollapserConfiguration> collapserConfigPerKey = new HashMap<HystrixCollapserKey, HystrixCollapserConfiguration>();
+                    Map<HystrixCollapserKey, HystrixCollapserConfiguration> collapserConfigPerKey = new HashMap<>();
                     for (HystrixCollapserMetrics collapserMetrics: HystrixCollapserMetrics.getInstances()) {
                         HystrixCollapserKey collapserKey = collapserMetrics.getCollapserKey();
                         collapserConfigPerKey.put(collapserKey, sampleCollapserConfiguration(collapserKey, collapserMetrics.getProperties()));
@@ -181,24 +177,21 @@ public class HystrixConfigurationStream {
 
 
 
-    private static final Func1<HystrixConfiguration, Map<HystrixCommandKey, HystrixCommandConfiguration>> getOnlyCommandConfig =
-            new Func1<HystrixConfiguration, Map<HystrixCommandKey, HystrixCommandConfiguration>>() {
+    private static final Func1<HystrixConfiguration, Map<HystrixCommandKey, HystrixCommandConfiguration>> getOnlyCommandConfig = new Func1<>() {
                 @Override
                 public Map<HystrixCommandKey, HystrixCommandConfiguration> call(HystrixConfiguration hystrixConfiguration) {
                     return hystrixConfiguration.getCommandConfig();
                 }
             };
 
-    private static final Func1<HystrixConfiguration, Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration>> getOnlyThreadPoolConfig =
-            new Func1<HystrixConfiguration, Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration>>() {
+    private static final Func1<HystrixConfiguration, Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration>> getOnlyThreadPoolConfig = new Func1<>() {
                 @Override
                 public Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration> call(HystrixConfiguration hystrixConfiguration) {
                     return hystrixConfiguration.getThreadPoolConfig();
                 }
             };
 
-    private static final Func1<HystrixConfiguration, Map<HystrixCollapserKey, HystrixCollapserConfiguration>> getOnlyCollapserConfig =
-            new Func1<HystrixConfiguration, Map<HystrixCollapserKey, HystrixCollapserConfiguration>>() {
+    private static final Func1<HystrixConfiguration, Map<HystrixCollapserKey, HystrixCollapserConfiguration>> getOnlyCollapserConfig = new Func1<>() {
                 @Override
                 public Map<HystrixCollapserKey, HystrixCollapserConfiguration> call(HystrixConfiguration hystrixConfiguration) {
                     return hystrixConfiguration.getCollapserConfig();

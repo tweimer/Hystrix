@@ -149,7 +149,7 @@ public class HystrixRequestVariableDefault<T> implements HystrixRequestVariable<
     }
 
     @SuppressWarnings("unchecked")
-    /* package */static <T> void remove(HystrixRequestContext context, HystrixRequestVariableDefault<T> v) {
+    static <T> void remove(HystrixRequestContext context, HystrixRequestVariableDefault<T> v) {
         // remove first so no other threads get it
         LazyInitializer<?> o = context.state.remove(v);
         if (o != null) {
@@ -184,7 +184,7 @@ public class HystrixRequestVariableDefault<T> implements HystrixRequestVariable<
      * 
      * @param <T>
      */
-    /* package */static final class LazyInitializer<T> {
+    static final class LazyInitializer<T> {
         // @GuardedBy("synchronization on get() or construction")
         private T value;
 

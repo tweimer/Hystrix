@@ -73,7 +73,7 @@ public abstract class HystrixObservableCommand<R> extends AbstractCommand<R> imp
         if (containsFromMap != null) {
             return containsFromMap;
         } else {
-            Boolean toInsertIntoMap;
+            boolean toInsertIntoMap;
             try {
                 getClass().getDeclaredMethod("resumeWithFallback");
                 toInsertIntoMap = true;
@@ -138,11 +138,11 @@ public abstract class HystrixObservableCommand<R> extends AbstractCommand<R> imp
      */
     final public static class Setter {
 
-        protected final HystrixCommandGroupKey groupKey;
-        protected HystrixCommandKey commandKey;
-        protected HystrixThreadPoolKey threadPoolKey;
-        protected HystrixCommandProperties.Setter commandPropertiesDefaults;
-        protected HystrixThreadPoolProperties.Setter threadPoolPropertiesDefaults;
+        private final HystrixCommandGroupKey groupKey;
+        private HystrixCommandKey commandKey;
+        private HystrixThreadPoolKey threadPoolKey;
+        private HystrixCommandProperties.Setter commandPropertiesDefaults;
+        private HystrixThreadPoolProperties.Setter threadPoolPropertiesDefaults;
 
         /**
          * Setter factory method containing required values.
@@ -156,7 +156,7 @@ public abstract class HystrixObservableCommand<R> extends AbstractCommand<R> imp
          *            with,
          *            common business purpose etc.
          */
-        protected Setter(HystrixCommandGroupKey groupKey) {
+        private Setter(HystrixCommandGroupKey groupKey) {
             this.groupKey = groupKey;
 
             // default to using SEMAPHORE for ObservableCommand

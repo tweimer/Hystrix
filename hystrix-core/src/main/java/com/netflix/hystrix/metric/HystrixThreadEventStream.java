@@ -60,14 +60,14 @@ public class HystrixThreadEventStream {
     private final Subject<HystrixCommandCompletion, HystrixCommandCompletion> writeOnlyCommandCompletionSubject;
     private final Subject<HystrixCollapserEvent, HystrixCollapserEvent> writeOnlyCollapserSubject;
 
-    private static final ThreadLocal<HystrixThreadEventStream> threadLocalStreams = new ThreadLocal<HystrixThreadEventStream>() {
+    private static final ThreadLocal<HystrixThreadEventStream> threadLocalStreams = new ThreadLocal<>() {
         @Override
         protected HystrixThreadEventStream initialValue() {
             return new HystrixThreadEventStream(Thread.currentThread());
         }
     };
 
-    private static final Action1<HystrixCommandExecutionStarted> writeCommandStartsToShardedStreams = new Action1<HystrixCommandExecutionStarted>() {
+    private static final Action1<HystrixCommandExecutionStarted> writeCommandStartsToShardedStreams = new Action1<>() {
         @Override
         public void call(HystrixCommandExecutionStarted event) {
             HystrixCommandStartStream commandStartStream = HystrixCommandStartStream.getInstance(event.getCommandKey());
@@ -80,7 +80,7 @@ public class HystrixThreadEventStream {
         }
     };
 
-    private static final Action1<HystrixCommandCompletion> writeCommandCompletionsToShardedStreams = new Action1<HystrixCommandCompletion>() {
+    private static final Action1<HystrixCommandCompletion> writeCommandCompletionsToShardedStreams = new Action1<>() {
         @Override
         public void call(HystrixCommandCompletion commandCompletion) {
             HystrixCommandCompletionStream commandStream = HystrixCommandCompletionStream.getInstance(commandCompletion.getCommandKey());
@@ -93,7 +93,7 @@ public class HystrixThreadEventStream {
         }
     };
 
-    private static final Action1<HystrixCollapserEvent> writeCollapserExecutionsToShardedStreams = new Action1<HystrixCollapserEvent>() {
+    private static final Action1<HystrixCollapserEvent> writeCollapserExecutionsToShardedStreams = new Action1<>() {
         @Override
         public void call(HystrixCollapserEvent collapserEvent) {
             HystrixCollapserEventStream collapserStream = HystrixCollapserEventStream.getInstance(collapserEvent.getCollapserKey());

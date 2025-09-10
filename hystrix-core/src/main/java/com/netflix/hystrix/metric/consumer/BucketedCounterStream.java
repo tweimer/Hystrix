@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class BucketedCounterStream<Event extends HystrixEvent, Bucket, Output> {
     protected final int numBuckets;
     protected final Observable<Bucket> bucketedStream;
-    protected final AtomicReference<Subscription> subscription = new AtomicReference<Subscription>(null);
+    protected final AtomicReference<Subscription> subscription = new AtomicReference<>(null);
 
     private final Func1<Observable<Event>, Observable<Bucket>> reduceBucketToSummary;
 
@@ -48,19 +48,19 @@ public abstract class BucketedCounterStream<Event extends HystrixEvent, Bucket, 
     protected BucketedCounterStream(final HystrixEventStream<Event> inputEventStream, final int numBuckets, final int bucketSizeInMs,
                                     final Func2<Bucket, Event, Bucket> appendRawEventToBucket) {
         this.numBuckets = numBuckets;
-        this.reduceBucketToSummary = new Func1<Observable<Event>, Observable<Bucket>>() {
+        this.reduceBucketToSummary = new Func1<>() {
             @Override
             public Observable<Bucket> call(Observable<Event> eventBucket) {
                 return eventBucket.reduce(getEmptyBucketSummary(), appendRawEventToBucket);
             }
         };
 
-        final List<Bucket> emptyEventCountsToStart = new ArrayList<Bucket>();
+        final List<Bucket> emptyEventCountsToStart = new ArrayList<>();
         for (int i = 0; i < numBuckets; i++) {
             emptyEventCountsToStart.add(getEmptyBucketSummary());
         }
 
-        this.bucketedStream = Observable.defer(new Func0<Observable<Bucket>>() {
+        this.bucketedStream = Observable.defer(new Func0<>() {
             @Override
             public Observable<Bucket> call() {
                 return inputEventStream

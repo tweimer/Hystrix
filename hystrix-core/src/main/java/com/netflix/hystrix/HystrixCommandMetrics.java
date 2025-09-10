@@ -28,12 +28,12 @@ import com.netflix.hystrix.strategy.eventnotifier.HystrixEventNotifier;
 import com.netflix.hystrix.util.HystrixRollingNumberEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.functions.Func0;
 import rx.functions.Func2;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -46,13 +46,14 @@ public class HystrixCommandMetrics extends HystrixMetrics {
 
     private static final HystrixEventType[] ALL_EVENT_TYPES = HystrixEventType.values();
 
-    public static final Func2<long[], HystrixCommandCompletion, long[]> appendEventToBucket = new Func2<long[], HystrixCommandCompletion, long[]>() {
+    public static final Func2<long[], HystrixCommandCompletion, long[]> appendEventToBucket = new Func2<>() {
         @Override
         public long[] call(long[] initialCountArray, HystrixCommandCompletion execution) {
             ExecutionResult.EventCounts eventCounts = execution.getEventCounts();
-            for (HystrixEventType eventType: ALL_EVENT_TYPES) {
+            for (HystrixEventType eventType : ALL_EVENT_TYPES) {
                 switch (eventType) {
-                    case EXCEPTION_THROWN: break; //this is just a sum of other anyway - don't do the work here
+                    case EXCEPTION_THROWN:
+                        break; //this is just a sum of other anyway - don't do the work here
                     default:
                         initialCountArray[eventType.ordinal()] += eventCounts.getCount(eventType);
                         break;
@@ -62,13 +63,13 @@ public class HystrixCommandMetrics extends HystrixMetrics {
         }
     };
 
-    public static final Func2<long[], long[], long[]> bucketAggregator = new Func2<long[], long[], long[]>() {
+    public static final Func2<long[], long[], long[]> bucketAggregator = new Func2<>() {
         @Override
         public long[] call(long[] cumulativeEvents, long[] bucketEventCounts) {
-            for (HystrixEventType eventType: ALL_EVENT_TYPES) {
+            for (HystrixEventType eventType : ALL_EVENT_TYPES) {
                 switch (eventType) {
                     case EXCEPTION_THROWN:
-                        for (HystrixEventType exceptionEventType: HystrixEventType.EXCEPTION_PRODUCING_EVENT_TYPES) {
+                        for (HystrixEventType exceptionEventType : HystrixEventType.EXCEPTION_PRODUCING_EVENT_TYPES) {
                             cumulativeEvents[eventType.ordinal()] += bucketEventCounts[exceptionEventType.ordinal()];
                         }
                         break;
@@ -82,7 +83,7 @@ public class HystrixCommandMetrics extends HystrixMetrics {
     };
 
     // String is HystrixCommandKey.name() (we can't use HystrixCommandKey directly as we can't guarantee it implements hashcode/equals correctly)
-    private static final ConcurrentHashMap<String, HystrixCommandMetrics> metrics = new ConcurrentHashMap<String, HystrixCommandMetrics>();
+    private static final ConcurrentMap<String, HystrixCommandMetrics> metrics = new ConcurrentHashMap<>();
 
     /**
      * Get or create the {@link HystrixCommandMetrics} instance for a given {@link HystrixCommandKey}.
@@ -162,7 +163,7 @@ public class HystrixCommandMetrics extends HystrixMetrics {
     /**
      * Clears all state from metrics. If new requests come in instances will be recreated and metrics started from scratch.
      */
-    /* package */ static void reset() {
+    static void reset() {
         for (HystrixCommandMetrics metricsInstance: getInstances()) {
             metricsInstance.unsubscribeAll();
         }
@@ -182,7 +183,7 @@ public class HystrixCommandMetrics extends HystrixMetrics {
     private final RollingCommandUserLatencyDistributionStream rollingCommandUserLatencyDistributionStream;
     private final RollingCommandMaxConcurrencyStream rollingCommandMaxConcurrencyStream;
 
-    /* package */HystrixCommandMetrics(final HystrixCommandKey key, HystrixCommandGroupKey commandGroup, HystrixThreadPoolKey threadPoolKey, HystrixCommandProperties properties, HystrixEventNotifier eventNotifier) {
+    HystrixCommandMetrics(final HystrixCommandKey key, HystrixCommandGroupKey commandGroup, HystrixThreadPoolKey threadPoolKey, HystrixCommandProperties properties, HystrixEventNotifier eventNotifier) {
         super(null);
         this.key = key;
         this.group = commandGroup;
@@ -198,7 +199,7 @@ public class HystrixCommandMetrics extends HystrixMetrics {
         rollingCommandMaxConcurrencyStream = RollingCommandMaxConcurrencyStream.getInstance(key, properties);
     }
 
-    /* package */ synchronized void resetStream() {
+    synchronized void resetStream() {
         healthCountsStream.unsubscribe();
         HealthCountsStream.removeByKey(key);
         healthCountsStream = HealthCountsStream.getInstance(key, properties);
@@ -331,19 +332,19 @@ public class HystrixCommandMetrics extends HystrixMetrics {
         return concurrentExecutionCount.get();
     }
 
-    /* package-private */ void markCommandStart(HystrixCommandKey commandKey, HystrixThreadPoolKey threadPoolKey, HystrixCommandProperties.ExecutionIsolationStrategy isolationStrategy) {
+    void markCommandStart(HystrixCommandKey commandKey, HystrixThreadPoolKey threadPoolKey, HystrixCommandProperties.ExecutionIsolationStrategy isolationStrategy) {
         int currentCount = concurrentExecutionCount.incrementAndGet();
         HystrixThreadEventStream.getInstance().commandExecutionStarted(commandKey, threadPoolKey, isolationStrategy, currentCount);
     }
 
-    /* package-private */ void markCommandDone(ExecutionResult executionResult, HystrixCommandKey commandKey, HystrixThreadPoolKey threadPoolKey, boolean executionStarted) {
+    void markCommandDone(ExecutionResult executionResult, HystrixCommandKey commandKey, HystrixThreadPoolKey threadPoolKey, boolean executionStarted) {
         HystrixThreadEventStream.getInstance().executionDone(executionResult, commandKey, threadPoolKey);
         if (executionStarted) {
             concurrentExecutionCount.decrementAndGet();
         }
     }
 
-    /* package-private */ HealthCountsStream getHealthCountsStream() {
+    HealthCountsStream getHealthCountsStream() {
         return healthCountsStream;
     }
 

@@ -91,8 +91,8 @@ public class HystrixCommandCompletion extends HystrixCommandEvent {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        List<HystrixEventType> foundEventTypes = new ArrayList<HystrixEventType>();
+        StringBuilder sb = new StringBuilder();
+        List<HystrixEventType> foundEventTypes = new ArrayList<>();
 
         sb.append(getCommandKey().name()).append("[");
         for (HystrixEventType eventType: ALL_EVENT_TYPES) {

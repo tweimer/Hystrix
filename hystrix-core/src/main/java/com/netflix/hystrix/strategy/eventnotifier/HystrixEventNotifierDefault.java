@@ -23,7 +23,7 @@ package com.netflix.hystrix.strategy.eventnotifier;
  */
 public class HystrixEventNotifierDefault extends HystrixEventNotifier {
 
-    private static HystrixEventNotifierDefault INSTANCE = new HystrixEventNotifierDefault();
+    private static final HystrixEventNotifierDefault INSTANCE = new HystrixEventNotifierDefault();
 
     private HystrixEventNotifierDefault() {
 

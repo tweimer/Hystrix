@@ -46,14 +46,12 @@ public class RequestCollapserFactory<BatchReturnType, ResponseType, RequestArgum
     private final HystrixConcurrencyStrategy concurrencyStrategy;
     private final Scope scope;
 
-    public static interface Scope {
+    public interface Scope {
         String name();
     }
     
     // internally expected scopes, dealing with the not-so-fun inheritance issues of enum when shared between classes
-    private static enum Scopes implements Scope {
-        REQUEST, GLOBAL
-    }
+    private enum Scopes implements Scope { REQUEST, GLOBAL }
     
     public RequestCollapserFactory(HystrixCollapserKey collapserKey, Scope scope, CollapserTimer timer, HystrixCollapserProperties.Setter propertiesBuilder) {
         this(collapserKey, scope, timer, HystrixPropertiesFactory.getCollapserProperties(collapserKey, propertiesBuilder));
@@ -96,7 +94,7 @@ public class RequestCollapserFactory<BatchReturnType, ResponseType, RequestArgum
      * Static global cache of RequestCollapsers for Scope.GLOBAL
      */
     // String is CollapserKey.name() (we can't use CollapserKey directly as we can't guarantee it implements hashcode/equals correctly)
-    private static ConcurrentHashMap<String, RequestCollapser<?, ?, ?>> globalScopedCollapsers = new ConcurrentHashMap<String, RequestCollapser<?, ?, ?>>();
+    private static final ConcurrentHashMap<String, RequestCollapser<?, ?, ?>> globalScopedCollapsers = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
     private RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> getCollapserForGlobalScope(HystrixCollapserBridge<BatchReturnType, ResponseType, RequestArgumentType> commandCollapser) {
@@ -105,7 +103,7 @@ public class RequestCollapserFactory<BatchReturnType, ResponseType, RequestArgum
             return (RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType>) collapser;
         }
         // create new collapser using 'this' first instance as the one that will get cached for future executions ('this' is stateless so we can do that)
-        RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> newCollapser = new RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType>(commandCollapser, properties, timer, concurrencyStrategy);
+        RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> newCollapser = new RequestCollapser<>(commandCollapser, properties, timer, concurrencyStrategy);
         RequestCollapser<?, ?, ?> existing = globalScopedCollapsers.putIfAbsent(collapserKey.name(), newCollapser);
         if (existing == null) {
             // we won
@@ -123,7 +121,7 @@ public class RequestCollapserFactory<BatchReturnType, ResponseType, RequestArgum
      * Static global cache of RequestVariables with RequestCollapsers for Scope.REQUEST
      */
     // String is HystrixCollapserKey.name() (we can't use HystrixCollapserKey directly as we can't guarantee it implements hashcode/equals correctly)
-    private static ConcurrentHashMap<String, HystrixRequestVariableHolder<RequestCollapser<?, ?, ?>>> requestScopedCollapsers = new ConcurrentHashMap<String, HystrixRequestVariableHolder<RequestCollapser<?, ?, ?>>>();
+    private static final ConcurrentHashMap<String, HystrixRequestVariableHolder<RequestCollapser<?, ?, ?>>> requestScopedCollapsers = new ConcurrentHashMap<>();
 
     /* we are casting because the Map needs to be <?, ?> but we know it is <ReturnType, RequestArgumentType> for this thread */
     @SuppressWarnings("unchecked")
@@ -199,11 +197,11 @@ public class RequestCollapserFactory<BatchReturnType, ResponseType, RequestArgum
          */
 
         private RequestCollapserRequestVariable(final HystrixCollapserBridge<BatchReturnType, ResponseType, RequestArgumentType> commandCollapser, final HystrixCollapserProperties properties, final CollapserTimer timer, final HystrixConcurrencyStrategy concurrencyStrategy) {
-            super(new HystrixRequestVariableLifecycle<RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType>>() {
+            super(new HystrixRequestVariableLifecycle<>() {
                 @Override
                 public RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> initialValue() {
                     // this gets calls once per request per HystrixCollapser instance
-                    return new RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType>(commandCollapser, properties, timer, concurrencyStrategy);
+                    return new RequestCollapser<>(commandCollapser, properties, timer, concurrencyStrategy);
                 }
 
                 @Override

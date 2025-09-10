@@ -28,9 +28,8 @@ public interface HystrixThreadPoolKey extends HystrixKey {
         }
 
         // used to intern instances so we don't keep re-creating them millions of times for the same key
-        private static final InternMap<String, HystrixThreadPoolKey> intern
-                = new InternMap<String, HystrixThreadPoolKey>(
-                new InternMap.ValueConstructor<String, HystrixThreadPoolKey>() {
+        private static final InternMap<String, HystrixThreadPoolKey> intern = new InternMap<>(
+                new InternMap.ValueConstructor<>() {
                     @Override
                     public HystrixThreadPoolKey create(String key) {
                         return new HystrixThreadPoolKeyDefault(key);
@@ -53,7 +52,7 @@ public interface HystrixThreadPoolKey extends HystrixKey {
             }
         }
 
-        /* package-private */ static int getThreadPoolCount() {
+        static int getThreadPoolCount() {
             return intern.size();
         }
     }

@@ -36,6 +36,6 @@ public interface HystrixRequestVariable<T> extends HystrixRequestVariableLifecyc
      * 
      * @return T value of variable for current request scope.
      */
-    public T get();
+    T get();
 
 }

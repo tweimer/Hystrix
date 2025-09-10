@@ -45,11 +45,11 @@ import java.util.concurrent.atomic.AtomicReference;
  * These values get produced and cached in this class.
  */
 public class RollingDistributionStream<Event extends HystrixEvent> {
-    private AtomicReference<Subscription> rollingDistributionSubscription = new AtomicReference<Subscription>(null);
+    private final AtomicReference<Subscription> rollingDistributionSubscription = new AtomicReference<>(null);
     private final BehaviorSubject<CachedValuesHistogram> rollingDistribution = BehaviorSubject.create(CachedValuesHistogram.backedBy(CachedValuesHistogram.getNewHistogram()));
     private final Observable<CachedValuesHistogram> rollingDistributionStream;
 
-    private static final Func2<Histogram, Histogram, Histogram> distributionAggregator = new Func2<Histogram, Histogram, Histogram>() {
+    private static final Func2<Histogram, Histogram, Histogram> distributionAggregator = new Func2<>() {
         @Override
         public Histogram call(Histogram initialDistribution, Histogram distributionToAdd) {
             initialDistribution.add(distributionToAdd);
@@ -64,7 +64,7 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
         }
     };
 
-    private static final Func1<Histogram, CachedValuesHistogram> cacheHistogramValues = new Func1<Histogram, CachedValuesHistogram>() {
+    private static final Func1<Histogram, CachedValuesHistogram> cacheHistogramValues = new Func1<>() {
         @Override
         public CachedValuesHistogram call(Histogram histogram) {
             return CachedValuesHistogram.backedBy(histogram);
@@ -72,7 +72,7 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
     };
 
     private static final Func1<Observable<CachedValuesHistogram>, Observable<List<CachedValuesHistogram>>> convertToList =
-            new Func1<Observable<CachedValuesHistogram>, Observable<List<CachedValuesHistogram>>>() {
+            new Func1<>() {
                 @Override
                 public Observable<List<CachedValuesHistogram>> call(Observable<CachedValuesHistogram> windowOf2) {
                     return windowOf2.toList();
@@ -81,12 +81,12 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
 
     protected RollingDistributionStream(final HystrixEventStream<Event> stream, final int numBuckets, final int bucketSizeInMs,
                                         final Func2<Histogram, Event, Histogram> addValuesToBucket) {
-        final List<Histogram> emptyDistributionsToStart = new ArrayList<Histogram>();
+        final List<Histogram> emptyDistributionsToStart = new ArrayList<>();
         for (int i = 0; i < numBuckets; i++) {
             emptyDistributionsToStart.add(CachedValuesHistogram.getNewHistogram());
         }
 
-        final Func1<Observable<Event>, Observable<Histogram>> reduceBucketToSingleDistribution = new Func1<Observable<Event>, Observable<Histogram>>() {
+        final Func1<Observable<Event>, Observable<Histogram>> reduceBucketToSingleDistribution = new Func1<>() {
             @Override
             public Observable<Histogram> call(Observable<Event> bucket) {
                 return bucket.reduce(CachedValuesHistogram.getNewHistogram(), addValuesToBucket);

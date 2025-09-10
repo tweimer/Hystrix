@@ -343,7 +343,7 @@ abstract class Striped64 extends Number {
             try {
                 return java.security.AccessController.doPrivileged
                     (new java.security
-                     .PrivilegedExceptionAction<sun.misc.Unsafe>() {
+                     .PrivilegedExceptionAction<>() {
                         public sun.misc.Unsafe run() throws Exception {
                             java.lang.reflect.Field f = sun.misc
                                 .Unsafe.class.getDeclaredField("theUnsafe");

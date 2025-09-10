@@ -76,13 +76,13 @@ public class Hystrix {
         HystrixCircuitBreaker.Factory.reset();
         HystrixPlugins.reset();
         HystrixPropertiesFactory.reset();
-        currentCommand.set(new ConcurrentStack<HystrixCommandKey>());
+        currentCommand.set(new ConcurrentStack<>());
     }
 
-    private static ThreadLocal<ConcurrentStack<HystrixCommandKey>> currentCommand = new ThreadLocal<ConcurrentStack<HystrixCommandKey>>() {
+    private static final ThreadLocal<ConcurrentStack<HystrixCommandKey>> currentCommand = new ThreadLocal<>() {
         @Override
         protected ConcurrentStack<HystrixCommandKey> initialValue() {
-            return new ConcurrentStack<HystrixCommandKey>();
+            return new ConcurrentStack<>();
         }
     };
 
@@ -107,7 +107,7 @@ public class Hystrix {
      * 
      * @return Action0 to perform the same work as `endCurrentThreadExecutingCommand()` but can be done from any thread
      */
-    /* package */static Action0 startCurrentThreadExecutingCommand(HystrixCommandKey key) {
+    static Action0 startCurrentThreadExecutingCommand(HystrixCommandKey key) {
         final ConcurrentStack<HystrixCommandKey> list = currentCommand.get();
         try {
             list.push(key);
@@ -124,7 +124,7 @@ public class Hystrix {
         };
     }
 
-    /* package */static void endCurrentThreadExecutingCommand() {
+    static void endCurrentThreadExecutingCommand() {
         endCurrentThreadExecutingCommand(currentCommand.get());
     }
 
@@ -141,7 +141,7 @@ public class Hystrix {
         }
     }
 
-    /* package-private */ static int getCommandCount() {
+    static int getCommandCount() {
         return currentCommand.get().size();
     }
 
@@ -150,10 +150,10 @@ public class Hystrix {
      * @param <E>
      */
     private static class ConcurrentStack<E> {
-        AtomicReference<Node<E>> top = new AtomicReference<Node<E>>();
+        AtomicReference<Node<E>> top = new AtomicReference<>();
 
         public void push(E item) {
-            Node<E> newHead = new Node<E>(item);
+            Node<E> newHead = new Node<>(item);
             Node<E> oldHead;
             do {
                 oldHead = top.get();
@@ -197,7 +197,7 @@ public class Hystrix {
             }
         }
 
-        private class Node<E> {
+        private static class Node<E> {
             public final E item;
             public Node<E> next;
 

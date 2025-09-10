@@ -8,12 +8,11 @@ import rx.subjects.ReplaySubject;
 public class HystrixCachedObservable<R> {
     protected final Subscription originalSubscription;
     protected final Observable<R> cachedObservable;
-    private volatile int outstandingSubscriptions = 0;
+    private volatile int outstandingSubscriptions;
 
     protected HystrixCachedObservable(final Observable<R> originalObservable) {
         ReplaySubject<R> replaySubject = ReplaySubject.create();
-        this.originalSubscription = originalObservable
-                .subscribe(replaySubject);
+        this.originalSubscription = originalObservable.subscribe(replaySubject);
 
         this.cachedObservable = replaySubject
                 .doOnUnsubscribe(new Action0() {
@@ -34,11 +33,11 @@ public class HystrixCachedObservable<R> {
     }
 
     public static <R> HystrixCachedObservable<R> from(Observable<R> o, AbstractCommand<R> originalCommand) {
-        return new HystrixCommandResponseFromCache<R>(o, originalCommand);
+        return new HystrixCommandResponseFromCache<>(o, originalCommand);
     }
 
     public static <R> HystrixCachedObservable<R> from(Observable<R> o) {
-        return new HystrixCachedObservable<R>(o);
+        return new HystrixCachedObservable<>(o);
     }
 
     public Observable<R> toObservable() {

@@ -64,7 +64,7 @@ public class HystrixTimer {
         }
     }
 
-    /* package */ AtomicReference<ScheduledExecutor> executor = new AtomicReference<ScheduledExecutor>();
+    AtomicReference<ScheduledExecutor> executor = new AtomicReference<>();
 
     /**
      * Add a {@link TimerListener} that will be executed until it is garbage collected or removed by clearing the returned {@link Reference}.
@@ -182,7 +182,7 @@ public class HystrixTimer {
         }
     }
 
-    public static interface TimerListener {
+    public interface TimerListener {
 
         /**
          * The 'tick' is called each time the interval occurs.
@@ -193,12 +193,12 @@ public class HystrixTimer {
          * <p>
          * If you need a ThreadLocal set, you can store the state in the TimerListener, then when tick() is called, set the ThreadLocal to your desired value.
          */
-        public void tick();
+        void tick();
 
         /**
          * How often this TimerListener should 'tick' defined in milliseconds.
          */
-        public int getIntervalTimeInMilliseconds();
+        int getIntervalTimeInMilliseconds();
     }
 
 }

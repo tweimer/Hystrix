@@ -69,7 +69,7 @@ public interface HystrixCircuitBreaker {
      */
     class Factory {
         // String is HystrixCommandKey.name() (we can't use HystrixCommandKey directly as we can't guarantee it implements hashcode/equals correctly)
-        private static ConcurrentHashMap<String, HystrixCircuitBreaker> circuitBreakersByCommand = new ConcurrentHashMap<String, HystrixCircuitBreaker>();
+        private static final ConcurrentHashMap<String, HystrixCircuitBreaker> circuitBreakersByCommand = new ConcurrentHashMap<>();
 
         /**
          * Get the {@link HystrixCircuitBreaker} instance for a given {@link HystrixCommandKey}.
@@ -123,7 +123,7 @@ public interface HystrixCircuitBreaker {
         /**
          * Clears all circuit breakers. If new requests come in instances will be recreated.
          */
-        /* package */static void reset() {
+        static void reset() {
             circuitBreakersByCommand.clear();
         }
     }
@@ -135,17 +135,15 @@ public interface HystrixCircuitBreaker {
      * @ExcludeFromJavadoc
      * @ThreadSafe
      */
-    /* package */class HystrixCircuitBreakerImpl implements HystrixCircuitBreaker {
+    class HystrixCircuitBreakerImpl implements HystrixCircuitBreaker {
         private final HystrixCommandProperties properties;
         private final HystrixCommandMetrics metrics;
 
-        enum Status {
-            CLOSED, OPEN, HALF_OPEN;
-        }
+        enum Status { CLOSED, OPEN, HALF_OPEN }
 
-        private final AtomicReference<Status> status = new AtomicReference<Status>(Status.CLOSED);
+        private final AtomicReference<Status> status = new AtomicReference<>(Status.CLOSED);
         private final AtomicLong circuitOpened = new AtomicLong(-1);
-        private final AtomicReference<Subscription> activeSubscription = new AtomicReference<Subscription>(null);
+        private final AtomicReference<Subscription> activeSubscription = new AtomicReference<>(null);
 
         protected HystrixCircuitBreakerImpl(HystrixCommandKey key, HystrixCommandGroupKey commandGroup, final HystrixCommandProperties properties, HystrixCommandMetrics metrics) {
             this.properties = properties;
@@ -162,7 +160,7 @@ public interface HystrixCircuitBreaker {
              */
             return metrics.getHealthCountsStream()
                     .observe()
-                    .subscribe(new Subscriber<HealthCounts>() {
+                    .subscribe(new Subscriber<>() {
                         @Override
                         public void onCompleted() {
 
@@ -276,11 +274,7 @@ public interface HystrixCircuitBreaker {
                     //if the executing command succeeds, the status will transition to CLOSED
                     //if the executing command fails, the status will transition to OPEN
                     //if the executing command gets unsubscribed, the status will transition to OPEN
-                    if (status.compareAndSet(Status.OPEN, Status.HALF_OPEN)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return status.compareAndSet(Status.OPEN, Status.HALF_OPEN);
                 } else {
                     return false;
                 }
@@ -293,7 +287,7 @@ public interface HystrixCircuitBreaker {
      * 
      * @ExcludeFromJavadoc
      */
-    /* package */static class NoOpCircuitBreaker implements HystrixCircuitBreaker {
+    class NoOpCircuitBreaker implements HystrixCircuitBreaker {
 
         @Override
         public boolean allowRequest() {

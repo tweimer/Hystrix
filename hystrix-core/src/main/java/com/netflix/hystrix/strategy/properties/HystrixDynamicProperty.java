@@ -26,15 +26,15 @@ package com.netflix.hystrix.strategy.properties;
  * @see HystrixProperty
  * @see HystrixDynamicProperties
  */
-public interface HystrixDynamicProperty<T> extends HystrixProperty<T>{
+public interface HystrixDynamicProperty<T> extends HystrixProperty<T> {
     
-    public String getName();
+    String getName();
     
     /**
      * Register a callback to be run if the property is updated.
      * Backing implementations may choose to do nothing.
      * @param callback callback.
      */
-    public void addCallback(Runnable callback);
+    void addCallback(Runnable callback);
     
 }

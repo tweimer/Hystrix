@@ -49,7 +49,7 @@ public class HystrixContextScheduler extends Scheduler {
     }
 
     public HystrixContextScheduler(HystrixConcurrencyStrategy concurrencyStrategy, HystrixThreadPool threadPool) {
-        this(concurrencyStrategy, threadPool, new Func0<Boolean>() {
+        this(concurrencyStrategy, threadPool, new Func0<>() {
             @Override
             public Boolean call() {
                 return true;
@@ -198,11 +198,7 @@ public class HystrixContextScheduler extends Scheduler {
         @Override
         public void unsubscribe() {
             executor.remove(f);
-            if (shouldInterruptThread.call()) {
-                f.cancel(true);
-            } else {
-                f.cancel(false);
-            }
+            f.cancel(shouldInterruptThread.call());
         }
 
         @Override

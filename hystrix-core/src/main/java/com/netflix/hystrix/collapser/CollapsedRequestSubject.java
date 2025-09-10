@@ -42,10 +42,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 
  * @param <R>
  */
-/* package */class CollapsedRequestSubject<T, R> implements CollapsedRequest<T, R> {
+class CollapsedRequestSubject<T, R> implements CollapsedRequest<T, R> {
     private final R argument;
 
-    private AtomicBoolean valueSet = new AtomicBoolean(false);
+    private final AtomicBoolean valueSet = new AtomicBoolean(false);
     private final ReplaySubject<T> subject = ReplaySubject.create();
     private final Observable<T> subjectWithAccounting;
 

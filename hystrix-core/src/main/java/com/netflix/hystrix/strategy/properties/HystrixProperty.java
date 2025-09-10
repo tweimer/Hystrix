@@ -36,7 +36,7 @@ public interface HystrixProperty<T> {
     public static class Factory {
 
         public static <T> HystrixProperty<T> asProperty(final T value) {
-            return new HystrixProperty<T>() {
+            return new HystrixProperty<>() {
 
                 @Override
                 public T get() {
@@ -50,7 +50,7 @@ public interface HystrixProperty<T> {
          * @ExcludeFromJavadoc
          */
         public static HystrixProperty<Integer> asProperty(final DynamicIntegerProperty value) {
-            return new HystrixProperty<Integer>() {
+            return new HystrixProperty<>() {
 
                 @Override
                 public Integer get() {
@@ -64,7 +64,7 @@ public interface HystrixProperty<T> {
          * @ExcludeFromJavadoc
          */
         public static HystrixProperty<Long> asProperty(final DynamicLongProperty value) {
-            return new HystrixProperty<Long>() {
+            return new HystrixProperty<>() {
 
                 @Override
                 public Long get() {
@@ -78,7 +78,7 @@ public interface HystrixProperty<T> {
          * @ExcludeFromJavadoc
          */
         public static HystrixProperty<String> asProperty(final DynamicStringProperty value) {
-            return new HystrixProperty<String>() {
+            return new HystrixProperty<>() {
 
                 @Override
                 public String get() {
@@ -92,7 +92,7 @@ public interface HystrixProperty<T> {
          * @ExcludeFromJavadoc
          */
         public static HystrixProperty<Boolean> asProperty(final DynamicBooleanProperty value) {
-            return new HystrixProperty<Boolean>() {
+            return new HystrixProperty<>() {
 
                 @Override
                 public Boolean get() {
@@ -112,7 +112,7 @@ public interface HystrixProperty<T> {
          * @return value or defaultValue if value returns null
          */
         public static <T> HystrixProperty<T> asProperty(final HystrixProperty<T> value, final T defaultValue) {
-            return new HystrixProperty<T>() {
+            return new HystrixProperty<>() {
 
                 @Override
                 public T get() {
@@ -134,7 +134,7 @@ public interface HystrixProperty<T> {
          * @return first non-null value or null if none found
          */
         public static <T> HystrixProperty<T> asProperty(final HystrixProperty<T>... values) {
-            return new HystrixProperty<T>() {
+            return new HystrixProperty<>() {
 
                 @Override
                 public T get() {
@@ -154,7 +154,7 @@ public interface HystrixProperty<T> {
          * @ExcludeFromJavadoc
          */
         public static <T> HystrixProperty<T> asProperty(final HystrixPropertiesChainedArchaiusProperty.ChainLink<T> chainedProperty) {
-            return new HystrixProperty<T>() {
+            return new HystrixProperty<>() {
 
                 @Override
                 public T get() {
@@ -165,7 +165,7 @@ public interface HystrixProperty<T> {
         }
 
         public static <T> HystrixProperty<T> nullProperty() {
-            return new HystrixProperty<T>() {
+            return new HystrixProperty<>() {
 
                 @Override
                 public T get() {

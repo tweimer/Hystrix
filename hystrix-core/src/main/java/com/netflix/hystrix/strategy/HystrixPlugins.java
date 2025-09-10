@@ -56,11 +56,11 @@ public class HystrixPlugins {
     //See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
     private static class LazyHolder { private static final HystrixPlugins INSTANCE = HystrixPlugins.create(); }
     private final ClassLoader classLoader;
-    /* package */ final AtomicReference<HystrixEventNotifier> notifier = new AtomicReference<HystrixEventNotifier>();
-    /* package */ final AtomicReference<HystrixConcurrencyStrategy> concurrencyStrategy = new AtomicReference<HystrixConcurrencyStrategy>();
-    /* package */ final AtomicReference<HystrixMetricsPublisher> metricsPublisher = new AtomicReference<HystrixMetricsPublisher>();
-    /* package */ final AtomicReference<HystrixPropertiesStrategy> propertiesFactory = new AtomicReference<HystrixPropertiesStrategy>();
-    /* package */ final AtomicReference<HystrixCommandExecutionHook> commandExecutionHook = new AtomicReference<HystrixCommandExecutionHook>();
+    final AtomicReference<HystrixEventNotifier> notifier = new AtomicReference<>();
+    final AtomicReference<HystrixConcurrencyStrategy> concurrencyStrategy = new AtomicReference<>();
+    final AtomicReference<HystrixMetricsPublisher> metricsPublisher = new AtomicReference<>();
+    final AtomicReference<HystrixPropertiesStrategy> propertiesFactory = new AtomicReference<>();
+    final AtomicReference<HystrixCommandExecutionHook> commandExecutionHook = new AtomicReference<>();
     private final HystrixDynamicProperties dynamicProperties;
 
     
@@ -76,7 +76,7 @@ public class HystrixPlugins {
      * For unit test purposes.
      * @ExcludeFromJavadoc
      */
-    /* private */ static HystrixPlugins create(ClassLoader classLoader, LoggerSupplier logSupplier) {
+    static HystrixPlugins create(ClassLoader classLoader, LoggerSupplier logSupplier) {
         return new HystrixPlugins(classLoader, logSupplier);
     }
     
@@ -84,7 +84,7 @@ public class HystrixPlugins {
      * For unit test purposes.
      * @ExcludeFromJavadoc
      */
-    /* private */ static HystrixPlugins create(ClassLoader classLoader) {
+    static HystrixPlugins create(ClassLoader classLoader) {
         return new HystrixPlugins(classLoader, new LoggerSupplier() {
             @Override
             public Logger getLogger() {
@@ -95,7 +95,7 @@ public class HystrixPlugins {
     /**
      * @ExcludeFromJavadoc
      */
-    /* private */ static HystrixPlugins create() {
+    static HystrixPlugins create() {
         return create(HystrixPlugins.class.getClassLoader());
     }
 
@@ -126,14 +126,14 @@ public class HystrixPlugins {
     public HystrixEventNotifier getEventNotifier() {
         if (notifier.get() == null) {
             // check for an implementation from Archaius first
-            Object impl = getPluginImplementation(HystrixEventNotifier.class);
+            HystrixEventNotifier impl = getPluginImplementation(HystrixEventNotifier.class);
             if (impl == null) {
                 // nothing set via Archaius so initialize with default
                 notifier.compareAndSet(null, HystrixEventNotifierDefault.getInstance());
                 // we don't return from here but call get() again in case of thread-race so the winner will always get returned
             } else {
                 // we received an implementation from Archaius so use it
-                notifier.compareAndSet(null, (HystrixEventNotifier) impl);
+                notifier.compareAndSet(null, impl);
             }
         }
         return notifier.get();
@@ -164,14 +164,14 @@ public class HystrixPlugins {
     public HystrixConcurrencyStrategy getConcurrencyStrategy() {
         if (concurrencyStrategy.get() == null) {
             // check for an implementation from Archaius first
-            Object impl = getPluginImplementation(HystrixConcurrencyStrategy.class);
+            HystrixConcurrencyStrategy impl = getPluginImplementation(HystrixConcurrencyStrategy.class);
             if (impl == null) {
                 // nothing set via Archaius so initialize with default
                 concurrencyStrategy.compareAndSet(null, HystrixConcurrencyStrategyDefault.getInstance());
                 // we don't return from here but call get() again in case of thread-race so the winner will always get returned
             } else {
                 // we received an implementation from Archaius so use it
-                concurrencyStrategy.compareAndSet(null, (HystrixConcurrencyStrategy) impl);
+                concurrencyStrategy.compareAndSet(null, impl);
             }
         }
         return concurrencyStrategy.get();
@@ -202,14 +202,14 @@ public class HystrixPlugins {
     public HystrixMetricsPublisher getMetricsPublisher() {
         if (metricsPublisher.get() == null) {
             // check for an implementation from Archaius first
-            Object impl = getPluginImplementation(HystrixMetricsPublisher.class);
+            HystrixMetricsPublisher impl = getPluginImplementation(HystrixMetricsPublisher.class);
             if (impl == null) {
                 // nothing set via Archaius so initialize with default
                 metricsPublisher.compareAndSet(null, HystrixMetricsPublisherDefault.getInstance());
                 // we don't return from here but call get() again in case of thread-race so the winner will always get returned
             } else {
                 // we received an implementation from Archaius so use it
-                metricsPublisher.compareAndSet(null, (HystrixMetricsPublisher) impl);
+                metricsPublisher.compareAndSet(null, impl);
             }
         }
         return metricsPublisher.get();
@@ -240,14 +240,14 @@ public class HystrixPlugins {
     public HystrixPropertiesStrategy getPropertiesStrategy() {
         if (propertiesFactory.get() == null) {
             // check for an implementation from Archaius first
-            Object impl = getPluginImplementation(HystrixPropertiesStrategy.class);
+            HystrixPropertiesStrategy impl = getPluginImplementation(HystrixPropertiesStrategy.class);
             if (impl == null) {
                 // nothing set via Archaius so initialize with default
                 propertiesFactory.compareAndSet(null, HystrixPropertiesStrategyDefault.getInstance());
                 // we don't return from here but call get() again in case of thread-race so the winner will always get returned
             } else {
                 // we received an implementation from Archaius so use it
-                propertiesFactory.compareAndSet(null, (HystrixPropertiesStrategy) impl);
+                propertiesFactory.compareAndSet(null, impl);
             }
         }
         return propertiesFactory.get();
@@ -300,14 +300,14 @@ public class HystrixPlugins {
     public HystrixCommandExecutionHook getCommandExecutionHook() {
         if (commandExecutionHook.get() == null) {
             // check for an implementation from Archaius first
-            Object impl = getPluginImplementation(HystrixCommandExecutionHook.class);
+            HystrixCommandExecutionHook impl = getPluginImplementation(HystrixCommandExecutionHook.class);
             if (impl == null) {
                 // nothing set via Archaius so initialize with default
                 commandExecutionHook.compareAndSet(null, HystrixCommandExecutionHookDefault.getInstance());
                 // we don't return from here but call get() again in case of thread-race so the winner will always get returned
             } else {
                 // we received an implementation from Archaius so use it
-                commandExecutionHook.compareAndSet(null, (HystrixCommandExecutionHook) impl);
+                commandExecutionHook.compareAndSet(null, impl);
             }
         }
         return commandExecutionHook.get();

@@ -43,7 +43,7 @@ public abstract class HystrixPropertiesChainedArchaiusProperty {
 
         private final AtomicReference<ChainLink<T>> pReference;
         private final ChainLink<T> next;
-        private final List<Runnable> callbacks;
+        private final List<Runnable> callbacks = new ArrayList<>();
 
         /**
          * @return String
@@ -65,8 +65,7 @@ public abstract class HystrixPropertiesChainedArchaiusProperty {
          */
         public ChainLink() {
             next = null;
-            pReference = new AtomicReference<ChainLink<T>>(this);
-            callbacks = new ArrayList<Runnable>();
+            pReference = new AtomicReference<>(this);
         }
 
         /**
@@ -74,8 +73,7 @@ public abstract class HystrixPropertiesChainedArchaiusProperty {
          */
         public ChainLink(ChainLink<T> nextProperty) {
             next = nextProperty;
-            pReference = new AtomicReference<ChainLink<T>>(next);
-            callbacks = new ArrayList<Runnable>();
+            pReference = new AtomicReference<>(next);
         }
 
         protected void checkAndFlip() {
@@ -132,7 +130,6 @@ public abstract class HystrixPropertiesChainedArchaiusProperty {
         private final DynamicStringProperty sProp;
 
         public StringProperty(DynamicStringProperty sProperty) {
-            super();
             sProp = sProperty;
         }
 
@@ -186,7 +183,6 @@ public abstract class HystrixPropertiesChainedArchaiusProperty {
         private final DynamicIntegerProperty sProp;
 
         public IntegerProperty(DynamicIntegerProperty sProperty) {
-            super();
             sProp = sProperty;
         }
 
@@ -240,7 +236,6 @@ public abstract class HystrixPropertiesChainedArchaiusProperty {
         private final DynamicBooleanProperty sProp;
 
         public BooleanProperty(DynamicBooleanProperty sProperty) {
-            super();
             sProp = sProperty;
         }
 

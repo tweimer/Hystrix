@@ -15,7 +15,6 @@
  */
 package com.netflix.hystrix;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +28,6 @@ import rx.functions.Action0;
 
 import com.netflix.hystrix.exception.HystrixBadRequestException;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
-import com.netflix.hystrix.exception.HystrixRuntimeException.FailureType;
 import com.netflix.hystrix.strategy.executionhook.HystrixCommandExecutionHook;
 import com.netflix.hystrix.strategy.properties.HystrixPropertiesStrategy;
 import rx.functions.Func0;
@@ -141,7 +139,7 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
      * <p>
      * Most of the args will revert to a valid default if 'null' is passed in.
      */
-    /* package for testing */HystrixCommand(HystrixCommandGroupKey group, HystrixCommandKey key, HystrixThreadPoolKey threadPoolKey, HystrixCircuitBreaker circuitBreaker, HystrixThreadPool threadPool,
+    HystrixCommand(HystrixCommandGroupKey group, HystrixCommandKey key, HystrixThreadPoolKey threadPoolKey, HystrixCircuitBreaker circuitBreaker, HystrixThreadPool threadPool,
             HystrixCommandProperties.Setter commandPropertiesDefaults, HystrixThreadPoolProperties.Setter threadPoolPropertiesDefaults,
             HystrixCommandMetrics metrics, TryableSemaphore fallbackSemaphore, TryableSemaphore executionSemaphore,
             HystrixPropertiesStrategy propertiesStrategy, HystrixCommandExecutionHook executionHook) {
@@ -163,11 +161,11 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
      */
     final public static class Setter {
 
-        protected final HystrixCommandGroupKey groupKey;
-        protected HystrixCommandKey commandKey;
-        protected HystrixThreadPoolKey threadPoolKey;
-        protected HystrixCommandProperties.Setter commandPropertiesDefaults;
-        protected HystrixThreadPoolProperties.Setter threadPoolPropertiesDefaults;
+        private final HystrixCommandGroupKey groupKey;
+        private HystrixCommandKey commandKey;
+        private HystrixThreadPoolKey threadPoolKey;
+        private HystrixCommandProperties.Setter commandPropertiesDefaults;
+        private HystrixThreadPoolProperties.Setter threadPoolPropertiesDefaults;
 
         /**
          * Setter factory method containing required values.
@@ -181,7 +179,7 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
          *            with,
          *            common business purpose etc.
          */
-        protected Setter(HystrixCommandGroupKey groupKey) {
+        private Setter(HystrixCommandGroupKey groupKey) {
             this.groupKey = groupKey;
         }
 
@@ -263,7 +261,7 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
 
     }
 
-	private final AtomicReference<Thread> executionThread = new AtomicReference<Thread>();
+	private final AtomicReference<Thread> executionThread = new AtomicReference<>();
 	private final AtomicBoolean interruptOnFutureCancel = new AtomicBoolean(false);
 
 	/**
@@ -315,7 +313,7 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
 
     @Override
     final protected Observable<R> getFallbackObservable() {
-        return Observable.defer(new Func0<Observable<R>>() {
+        return Observable.defer(new Func0<>() {
             @Override
             public Observable<R> call() {
                 try {
@@ -377,7 +375,7 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
          */
         final Future<R> delegate = toObservable().toBlocking().toFuture();
     	
-        final Future<R> f = new Future<R>() {
+        final Future<R> f = new Future<>() {
 
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
@@ -394,7 +392,7 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
                      * than that interruption request cannot be taken back.
                      */
                     interruptOnFutureCancel.compareAndSet(false, mayInterruptIfRunning);
-        		}
+                }
 
                 final boolean res = delegate.cancel(interruptOnFutureCancel.get());
 
@@ -406,17 +404,17 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
                 }
 
                 return res;
-			}
+            }
 
             @Override
             public boolean isCancelled() {
                 return delegate.isCancelled();
-			}
+            }
 
             @Override
             public boolean isDone() {
                 return delegate.isDone();
-			}
+            }
 
             @Override
             public R get() throws InterruptedException, ExecutionException {
@@ -427,7 +425,7 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
             public R get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                 return delegate.get(timeout, unit);
             }
-        	
+
         };
 
         /* special handling of error states that throw immediately */
@@ -470,7 +468,7 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
         if (containsFromMap != null) {
             return containsFromMap;
         } else {
-            Boolean toInsertIntoMap;
+            boolean toInsertIntoMap;
             try {
                 getClass().getDeclaredMethod("getFallback");
                 toInsertIntoMap = true;

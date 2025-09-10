@@ -342,7 +342,7 @@ public abstract class HystrixCollapserProperties {
          * @param builder collapser properties builder
          * @return HystrixCollapserProperties
          */
-        /* package */static HystrixCollapserProperties asMock(final Setter builder) {
+        static HystrixCollapserProperties asMock(final Setter builder) {
             return new HystrixCollapserProperties(TestHystrixCollapserKey.TEST) {
 
                 @Override
@@ -363,7 +363,7 @@ public abstract class HystrixCollapserProperties {
             };
         }
 
-        private static enum TestHystrixCollapserKey implements HystrixCollapserKey {
+        private enum TestHystrixCollapserKey implements HystrixCollapserKey {
             TEST
         }
     }

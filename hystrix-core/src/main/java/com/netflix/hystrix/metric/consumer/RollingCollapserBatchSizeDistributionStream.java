@@ -39,9 +39,9 @@ import java.util.concurrent.ConcurrentMap;
  * These values get produced and cached in this class, as soon as this stream is queried for the first time.
  */
 public class RollingCollapserBatchSizeDistributionStream extends RollingDistributionStream<HystrixCollapserEvent> {
-    private static final ConcurrentMap<String, RollingCollapserBatchSizeDistributionStream> streams = new ConcurrentHashMap<String, RollingCollapserBatchSizeDistributionStream>();
+    private static final ConcurrentMap<String, RollingCollapserBatchSizeDistributionStream> streams = new ConcurrentHashMap<>();
 
-    private static final Func2<Histogram, HystrixCollapserEvent, Histogram> addValuesToBucket = new Func2<Histogram, HystrixCollapserEvent, Histogram>() {
+    private static final Func2<Histogram, HystrixCollapserEvent, Histogram> addValuesToBucket = new Func2<>() {
         @Override
         public Histogram call(Histogram initialDistribution, HystrixCollapserEvent event) {
             switch (event.getEventType()) {

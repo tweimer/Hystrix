@@ -74,7 +74,7 @@ public class HystrixRollingNumber {
         this(ACTUAL_TIME, timeInMilliseconds, numberOfBuckets);
     }
 
-    /* package for testing */ HystrixRollingNumber(Time time, int timeInMilliseconds, int numberOfBuckets) {
+    HystrixRollingNumber(Time time, int timeInMilliseconds, int numberOfBuckets) {
         this.time = time;
         this.timeInMilliseconds = timeInMilliseconds;
         this.numberOfBuckets = numberOfBuckets;
@@ -218,7 +218,7 @@ public class HystrixRollingNumber {
         Bucket[] bucketArray = buckets.getArray();
 
         // we have bucket data so we'll return an array of values for all buckets
-        long values[] = new long[bucketArray.length];
+        long[] values = new long[bucketArray.length];
         int i = 0;
         for (Bucket bucket : bucketArray) {
             if (type.isCounter()) {
@@ -240,7 +240,7 @@ public class HystrixRollingNumber {
      * @return max value for given {@link HystrixRollingNumberEvent} type during rolling window
      */
     public long getRollingMaxValue(HystrixRollingNumberEvent type) {
-        long values[] = getValues(type);
+        long[] values = getValues(type);
         if (values.length == 0) {
             return 0;
         } else {
@@ -249,9 +249,9 @@ public class HystrixRollingNumber {
         }
     }
 
-    private ReentrantLock newBucketLock = new ReentrantLock();
+    private final ReentrantLock newBucketLock = new ReentrantLock();
 
-    /* package for testing */Bucket getCurrentBucket() {
+    Bucket getCurrentBucket() {
         long currentTime = time.getCurrentTimeInMillis();
 
         /* a shortcut to try and get the most common result of immediately finding the current bucket */
@@ -347,8 +347,8 @@ public class HystrixRollingNumber {
         }
     }
 
-    /* package */static interface Time {
-        public long getCurrentTimeInMillis();
+    interface Time {
+        long getCurrentTimeInMillis();
     }
 
     private static class ActualTime implements Time {
@@ -363,7 +363,7 @@ public class HystrixRollingNumber {
     /**
      * Counters for a given 'bucket' of time.
      */
-    /* package */static class Bucket {
+    static class Bucket {
         final long windowStart;
         final LongAdder[] adderForCounterType;
         final LongMaxUpdater[] updaterForCounterType;
@@ -551,7 +551,7 @@ public class HystrixRollingNumber {
                  * but since we never clear the data directly, only increment/decrement head/tail we would never get a NULL
                  * just potentially return stale data which we are okay with doing
                  */
-                ArrayList<Bucket> array = new ArrayList<Bucket>();
+                ArrayList<Bucket> array = new ArrayList<>();
                 for (int i = 0; i < size; i++) {
                     array.add(data.get(convert(i)));
                 }
@@ -597,8 +597,8 @@ public class HystrixRollingNumber {
         }
 
         BucketCircularArray(int size) {
-            AtomicReferenceArray<Bucket> _buckets = new AtomicReferenceArray<Bucket>(size + 1); // + 1 as extra room for the add/remove;
-            state = new AtomicReference<ListState>(new ListState(_buckets, 0, 0));
+            AtomicReferenceArray<Bucket> _buckets = new AtomicReferenceArray<>(size + 1); // + 1 as extra room for the add/remove;
+            state = new AtomicReference<>(new ListState(_buckets, 0, 0));
             dataLength = _buckets.length();
             numBuckets = size;
         }

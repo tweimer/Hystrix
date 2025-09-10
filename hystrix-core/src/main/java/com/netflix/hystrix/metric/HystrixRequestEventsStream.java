@@ -29,7 +29,7 @@ public class HystrixRequestEventsStream {
     private final Subject<HystrixRequestEvents, HystrixRequestEvents> writeOnlyRequestEventsSubject;
     private final Observable<HystrixRequestEvents> readOnlyRequestEvents;
 
-    /* package */ HystrixRequestEventsStream() {
+    HystrixRequestEventsStream() {
         writeOnlyRequestEventsSubject = PublishSubject.create();
         readOnlyRequestEvents = writeOnlyRequestEventsSubject.onBackpressureBuffer(1024);
     }

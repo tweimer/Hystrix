@@ -48,7 +48,7 @@ public class HystrixRollingPercentile {
 
     private static final Time ACTUAL_TIME = new ActualTime();
     private final Time time;
-    /* package for testing */ final BucketCircularArray buckets;
+    final BucketCircularArray buckets;
     private final int timeInMilliseconds;
     private final int numberOfBuckets;
     private final int bucketDataLength;
@@ -58,7 +58,7 @@ public class HystrixRollingPercentile {
     /*
      * This will get flipped each time a new bucket is created.
      */
-    /* package for testing */ volatile PercentileSnapshot currentPercentileSnapshot = new PercentileSnapshot(0);
+    volatile PercentileSnapshot currentPercentileSnapshot = new PercentileSnapshot(0);
 
     /**
      * 
@@ -115,7 +115,7 @@ public class HystrixRollingPercentile {
 
     }
 
-    /* package for testing */ HystrixRollingPercentile(Time time, int timeInMilliseconds, int numberOfBuckets, int bucketDataLength, HystrixProperty<Boolean> enabled) {
+    HystrixRollingPercentile(Time time, int timeInMilliseconds, int numberOfBuckets, int bucketDataLength, HystrixProperty<Boolean> enabled) {
         this.time = time;
         this.timeInMilliseconds = timeInMilliseconds;
         this.numberOfBuckets = numberOfBuckets;
@@ -199,14 +199,14 @@ public class HystrixRollingPercentile {
         return currentPercentileSnapshot;
     }
 
-    private ReentrantLock newBucketLock = new ReentrantLock();
+    private final ReentrantLock newBucketLock = new ReentrantLock();
 
     private Bucket getCurrentBucket() {
         long currentTime = time.getCurrentTimeInMillis();
 
         /* a shortcut to try and get the most common result of immediately finding the current bucket */
 
-        /**
+        /*
          * Retrieve the latest bucket if the given time is BEFORE the end of the bucket window, otherwise it returns NULL.
          * 
          * NOTE: This is thread-safe because it's accessing 'buckets' which is a LinkedBlockingDeque
@@ -221,7 +221,7 @@ public class HystrixRollingPercentile {
 
         /* if we didn't find the current bucket above, then we have to create one */
 
-        /**
+        /*
          * The following needs to be synchronized/locked even with a synchronized/thread-safe data structure such as LinkedBlockingDeque because
          * the logic involves multiple steps to check existence, create an object then insert the object. The 'check' or 'insertion' themselves
          * are thread-safe by themselves but not the aggregate algorithm, thus we put this entire block of logic inside synchronized.
@@ -313,7 +313,7 @@ public class HystrixRollingPercentile {
         currentPercentileSnapshot = new PercentileSnapshot(buckets.getArray());
     }
 
-    /* package-private for testing */ static class PercentileBucketData {
+    static class PercentileBucketData {
         private final int length;
         private final AtomicIntegerArray list;
         private final AtomicInteger index = new AtomicInteger();
@@ -346,12 +346,12 @@ public class HystrixRollingPercentile {
     /**
      * @NotThreadSafe
      */
-    /* package for testing */ static class PercentileSnapshot {
+    static class PercentileSnapshot {
         private final int[] data;
         private final int length;
         private int mean;
 
-        /* package for testing */ PercentileSnapshot(Bucket[] buckets) {
+        PercentileSnapshot(Bucket[] buckets) {
             int lengthFromBuckets = 0;
             // we need to calculate it dynamically as it could have been changed by properties (rare, but possible)
             // also this way we capture the actual index size rather than the max so size the int[] to only what we need
@@ -380,7 +380,7 @@ public class HystrixRollingPercentile {
             Arrays.sort(this.data, 0, length);
         }
 
-        /* package for testing */ PercentileSnapshot(int... data) {
+        PercentileSnapshot(int... data) {
             this.data = data;
             this.length = data.length;
 
@@ -393,7 +393,7 @@ public class HystrixRollingPercentile {
             Arrays.sort(this.data, 0, length);
         }
 
-        /* package for testing */ int getMean() {
+        int getMean() {
             return mean;
         }
 
@@ -456,7 +456,7 @@ public class HystrixRollingPercentile {
      * <p>
      * benjchristensen => This implementation was chosen based on performance testing I did and documented at: http://benjchristensen.com/2011/10/08/atomiccirculararray/
      */
-    /* package for testing */ static class BucketCircularArray implements Iterable<Bucket> {
+    static class BucketCircularArray implements Iterable<Bucket> {
         private final AtomicReference<ListState> state;
         private final int dataLength; // we don't resize, we always stay the same, so remember this
         private final int numBuckets;
@@ -503,7 +503,7 @@ public class HystrixRollingPercentile {
                  * but since we never clear the data directly, only increment/decrement head/tail we would never get a NULL
                  * just potentially return stale data which we are okay with doing
                  */
-                ArrayList<Bucket> array = new ArrayList<Bucket>();
+                ArrayList<Bucket> array = new ArrayList<>();
                 for (int i = 0; i < size; i++) {
                     array.add(data.get(convert(i)));
                 }
@@ -522,7 +522,7 @@ public class HystrixRollingPercentile {
             }
 
             public ListState clear() {
-                return new ListState(new AtomicReferenceArray<Bucket>(dataLength), 0, 0);
+                return new ListState(new AtomicReferenceArray<>(dataLength), 0, 0);
             }
 
             public ListState addBucket(Bucket b) {
@@ -550,7 +550,7 @@ public class HystrixRollingPercentile {
 
         BucketCircularArray(int size) {
             AtomicReferenceArray<Bucket> _buckets = new AtomicReferenceArray<Bucket>(size + 1); // + 1 as extra room for the add/remove;
-            state = new AtomicReference<ListState>(new ListState(_buckets, 0, 0));
+            state = new AtomicReference<>(new ListState(_buckets, 0, 0));
             dataLength = _buckets.length();
             numBuckets = size;
         }
@@ -624,7 +624,7 @@ public class HystrixRollingPercentile {
     /**
      * Counters for a given 'bucket' of time.
      */
-    /* package for testing */ static class Bucket {
+    static class Bucket {
         final long windowStart;
         final PercentileBucketData data;
 
@@ -635,8 +635,8 @@ public class HystrixRollingPercentile {
 
     }
 
-    /* package for testing */ static interface Time {
-        public long getCurrentTimeInMillis();
+    interface Time {
+        long getCurrentTimeInMillis();
     }
 
     private static class ActualTime implements Time {

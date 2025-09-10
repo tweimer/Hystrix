@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class HystrixCommandResponseFromCache<R> extends HystrixCachedObservable<R> {
     private final AbstractCommand<R> originalCommand;
 
-    /* package-private */ HystrixCommandResponseFromCache(Observable<R> originalObservable, final AbstractCommand<R> originalCommand) {
+    HystrixCommandResponseFromCache(Observable<R> originalObservable, final AbstractCommand<R> originalCommand) {
         super(originalObservable);
         this.originalCommand = originalCommand;
     }
@@ -18,7 +18,7 @@ public class HystrixCommandResponseFromCache<R> extends HystrixCachedObservable<
         final AtomicBoolean completionLogicRun = new AtomicBoolean(false);
 
         return cachedObservable
-                .doOnError(new Action1<Throwable>() {
+                .doOnError(new Action1<>() {
                     @Override
                     public void call(Throwable throwable) {
                         if (completionLogicRun.compareAndSet(false, true)) {

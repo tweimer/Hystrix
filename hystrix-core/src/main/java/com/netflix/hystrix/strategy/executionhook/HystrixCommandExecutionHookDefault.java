@@ -22,7 +22,7 @@ package com.netflix.hystrix.strategy.executionhook;
  */
 public class HystrixCommandExecutionHookDefault extends HystrixCommandExecutionHook {
 
-    private static HystrixCommandExecutionHookDefault INSTANCE = new HystrixCommandExecutionHookDefault();
+    private static final HystrixCommandExecutionHookDefault INSTANCE = new HystrixCommandExecutionHookDefault();
 
     private HystrixCommandExecutionHookDefault() {
 
