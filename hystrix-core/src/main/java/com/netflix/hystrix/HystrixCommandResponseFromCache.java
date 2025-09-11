@@ -18,28 +18,19 @@ public class HystrixCommandResponseFromCache<R> extends HystrixCachedObservable<
         final AtomicBoolean completionLogicRun = new AtomicBoolean(false);
 
         return cachedObservable
-                .doOnError(new Action1<>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        if (completionLogicRun.compareAndSet(false, true)) {
-                            commandCompleted(commandToCopyStateInto);
-                        }
+                .doOnError(throwable -> {
+                    if (completionLogicRun.compareAndSet(false, true)) {
+                        commandCompleted(commandToCopyStateInto);
                     }
                 })
-                .doOnCompleted(new Action0() {
-                    @Override
-                    public void call() {
-                        if (completionLogicRun.compareAndSet(false, true)) {
-                            commandCompleted(commandToCopyStateInto);
-                        }
+                .doOnCompleted(() -> {
+                    if (completionLogicRun.compareAndSet(false, true)) {
+                        commandCompleted(commandToCopyStateInto);
                     }
                 })
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        if (completionLogicRun.compareAndSet(false, true)) {
-                            commandUnsubscribed(commandToCopyStateInto);
-                        }
+                .doOnUnsubscribe(() -> {
+                    if (completionLogicRun.compareAndSet(false, true)) {
+                        commandUnsubscribed(commandToCopyStateInto);
                     }
                 });
     }

@@ -108,36 +108,30 @@ public class HystrixThreadPoolMetrics extends HystrixMetrics {
     }
 
     public static final Func2<long[], HystrixCommandCompletion, long[]> appendEventToBucket
-            = new Func2<>() {
-        @Override
-        public long[] call(long[] initialCountArray, HystrixCommandCompletion execution) {
-            ExecutionResult.EventCounts eventCounts = execution.getEventCounts();
-            for (HystrixEventType eventType: ALL_COMMAND_EVENT_TYPES) {
-                long eventCount = eventCounts.getCount(eventType);
-                HystrixEventType.ThreadPool threadPoolEventType = HystrixEventType.ThreadPool.from(eventType);
-                if (threadPoolEventType != null) {
-                    initialCountArray[threadPoolEventType.ordinal()] += eventCount;
+            = (initialCountArray, execution) -> {
+                ExecutionResult.EventCounts eventCounts = execution.getEventCounts();
+                for (HystrixEventType eventType: ALL_COMMAND_EVENT_TYPES) {
+                    long eventCount = eventCounts.getCount(eventType);
+                    HystrixEventType.ThreadPool threadPoolEventType = HystrixEventType.ThreadPool.from(eventType);
+                    if (threadPoolEventType != null) {
+                        initialCountArray[threadPoolEventType.ordinal()] += eventCount;
+                    }
                 }
-            }
-            return initialCountArray;
-        }
-    };
+                return initialCountArray;
+            };
 
-    public static final Func2<long[], long[], long[]> counterAggregator = new Func2<>() {
-        @Override
-        public long[] call(long[] cumulativeEvents, long[] bucketEventCounts) {
-            for (int i = 0; i < NUMBER_THREADPOOL_EVENT_TYPES; i++) {
-                cumulativeEvents[i] += bucketEventCounts[i];
-            }
-            return cumulativeEvents;
+    public static final Func2<long[], long[], long[]> counterAggregator = (cumulativeEvents, bucketEventCounts) -> {
+        for (int i = 0; i < NUMBER_THREADPOOL_EVENT_TYPES; i++) {
+            cumulativeEvents[i] += bucketEventCounts[i];
         }
+        return cumulativeEvents;
     };
 
     /**
      * Clears all state from metrics. If new requests come in instances will be recreated and metrics started from scratch.
      *
      */
-    /* package */ static void reset() {
+    static void reset() {
         metrics.clear();
     }
 
@@ -352,11 +346,6 @@ public class HystrixThreadPoolMetrics extends HystrixMetrics {
     }
 
     public static Func0<Integer> getCurrentConcurrencyThunk(final HystrixThreadPoolKey threadPoolKey) {
-        return new Func0<>() {
-            @Override
-            public Integer call() {
-                return HystrixThreadPoolMetrics.getInstance(threadPoolKey).concurrentExecutionCount.get();
-            }
-        };
+        return () -> HystrixThreadPoolMetrics.getInstance(threadPoolKey).concurrentExecutionCount.get();
     }
 }

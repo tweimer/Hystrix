@@ -17,7 +17,6 @@ package com.netflix.hystrix.collapser;
 
 import com.netflix.hystrix.HystrixCollapser.CollapsedRequest;
 import rx.Observable;
-import rx.functions.Action0;
 import rx.subjects.ReplaySubject;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -58,19 +57,10 @@ class CollapsedRequestSubject<T, R> implements CollapsedRequest<T, R> {
             this.argument = arg;
         }
         this.subjectWithAccounting = subject
-                .doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        outstandingSubscriptions++;
-                    }
-                })
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        outstandingSubscriptions--;
-                        if (outstandingSubscriptions == 0) {
-                            containingBatch.remove(arg);
-                        }
+                .doOnSubscribe(() -> outstandingSubscriptions++)
+                .doOnUnsubscribe(() -> {
+                    if (--outstandingSubscriptions == 0) {
+                        containingBatch.remove(arg);
                     }
                 });
     }

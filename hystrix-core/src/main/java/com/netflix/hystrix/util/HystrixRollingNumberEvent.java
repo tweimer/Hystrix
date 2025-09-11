@@ -38,7 +38,7 @@ public enum HystrixRollingNumberEvent {
 
     private final int type;
 
-    private HystrixRollingNumberEvent(int type) {
+    HystrixRollingNumberEvent(int type) {
         this.type = type;
     }
 

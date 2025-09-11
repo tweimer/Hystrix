@@ -28,13 +28,7 @@ public interface HystrixCommandKey extends HystrixKey {
         }
 
         // used to intern instances so we don't keep re-creating them millions of times for the same key
-        private static final InternMap<String, HystrixCommandKeyDefault> intern = new InternMap<>(
-                new InternMap.ValueConstructor<>() {
-                    @Override
-                    public HystrixCommandKeyDefault create(String key) {
-                        return new HystrixCommandKeyDefault(key);
-                    }
-                });
+        private static final InternMap<String, HystrixCommandKeyDefault> intern = new InternMap<>(HystrixCommandKeyDefault::new);
 
 
         /**

@@ -113,9 +113,7 @@ public class LongAdder extends Striped64 implements Serializable {
         long sum = base;
         Cell[] as = cells;
         if (as != null) {
-            int n = as.length;
-            for (int i = 0; i < n; ++i) {
-                Cell a = as[i];
+            for (Cell a : as) {
                 if (a != null)
                     sum += a.value;
             }
@@ -149,9 +147,7 @@ public class LongAdder extends Striped64 implements Serializable {
         Cell[] as = cells;
         base = 0L;
         if (as != null) {
-            int n = as.length;
-            for (int i = 0; i < n; ++i) {
-                Cell a = as[i];
+            for (Cell a : as) {
                 if (a != null) {
                     sum += a.value;
                     a.value = 0L;

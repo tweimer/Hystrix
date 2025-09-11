@@ -38,7 +38,7 @@ public class HystrixTimer {
 
     private static final Logger logger = LoggerFactory.getLogger(HystrixTimer.class);
 
-    private static HystrixTimer INSTANCE = new HystrixTimer();
+    private static final HystrixTimer INSTANCE = new HystrixTimer();
 
     private HystrixTimer() {
         // private to prevent public instantiation
@@ -91,15 +91,11 @@ public class HystrixTimer {
         startThreadIfNeeded();
         // add the listener
 
-        Runnable r = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    listener.tick();
-                } catch (Exception e) {
-                    logger.error("Failed while ticking TimerListener", e);
-                }
+        Runnable r = () -> {
+            try {
+                listener.tick();
+            } catch (Exception e) {
+                logger.error("Failed while ticking TimerListener", e);
             }
         };
 
@@ -140,8 +136,8 @@ public class HystrixTimer {
         }
     }
 
-    /* package */ static class ScheduledExecutor {
-        /* package */ volatile ScheduledThreadPoolExecutor executor;
+    static class ScheduledExecutor {
+        volatile ScheduledThreadPoolExecutor executor;
         private volatile boolean initialized;
 
         /**

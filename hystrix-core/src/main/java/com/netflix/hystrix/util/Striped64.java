@@ -23,6 +23,10 @@ package com.netflix.hystrix.util;
  * From http://gee.cs.oswego.edu/cgi-bin/viewcvs.cgi/jsr166/src/jsr166e/
  */
 
+import sun.misc.Unsafe;
+
+import java.lang.reflect.Field;
+import java.security.PrivilegedExceptionAction;
 import java.util.Random;
 
 /**
@@ -342,14 +346,11 @@ abstract class Striped64 extends Number {
         } catch (SecurityException se) {
             try {
                 return java.security.AccessController.doPrivileged
-                    (new java.security
-                     .PrivilegedExceptionAction<>() {
-                        public sun.misc.Unsafe run() throws Exception {
-                            java.lang.reflect.Field f = sun.misc
-                                .Unsafe.class.getDeclaredField("theUnsafe");
-                            f.setAccessible(true);
-                            return (sun.misc.Unsafe) f.get(null);
-                        }});
+                    ((PrivilegedExceptionAction<Unsafe>) () -> {
+                        Field f = Unsafe.class.getDeclaredField("theUnsafe");
+                        f.setAccessible(true);
+                        return (Unsafe) f.get(null);
+                    });
             } catch (java.security.PrivilegedActionException e) {
                 throw new RuntimeException("Could not initialize intrinsics",
                                            e.getCause());

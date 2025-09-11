@@ -93,10 +93,8 @@ public class LongMaxUpdater extends Striped64 implements Serializable {
         Cell[] as = cells;
         long max = base;
         if (as != null) {
-            int n = as.length;
             long v;
-            for (int i = 0; i < n; ++i) {
-                Cell a = as[i];
+            for (Cell a : as) {
                 if (a != null && (v = a.value) > max)
                     max = v;
             }
@@ -131,9 +129,7 @@ public class LongMaxUpdater extends Striped64 implements Serializable {
         long max = base;
         base = Long.MIN_VALUE;
         if (as != null) {
-            int n = as.length;
-            for (int i = 0; i < n; ++i) {
-                Cell a = as[i];
+            for (Cell a : as) {
                 if (a != null) {
                     long v = a.value;
                     a.value = Long.MIN_VALUE;

@@ -549,7 +549,7 @@ public class HystrixRollingPercentile {
         }
 
         BucketCircularArray(int size) {
-            AtomicReferenceArray<Bucket> _buckets = new AtomicReferenceArray<Bucket>(size + 1); // + 1 as extra room for the add/remove;
+            AtomicReferenceArray<Bucket> _buckets = new AtomicReferenceArray<>(size + 1); // + 1 as extra room for the add/remove;
             state = new AtomicReference<>(new ListState(_buckets, 0, 0));
             dataLength = _buckets.length();
             numBuckets = size;
@@ -596,12 +596,10 @@ public class HystrixRollingPercentile {
              */
             if (state.compareAndSet(currentState, newState)) {
                 // we succeeded
-                return;
             } else {
                 // we failed, someone else was adding or removing
                 // instead of trying again and risking multiple addLast concurrently (which shouldn't be the case)
                 // we'll just return and let the other thread 'win' and if the timing is off the next call to getCurrentBucket will fix things
-                return;
             }
         }
 

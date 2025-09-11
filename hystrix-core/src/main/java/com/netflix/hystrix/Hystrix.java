@@ -79,12 +79,7 @@ public class Hystrix {
         currentCommand.set(new ConcurrentStack<>());
     }
 
-    private static final ThreadLocal<ConcurrentStack<HystrixCommandKey>> currentCommand = new ThreadLocal<>() {
-        @Override
-        protected ConcurrentStack<HystrixCommandKey> initialValue() {
-            return new ConcurrentStack<>();
-        }
-    };
+    private static final ThreadLocal<ConcurrentStack<HystrixCommandKey>> currentCommand = ThreadLocal.withInitial(ConcurrentStack::new);
 
     /**
      * Allows a thread to query whether it's current point of execution is within the scope of a HystrixCommand.
@@ -114,14 +109,7 @@ public class Hystrix {
         } catch (Exception e) {
             logger.warn("Unable to record command starting", e);
         }
-        return new Action0() {
-
-            @Override
-            public void call() {
-                endCurrentThreadExecutingCommand(list);
-            }
-
-        };
+        return () -> endCurrentThreadExecutingCommand(list);
     }
 
     static void endCurrentThreadExecutingCommand() {

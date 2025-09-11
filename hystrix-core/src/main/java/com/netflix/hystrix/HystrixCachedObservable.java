@@ -2,7 +2,6 @@ package com.netflix.hystrix;
 
 import rx.Observable;
 import rx.Subscription;
-import rx.functions.Action0;
 import rx.subjects.ReplaySubject;
 
 public class HystrixCachedObservable<R> {
@@ -15,21 +14,13 @@ public class HystrixCachedObservable<R> {
         this.originalSubscription = originalObservable.subscribe(replaySubject);
 
         this.cachedObservable = replaySubject
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        outstandingSubscriptions--;
-                        if (outstandingSubscriptions == 0) {
-                            originalSubscription.unsubscribe();
-                        }
+                .doOnUnsubscribe(() -> {
+                    outstandingSubscriptions--;
+                    if (outstandingSubscriptions == 0) {
+                        originalSubscription.unsubscribe();
                     }
                 })
-                .doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        outstandingSubscriptions++;
-                    }
-                });
+                .doOnSubscribe(() -> outstandingSubscriptions++);
     }
 
     public static <R> HystrixCachedObservable<R> from(Observable<R> o, AbstractCommand<R> originalCommand) {

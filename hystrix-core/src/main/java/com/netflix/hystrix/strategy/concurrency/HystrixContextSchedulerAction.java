@@ -25,9 +25,6 @@ import com.netflix.hystrix.strategy.HystrixPlugins;
 /**
  * Wrapper around {@link Func2} that manages the {@link HystrixRequestContext} initialization and cleanup for the execution of the {@link Func2}
  * 
- * @param <T>
- *            Return type of {@link Func2}
- * 
  * @ExcludeFromJavadoc
  */
 public class HystrixContextSchedulerAction implements Action0 {
@@ -44,21 +41,17 @@ public class HystrixContextSchedulerAction implements Action0 {
         this.actual = action;
         this.parentThreadState = HystrixRequestContext.getContextForCurrentThread();
 
-        this.c = concurrencyStrategy.wrapCallable(new Callable<>() {
-
-            @Override
-            public Void call() {
-                HystrixRequestContext existingState = HystrixRequestContext.getContextForCurrentThread();
-                try {
-                    // set the state of this thread to that of its parent
-                    HystrixRequestContext.setContextOnCurrentThread(parentThreadState);
-                    // execute actual Action0 with the state of the parent
-                    actual.call();
-                    return null;
-                } finally {
-                    // restore this thread back to its original state
-                    HystrixRequestContext.setContextOnCurrentThread(existingState);
-                }
+        this.c = concurrencyStrategy.wrapCallable(() -> {
+            HystrixRequestContext existingState = HystrixRequestContext.getContextForCurrentThread();
+            try {
+                // set the state of this thread to that of its parent
+                HystrixRequestContext.setContextOnCurrentThread(parentThreadState);
+                // execute actual Action0 with the state of the parent
+                actual.call();
+                return null;
+            } finally {
+                // restore this thread back to its original state
+                HystrixRequestContext.setContextOnCurrentThread(existingState);
             }
         });
     }

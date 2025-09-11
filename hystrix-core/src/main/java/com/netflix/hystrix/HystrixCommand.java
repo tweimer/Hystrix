@@ -24,13 +24,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.netflix.hystrix.util.Exceptions;
 import rx.Observable;
-import rx.functions.Action0;
 
 import com.netflix.hystrix.exception.HystrixBadRequestException;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.netflix.hystrix.strategy.executionhook.HystrixCommandExecutionHook;
 import com.netflix.hystrix.strategy.properties.HystrixPropertiesStrategy;
-import rx.functions.Func0;
 
 /**
  * Used to wrap code that will execute potentially risky functionality (typically meaning a service call over the network)
@@ -293,34 +291,23 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
 
     @Override
     final protected Observable<R> getExecutionObservable() {
-        return Observable.defer(new Func0<Observable<R>>() {
-            @Override
-            public Observable<R> call() {
-                try {
-                    return Observable.just(run());
-                } catch (Throwable ex) {
-                    return Observable.error(ex);
-                }
+        return Observable.defer(() -> {
+            try {
+                return Observable.just(run());
+            } catch (Throwable ex) {
+                return Observable.error(ex);
             }
-        }).doOnSubscribe(new Action0() {
-            @Override
-            public void call() {
-                // Save thread on which we get subscribed so that we can interrupt it later if needed
-                executionThread.set(Thread.currentThread());
-            }
-        });
+        })// Save thread on which we get subscribed so that we can interrupt it later if needed
+        .doOnSubscribe(() -> executionThread.set(Thread.currentThread()));
     }
 
     @Override
     final protected Observable<R> getFallbackObservable() {
-        return Observable.defer(new Func0<>() {
-            @Override
-            public Observable<R> call() {
-                try {
-                    return Observable.just(getFallback());
-                } catch (Throwable ex) {
-                    return Observable.error(ex);
-                }
+        return Observable.defer(() -> {
+            try {
+                return Observable.just(getFallback());
+            } catch (Throwable ex) {
+                return Observable.error(ex);
             }
         });
     }

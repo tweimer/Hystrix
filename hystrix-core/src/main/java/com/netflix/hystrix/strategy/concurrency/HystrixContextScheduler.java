@@ -49,12 +49,7 @@ public class HystrixContextScheduler extends Scheduler {
     }
 
     public HystrixContextScheduler(HystrixConcurrencyStrategy concurrencyStrategy, HystrixThreadPool threadPool) {
-        this(concurrencyStrategy, threadPool, new Func0<>() {
-            @Override
-            public Boolean call() {
-                return true;
-            }
-        });
+        this(concurrencyStrategy, threadPool, () -> Boolean.TRUE);
     }
 
     public HystrixContextScheduler(HystrixConcurrencyStrategy concurrencyStrategy, HystrixThreadPool threadPool, Func0<Boolean> shouldInterruptThread) {

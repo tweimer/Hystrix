@@ -30,13 +30,7 @@ public interface HystrixCommandGroupKey extends HystrixKey {
         }
 
         // used to intern instances so we don't keep re-creating them millions of times for the same key
-        private static final InternMap<String, HystrixCommandGroupDefault> intern = new InternMap<>(
-                new InternMap.ValueConstructor<>() {
-                    @Override
-                    public HystrixCommandGroupDefault create(String key) {
-                        return new HystrixCommandGroupDefault(key);
-                    }
-                });
+        private static final InternMap<String, HystrixCommandGroupDefault> intern = new InternMap<>(HystrixCommandGroupDefault::new);
 
 
         /**

@@ -32,9 +32,6 @@ import org.slf4j.LoggerFactory;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 import rx.subjects.ReplaySubject;
 
@@ -162,12 +159,9 @@ public abstract class HystrixCollapser<BatchReturnType, ResponseType, RequestArg
 
             @Override
             public Observable<Void> mapResponseToRequests(Observable<BatchReturnType> batchResponse, final Collection<CollapsedRequest<ResponseType, RequestArgumentType>> requests) {
-                return batchResponse.single().doOnNext(new Action1<>() {
-                    @Override
-                    public void call(BatchReturnType batchReturnType) {
-                        // this is a blocking call in HystrixCollapser
-                        self.mapResponseToRequests(batchReturnType, requests);
-                    }
+                return batchResponse.single().doOnNext(batchReturnType -> {
+                    // this is a blocking call in HystrixCollapser
+                    self.mapResponseToRequests(batchReturnType, requests);
                 }).ignoreElements().cast(Void.class);
             }
 
@@ -337,12 +331,7 @@ public abstract class HystrixCollapser<BatchReturnType, ResponseType, RequestArg
         // eagerly kick off subscription
         final Subscription underlyingSubscription = toObservable().subscribe(subject);
         // return the subject that can be subscribed to later while the execution has already started
-        return subject.doOnUnsubscribe(new Action0() {
-            @Override
-            public void call() {
-                underlyingSubscription.unsubscribe();
-            }
-        });
+        return subject.doOnUnsubscribe(underlyingSubscription::unsubscribe);
     }
 
     /**
@@ -377,36 +366,33 @@ public abstract class HystrixCollapser<BatchReturnType, ResponseType, RequestArg
      *         {@link #mapResponseToRequests} to transform the {@code <BatchReturnType>} into {@code <ResponseType>}
      */
     public Observable<ResponseType> toObservable(Scheduler observeOn) {
-        return Observable.defer(new Func0<>() {
-            @Override
-            public Observable<ResponseType> call() {
-                final boolean isRequestCacheEnabled = getProperties().requestCacheEnabled().get();
-                final String cacheKey = getCacheKey();
+        return Observable.defer(() -> {
+            final boolean isRequestCacheEnabled = getProperties().requestCacheEnabled().get();
+            final String cacheKey = getCacheKey();
 
-                /* try from cache first */
-                if (isRequestCacheEnabled) {
-                    HystrixCachedObservable<ResponseType> fromCache = requestCache.get(cacheKey);
-                    if (fromCache != null) {
-                        metrics.markResponseFromCache();
-                        return fromCache.toObservable();
-                    }
+            /* try from cache first */
+            if (isRequestCacheEnabled) {
+                HystrixCachedObservable<ResponseType> fromCache = requestCache.get(cacheKey);
+                if (fromCache != null) {
+                    metrics.markResponseFromCache();
+                    return fromCache.toObservable();
                 }
-
-                RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> requestCollapser = collapserFactory.getRequestCollapser(collapserInstanceWrapper);
-                Observable<ResponseType> response = requestCollapser.submitRequest(getRequestArgument());
-
-                if (isRequestCacheEnabled && cacheKey != null) {
-                    HystrixCachedObservable<ResponseType> toCache = HystrixCachedObservable.from(response);
-                    HystrixCachedObservable<ResponseType> fromCache = requestCache.putIfAbsent(cacheKey, toCache);
-                    if (fromCache == null) {
-                        return toCache.toObservable();
-                    } else {
-                        toCache.unsubscribe();
-                        return fromCache.toObservable();
-                    }
-                }
-                return response;
             }
+
+            RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> requestCollapser = collapserFactory.getRequestCollapser(collapserInstanceWrapper);
+            Observable<ResponseType> response = requestCollapser.submitRequest(getRequestArgument());
+
+            if (isRequestCacheEnabled && cacheKey != null) {
+                HystrixCachedObservable<ResponseType> toCache = HystrixCachedObservable.from(response);
+                HystrixCachedObservable<ResponseType> fromCache = requestCache.putIfAbsent(cacheKey, toCache);
+                if (fromCache == null) {
+                    return toCache.toObservable();
+                } else {
+                    toCache.unsubscribe();
+                    return fromCache.toObservable();
+                }
+            }
+            return response;
         });
     }
 
@@ -475,7 +461,7 @@ public abstract class HystrixCollapser<BatchReturnType, ResponseType, RequestArg
     /**
      * Clears all state. If new requests come in instances will be recreated and metrics started from scratch.
      */
-    /* package */static void reset() {
+    static void reset() {
         RequestCollapserFactory.reset();
     }
 

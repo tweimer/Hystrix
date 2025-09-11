@@ -23,9 +23,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 
 /**
@@ -570,7 +567,7 @@ public class HystrixRollingNumber {
             }
 
             public ListState clear() {
-                return new ListState(new AtomicReferenceArray<Bucket>(dataLength), 0, 0);
+                return new ListState(new AtomicReferenceArray<>(dataLength), 0, 0);
             }
 
             public ListState addBucket(Bucket b) {
@@ -644,12 +641,10 @@ public class HystrixRollingNumber {
              */
             if (state.compareAndSet(currentState, newState)) {
                 // we succeeded
-                return;
             } else {
                 // we failed, someone else was adding or removing
                 // instead of trying again and risking multiple addLast concurrently (which shouldn't be the case)
                 // we'll just return and let the other thread 'win' and if the timing is off the next call to getCurrentBucket will fix things
-                return;
             }
         }
 

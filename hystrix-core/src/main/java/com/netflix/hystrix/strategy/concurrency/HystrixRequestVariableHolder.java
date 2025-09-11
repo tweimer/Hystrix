@@ -16,6 +16,7 @@
 package com.netflix.hystrix.strategy.concurrency;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class HystrixRequestVariableHolder<T> {
 
     static final Logger logger = LoggerFactory.getLogger(HystrixRequestVariableHolder.class);
 
-    private static ConcurrentHashMap<RVCacheKey, HystrixRequestVariable<?>> requestVariableInstance = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<RVCacheKey, HystrixRequestVariable<?>> requestVariableInstance = new ConcurrentHashMap<>();
 
     private final HystrixRequestVariableLifecycle<T> lifeCycleMethods;
 
