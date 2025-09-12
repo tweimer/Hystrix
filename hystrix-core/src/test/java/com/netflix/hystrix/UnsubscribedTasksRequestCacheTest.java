@@ -35,8 +35,8 @@ import static org.junit.Assert.*;
 
 public class UnsubscribedTasksRequestCacheTest {
 
-    private AtomicBoolean encounteredCommandException = new AtomicBoolean(false);
-    private AtomicInteger numOfExecutions = new AtomicInteger(0);
+    private final AtomicBoolean encounteredCommandException = new AtomicBoolean(false);
+    private final AtomicInteger numOfExecutions = new AtomicInteger(0);
 
     public class CommandExecutionHook extends HystrixCommandExecutionHook {
 
@@ -90,8 +90,8 @@ public class UnsubscribedTasksRequestCacheTest {
         try {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-            Future futureCommand2a = executorService.submit(createCommandRunnable(context, numCacheResponses));
-            Future futureCommand2b = executorService.submit(createCommandRunnable(context, numCacheResponses));
+            Future<?> futureCommand2a = executorService.submit(createCommandRunnable(context, numCacheResponses));
+            Future<?> futureCommand2b = executorService.submit(createCommandRunnable(context, numCacheResponses));
 
             futureCommand2a.get();
             futureCommand2b.get();
@@ -105,24 +105,21 @@ public class UnsubscribedTasksRequestCacheTest {
     }
 
     private Runnable createCommandRunnable(final HystrixRequestContext context, final AtomicInteger numCacheResponses) {
-        return new Runnable() {
+        return () -> {
 
-            public void run() {
+            HystrixRequestContext.setContextOnCurrentThread(context);
 
-                HystrixRequestContext.setContextOnCurrentThread(context);
+            CommandUsingRequestCache command2a = new CommandUsingRequestCache(2);
+            Future<Boolean> resultCommand2a = command2a.queue();
 
-                CommandUsingRequestCache command2a = new CommandUsingRequestCache(2);
-                Future<Boolean> resultCommand2a = command2a.queue();
-
-                try {
-                    assertTrue(resultCommand2a.get());
-                    System.out.println(Thread.currentThread() + " " + command2a.isResponseFromCache());
-                    if (command2a.isResponseFromCache()) {
-                        numCacheResponses.getAndIncrement();
-                    }
-                } catch (Exception e) {
-                    fail("Exception: " + e.getMessage());
+            try {
+                assertTrue(resultCommand2a.get());
+                System.out.println(Thread.currentThread() + " " + command2a.isResponseFromCache());
+                if (command2a.isResponseFromCache()) {
+                    numCacheResponses.getAndIncrement();
                 }
+            } catch (Exception e) {
+                fail("Exception: " + e.getMessage());
             }
         };
     }

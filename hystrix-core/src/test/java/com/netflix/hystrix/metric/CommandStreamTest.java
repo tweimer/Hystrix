@@ -26,7 +26,6 @@ import com.netflix.hystrix.HystrixEventType;
 import com.netflix.hystrix.HystrixThreadPoolKey;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
-import rx.functions.Func2;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -132,7 +131,7 @@ public abstract class CommandStreamTest {
         public static List<Command> getCommandsWithResponseFromCache(HystrixCommandGroupKey groupKey, HystrixCommandKey key) {
             Command cmd1 = Command.from(groupKey, key, HystrixEventType.SUCCESS);
             Command cmd2 = Command.from(groupKey, key, HystrixEventType.RESPONSE_FROM_CACHE);
-            List<Command> cmds = new ArrayList<Command>();
+            List<Command> cmds = new ArrayList<>();
             cmds.add(cmd1);
             cmds.add(cmd2);
             return cmds;
@@ -205,7 +204,7 @@ public abstract class CommandStreamTest {
 
         @Override
         protected HystrixCommand<List<Integer>> createCommand(Collection<CollapsedRequest<Integer, Integer>> collapsedRequests) {
-            List<Integer> args = new ArrayList<Integer>();
+            List<Integer> args = new ArrayList<>();
             for (CollapsedRequest<Integer, Integer> collapsedReq: collapsedRequests) {
                 args.add(collapsedReq.getArgument());
             }
@@ -227,7 +226,7 @@ public abstract class CommandStreamTest {
     }
 
     private static class BatchCommand extends HystrixCommand<List<Integer>> {
-        private List<Integer> args;
+        private final List<Integer> args;
 
         protected BatchCommand(List<Integer> args) {
             super(HystrixCommandGroupKey.Factory.asKey("BATCH"));
@@ -235,7 +234,7 @@ public abstract class CommandStreamTest {
         }
 
         @Override
-        protected List<Integer> run() throws Exception {
+        protected List<Integer> run() {
             System.out.println(Thread.currentThread().getName() + " : Executing batch of : " + args.size());
             return args;
         }

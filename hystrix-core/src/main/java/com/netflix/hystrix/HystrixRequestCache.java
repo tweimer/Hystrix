@@ -21,8 +21,6 @@ import com.netflix.hystrix.strategy.concurrency.HystrixRequestVariableHolder;
 import com.netflix.hystrix.strategy.concurrency.HystrixRequestVariableLifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.internal.operators.CachedObservable;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -133,10 +131,8 @@ public class HystrixRequestCache {
                 throw new IllegalStateException("Request caching is not available. Maybe you need to initialize the HystrixRequestContext?");
             }
             HystrixCachedObservable<T> alreadySet = (HystrixCachedObservable<T>) cacheInstance.putIfAbsent(key, f);
-            if (alreadySet != null) {
-                // someone beat us so we didn't cache this
-                return alreadySet;
-            }
+            // someone beat us so we didn't cache this
+            return alreadySet;
         }
         // we either set it in the cache or do not have a cache key
         return null;

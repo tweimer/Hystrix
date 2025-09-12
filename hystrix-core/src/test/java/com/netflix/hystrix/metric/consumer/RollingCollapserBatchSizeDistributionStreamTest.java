@@ -54,7 +54,7 @@ public class RollingCollapserBatchSizeDistributionStreamTest extends CommandStre
         stream.startCachingStreamValuesIfUnstarted();
 
         final CountDownLatch latch = new CountDownLatch(1);
-        stream.observe().skip(10).take(10).subscribe(new Subscriber<CachedValuesHistogram>() {
+        stream.observe().skip(10).take(10).subscribe(new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();
@@ -89,7 +89,7 @@ public class RollingCollapserBatchSizeDistributionStreamTest extends CommandStre
         stream.startCachingStreamValuesIfUnstarted();
 
         final CountDownLatch latch = new CountDownLatch(1);
-        stream.observe().take(10).subscribe(new Subscriber<CachedValuesHistogram>() {
+        stream.observe().take(10).subscribe(new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();
@@ -160,7 +160,7 @@ public class RollingCollapserBatchSizeDistributionStreamTest extends CommandStre
         stream.startCachingStreamValuesIfUnstarted();
 
         final CountDownLatch latch = new CountDownLatch(1);
-        stream.observe().take(30).subscribe(new Subscriber<CachedValuesHistogram>() {
+        stream.observe().take(30).subscribe(new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();

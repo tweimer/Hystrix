@@ -31,8 +31,6 @@ import org.junit.Test;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 import java.util.ArrayList;
@@ -51,7 +49,7 @@ public class HealthCountsStreamTest extends CommandStreamTest {
     static HystrixCommandGroupKey groupKey = HystrixCommandGroupKey.Factory.asKey("HealthCounts");
 
     private static Subscriber<HystrixCommandMetrics.HealthCounts> getSubscriber(final CountDownLatch latch) {
-        return new Subscriber<HystrixCommandMetrics.HealthCounts>() {
+        return new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();
@@ -273,7 +271,7 @@ public class HealthCountsStreamTest extends CommandStreamTest {
         //submit 2 more requests and they should be SEMAPHORE_REJECTED
         //should see 10 SUCCESSes, 2 SEMAPHORE_REJECTED and 2 FALLBACK_SUCCESSes
 
-        List<Command> saturators = new ArrayList<Command>();
+        List<Command> saturators = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
             saturators.add(CommandStreamTest.Command.from(groupKey, key, HystrixEventType.SUCCESS, 400, HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE));
@@ -283,12 +281,7 @@ public class HealthCountsStreamTest extends CommandStreamTest {
         CommandStreamTest.Command rejected2 = CommandStreamTest.Command.from(groupKey, key, HystrixEventType.SUCCESS, 0, HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE);
 
         for (final CommandStreamTest.Command saturator : saturators) {
-            new Thread(new HystrixContextRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    saturator.observe();
-                }
-            })).start();
+            new Thread(new HystrixContextRunnable(saturator::observe)).start();
         }
 
         try {
@@ -325,7 +318,7 @@ public class HealthCountsStreamTest extends CommandStreamTest {
         //submit 2 more requests and they should be THREADPOOL_REJECTED
         //should see 10 SUCCESSes, 2 THREADPOOL_REJECTED and 2 FALLBACK_SUCCESSes
 
-        List<CommandStreamTest.Command> saturators = new ArrayList<CommandStreamTest.Command>();
+        List<CommandStreamTest.Command> saturators = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
             saturators.add(CommandStreamTest.Command.from(groupKey, key, HystrixEventType.SUCCESS, 400));
@@ -414,7 +407,7 @@ public class HealthCountsStreamTest extends CommandStreamTest {
         //fallback semaphore size is 5.  So let 5 commands saturate that semaphore, then
         //let 2 more commands go to fallback.  they should get rejected by the fallback-semaphore
 
-        List<CommandStreamTest.Command> fallbackSaturators = new ArrayList<CommandStreamTest.Command>();
+        List<CommandStreamTest.Command> fallbackSaturators = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             fallbackSaturators.add(CommandStreamTest.Command.from(groupKey, key, HystrixEventType.FAILURE, 20, HystrixEventType.FALLBACK_SUCCESS, 400));
         }
@@ -489,20 +482,11 @@ public class HealthCountsStreamTest extends CommandStreamTest {
                 .take(10)
                 .observeOn(Schedulers.computation());
 
-        Observable<Boolean> zipped = Observable.zip(o1, o2, new Func2<HystrixCommandMetrics.HealthCounts, HystrixCommandMetrics.HealthCounts, Boolean>() {
-            @Override
-            public Boolean call(HystrixCommandMetrics.HealthCounts healthCounts, HystrixCommandMetrics.HealthCounts healthCounts2) {
-                return healthCounts == healthCounts2;  //we want object equality
-            }
-        });
-        Observable < Boolean > reduced = zipped.reduce(true, new Func2<Boolean, Boolean, Boolean>() {
-            @Override
-            public Boolean call(Boolean a, Boolean b) {
-                return a && b;
-            }
-        });
+        Observable<Boolean> zipped = Observable.zip(o1, o2, (healthCounts, healthCounts2) -> healthCounts == healthCounts2);  //we want object equality
 
-        reduced.subscribe(new Subscriber<Boolean>() {
+        Observable < Boolean > reduced = zipped.reduce(true, (a, b) -> a && b);
+
+        reduced.subscribe(new Subscriber<>() {
             @Override
             public void onCompleted() {
                 System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " Reduced OnCompleted");
@@ -547,13 +531,8 @@ public class HealthCountsStreamTest extends CommandStreamTest {
                 .observe()
                 .take(10)
                 .observeOn(Schedulers.computation())
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch1.countDown();
-                    }
-                })
-                .subscribe(new Subscriber<HystrixCommandMetrics.HealthCounts>() {
+                .doOnUnsubscribe(latch1::countDown)
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Health 1 OnCompleted");
@@ -577,13 +556,8 @@ public class HealthCountsStreamTest extends CommandStreamTest {
                 .observe()
                 .take(10)
                 .observeOn(Schedulers.computation())
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch2.countDown();
-                    }
-                })
-                .subscribe(new Subscriber<HystrixCommandMetrics.HealthCounts>() {
+                .doOnUnsubscribe(latch2::countDown)
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Health 2 OnCompleted");

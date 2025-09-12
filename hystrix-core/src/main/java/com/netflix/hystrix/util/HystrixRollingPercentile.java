@@ -349,7 +349,7 @@ public class HystrixRollingPercentile {
     static class PercentileSnapshot {
         private final int[] data;
         private final int length;
-        private int mean;
+        private final int mean;
 
         PercentileSnapshot(Bucket[] buckets) {
             int lengthFromBuckets = 0;

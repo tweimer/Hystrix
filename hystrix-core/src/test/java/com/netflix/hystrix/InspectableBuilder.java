@@ -16,31 +16,31 @@
 package com.netflix.hystrix;
 
 public interface InspectableBuilder {
-    public TestCommandBuilder getBuilder();
+    TestCommandBuilder getBuilder();
 
-    public enum CommandKeyForUnitTest implements HystrixCommandKey {
+    enum CommandKeyForUnitTest implements HystrixCommandKey {
         KEY_ONE, KEY_TWO
     }
 
-    public enum CommandGroupForUnitTest implements HystrixCommandGroupKey {
+    enum CommandGroupForUnitTest implements HystrixCommandGroupKey {
         OWNER_ONE, OWNER_TWO
     }
 
-    public enum ThreadPoolKeyForUnitTest implements HystrixThreadPoolKey {
+    enum ThreadPoolKeyForUnitTest implements HystrixThreadPoolKey {
         THREAD_POOL_ONE, THREAD_POOL_TWO
     }
 
-    public static class TestCommandBuilder {
+    class TestCommandBuilder {
         HystrixCommandGroupKey owner = CommandGroupForUnitTest.OWNER_ONE;
-        HystrixCommandKey dependencyKey = null;
-        HystrixThreadPoolKey threadPoolKey = null;
+        HystrixCommandKey dependencyKey;
+        HystrixThreadPoolKey threadPoolKey;
         HystrixCircuitBreaker circuitBreaker;
-        HystrixThreadPool threadPool = null;
-        HystrixCommandProperties.Setter commandPropertiesDefaults = HystrixCommandPropertiesTest.getUnitTestPropertiesSetter();
+        HystrixThreadPool threadPool;
+        HystrixCommandProperties.Setter commandPropertiesDefaults;
         HystrixThreadPoolProperties.Setter threadPoolPropertiesDefaults = HystrixThreadPoolPropertiesTest.getUnitTestPropertiesBuilder();
         HystrixCommandMetrics metrics;
-        AbstractCommand.TryableSemaphore fallbackSemaphore = null;
-        AbstractCommand.TryableSemaphore executionSemaphore = null;
+        AbstractCommand.TryableSemaphore fallbackSemaphore;
+        AbstractCommand.TryableSemaphore executionSemaphore;
         TestableExecutionHook executionHook = new TestableExecutionHook();
 
         TestCommandBuilder(HystrixCommandProperties.ExecutionIsolationStrategy isolationStrategy) {

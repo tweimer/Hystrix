@@ -16,7 +16,6 @@
 package com.netflix.hystrix.metric.consumer;
 
 import com.netflix.hystrix.HystrixCollapserKey;
-import com.netflix.hystrix.HystrixCollapserMetrics;
 import com.netflix.hystrix.HystrixEventType;
 import com.netflix.hystrix.HystrixRequestLog;
 import com.netflix.hystrix.metric.CommandStreamTest;
@@ -36,7 +35,7 @@ public class RollingCollapserEventCounterStreamTest extends CommandStreamTest {
     RollingCollapserEventCounterStream stream;
 
     private static Subscriber<long[]> getSubscriber(final CountDownLatch latch) {
-        return new Subscriber<long[]>() {
+        return new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();

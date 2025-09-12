@@ -40,17 +40,6 @@ public class HystrixUtilizationStream {
     private static final DynamicIntProperty dataEmissionIntervalInMs =
             DynamicPropertyFactory.getInstance().getIntProperty("hystrix.stream.utilization.intervalInMilliseconds", 500);
 
-
-    private static final Func1<Long, HystrixUtilization> getAllUtilization = new Func1<>() {
-        @Override
-        public HystrixUtilization call(Long timestamp) {
-            return HystrixUtilization.from(
-                    getAllCommandUtilization.call(timestamp),
-                    getAllThreadPoolUtilization.call(timestamp)
-            );
-        }
-    };
-
     /**
      * @deprecated Not for public use.  Please use {@link #getInstance()}.  This facilitates better stream-sharing
      * @param intervalInMilliseconds milliseconds between data emissions
@@ -67,8 +56,7 @@ public class HystrixUtilizationStream {
     }
 
     //The data emission interval is looked up on startup only
-    private static final HystrixUtilizationStream INSTANCE =
-            new HystrixUtilizationStream(dataEmissionIntervalInMs.get());
+    private static final HystrixUtilizationStream INSTANCE = new HystrixUtilizationStream(dataEmissionIntervalInMs.get());
 
     public static HystrixUtilizationStream getInstance() {
         return INSTANCE;
@@ -128,6 +116,11 @@ public class HystrixUtilizationStream {
                 }
                 return threadPoolUtilizationPerKey;
             };
+
+    private static final Func1<Long, HystrixUtilization> getAllUtilization = timestamp -> HystrixUtilization.from(
+            getAllCommandUtilization.call(timestamp),
+            getAllThreadPoolUtilization.call(timestamp)
+    );
 
     private static final Func1<HystrixUtilization, Map<HystrixCommandKey, HystrixCommandUtilization>> getOnlyCommandUtilization =
             HystrixUtilization::getCommandUtilizationMap;

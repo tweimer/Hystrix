@@ -36,7 +36,7 @@ public class CumulativeCollapserEventCounterStreamTest extends CommandStreamTest
     CumulativeCollapserEventCounterStream stream;
 
     private static Subscriber<long[]> getSubscriber(final CountDownLatch latch) {
-        return new Subscriber<long[]>() {
+        return new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();

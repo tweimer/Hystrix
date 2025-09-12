@@ -62,16 +62,14 @@ public class HystrixCircuitBreakerTest {
     public static class TestCircuitBreaker implements HystrixCircuitBreaker {
 
         final HystrixCommandMetrics metrics;
-        private boolean forceShortCircuit = false;
+        private boolean forceShortCircuit;
 
         public TestCircuitBreaker() {
             this.metrics = getMetrics(HystrixCommandPropertiesTest.getUnitTestPropertiesSetter());
-            forceShortCircuit = false;
         }
 
         public TestCircuitBreaker(HystrixCommandKey commandKey) {
             this.metrics = getMetrics(commandKey, HystrixCommandPropertiesTest.getUnitTestPropertiesSetter());
-            forceShortCircuit = false;
         }
 
         public TestCircuitBreaker setForceShortCircuit(boolean value) {
@@ -638,15 +636,15 @@ public class HystrixCircuitBreakerTest {
         return new HystrixCircuitBreakerImpl(key, commandGroup, HystrixCommandPropertiesTest.asMock(properties), metrics);
     }
 
-    private static enum CommandOwnerForUnitTest implements HystrixCommandGroupKey {
+    private enum CommandOwnerForUnitTest implements HystrixCommandGroupKey {
         OWNER_ONE, OWNER_TWO
     }
 
-    private static enum ThreadPoolKeyForUnitTest implements HystrixThreadPoolKey {
+    private enum ThreadPoolKeyForUnitTest implements HystrixThreadPoolKey {
         THREAD_POOL_ONE, THREAD_POOL_TWO
     }
 
-    private static enum CommandKeyForUnitTest implements HystrixCommandKey {
+    private enum CommandKeyForUnitTest implements HystrixCommandKey {
         KEY_ONE, KEY_TWO
     }
 
@@ -806,7 +804,7 @@ public class HystrixCircuitBreakerTest {
         }
     }
 
-    public class MyHystrixCommandExecutionHook extends HystrixCommandExecutionHook {
+    public static class MyHystrixCommandExecutionHook extends HystrixCommandExecutionHook {
 
         @Override
         public <T> T onComplete(final HystrixInvokable<T> command, final T response) {

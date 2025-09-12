@@ -26,19 +26,14 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.netflix.hystrix.strategy.concurrency.HystrixContextScheduler;
 import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
 import com.netflix.hystrix.strategy.properties.HystrixPropertiesCollapserDefault;
 import com.netflix.hystrix.strategy.properties.HystrixPropertiesFactory;
-import com.netflix.hystrix.util.HystrixTimer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,10 +50,7 @@ import com.netflix.hystrix.util.HystrixTimer.TimerListener;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.functions.Action0;
-import rx.observers.Subscribers;
 import rx.observers.TestSubscriber;
-import rx.schedulers.Schedulers;
 
 import static org.junit.Assert.*;
 
@@ -180,7 +172,7 @@ public class HystrixCollapserTest {
         assertEquals(1, cmdIterator.next().getNumberCollapsed());
     }
 
-    class Pair<A, B> {
+    static class Pair<A, B> {
         final A a;
         final B b;
 
@@ -190,7 +182,7 @@ public class HystrixCollapserTest {
         }
     }
 
-    class MyCommand extends HystrixCommand<List<Pair<String, Integer>>> {
+    static class MyCommand extends HystrixCommand<List<Pair<String, Integer>>> {
 
         private final List<String> args;
 
@@ -202,15 +194,15 @@ public class HystrixCollapserTest {
         @Override
         protected List<Pair<String, Integer>> run() throws Exception {
             System.out.println("Executing batch command on : " + Thread.currentThread().getName() + " with args : " + args);
-            List<Pair<String, Integer>> results = new ArrayList<Pair<String, Integer>>();
+            List<Pair<String, Integer>> results = new ArrayList<>();
             for (String arg: args) {
-                results.add(new Pair<String, Integer>(arg, Integer.parseInt(arg)));
+                results.add(new Pair<>(arg, Integer.parseInt(arg)));
             }
             return results;
         }
     }
 
-    class MyCollapser extends HystrixCollapser<List<Pair<String, Integer>>, Integer, String> {
+    static class MyCollapser extends HystrixCollapser<List<Pair<String, Integer>>, Integer, String> {
 
         private final String arg;
 
@@ -232,7 +224,7 @@ public class HystrixCollapserTest {
 
         @Override
         protected HystrixCommand<List<Pair<String, Integer>>> createCommand(Collection<CollapsedRequest<Integer, String>> collapsedRequests) {
-            List<String> args = new ArrayList<String>(collapsedRequests.size());
+            List<String> args = new ArrayList<>(collapsedRequests.size());
             for (CollapsedRequest<Integer, String> req: collapsedRequests) {
                 args.add(req.getArgument());
             }
@@ -261,15 +253,15 @@ public class HystrixCollapserTest {
     public void testDuplicateArgumentsWithRequestCachingOn() throws Exception {
         final int NUM = 10;
 
-        List<Observable<Integer>> observables = new ArrayList<Observable<Integer>>();
+        List<Observable<Integer>> observables = new ArrayList<>();
         for (int i = 0; i < NUM; i++) {
             MyCollapser c = new MyCollapser("5", true);
             observables.add(c.toObservable());
         }
 
-        List<TestSubscriber<Integer>> subscribers = new ArrayList<TestSubscriber<Integer>>();
+        List<TestSubscriber<Integer>> subscribers = new ArrayList<>();
         for (final Observable<Integer> o: observables) {
-            final TestSubscriber<Integer> sub = new TestSubscriber<Integer>();
+            final TestSubscriber<Integer> sub = new TestSubscriber<>();
             subscribers.add(sub);
 
             o.subscribe(sub);
@@ -290,15 +282,15 @@ public class HystrixCollapserTest {
     public void testDuplicateArgumentsWithRequestCachingOff() throws Exception {
         final int NUM = 10;
 
-        List<Observable<Integer>> observables = new ArrayList<Observable<Integer>>();
+        List<Observable<Integer>> observables = new ArrayList<>();
         for (int i = 0; i < NUM; i++) {
             MyCollapser c = new MyCollapser("5", false);
             observables.add(c.toObservable());
         }
 
-        List<TestSubscriber<Integer>> subscribers = new ArrayList<TestSubscriber<Integer>>();
+        List<TestSubscriber<Integer>> subscribers = new ArrayList<>();
         for (final Observable<Integer> o: observables) {
-            final TestSubscriber<Integer> sub = new TestSubscriber<Integer>();
+            final TestSubscriber<Integer> sub = new TestSubscriber<>();
             subscribers.add(sub);
 
             o.subscribe(sub);
@@ -336,17 +328,17 @@ public class HystrixCollapserTest {
     public void testUnsubscribeFromSomeDuplicateArgsDoesNotRemoveFromBatch() throws Exception {
         final int NUM = 10;
 
-        List<Observable<Integer>> observables = new ArrayList<Observable<Integer>>();
+        List<Observable<Integer>> observables = new ArrayList<>();
         for (int i = 0; i < NUM; i++) {
             MyCollapser c = new MyCollapser("5", true);
             observables.add(c.toObservable());
         }
 
-        List<TestSubscriber<Integer>> subscribers = new ArrayList<TestSubscriber<Integer>>();
-        List<Subscription> subscriptions = new ArrayList<Subscription>();
+        List<TestSubscriber<Integer>> subscribers = new ArrayList<>();
+        List<Subscription> subscriptions = new ArrayList<>();
 
         for (final Observable<Integer> o: observables) {
-            final TestSubscriber<Integer> sub = new TestSubscriber<Integer>();
+            final TestSubscriber<Integer> sub = new TestSubscriber<>();
             subscribers.add(sub);
 
             Subscription s = o.subscribe(sub);
@@ -591,20 +583,16 @@ public class HystrixCollapserTest {
         final HystrixRequestContext reqContext = HystrixRequestContext.initializeContext();
 
         final TestCollapserTimer timer = new TestCollapserTimer();
-        final ConcurrentLinkedQueue<Future<String>> responses = new ConcurrentLinkedQueue<Future<String>>();
-        ConcurrentLinkedQueue<Thread> threads = new ConcurrentLinkedQueue<Thread>();
+        final ConcurrentLinkedQueue<Future<String>> responses = new ConcurrentLinkedQueue<>();
+        ConcurrentLinkedQueue<Thread> threads = new ConcurrentLinkedQueue<>();
 
         // kick off work (simulating a single request with multiple threads)
         for (int t = 0; t < 5; t++) {
             final int outerLoop = t;
-            Thread th = new Thread(new HystrixContextRunnable(HystrixPlugins.getInstance().getConcurrencyStrategy(), new Runnable() {
-
-                @Override
-                public void run() {
-                    for (int i = 0; i < 100; i++) {
-                        int uniqueInt = (outerLoop * 100) + i;
-                        responses.add(new TestRequestCollapser(timer, uniqueInt).queue());
-                    }
+            Thread th = new Thread(new HystrixContextRunnable(HystrixPlugins.getInstance().getConcurrencyStrategy(), () -> {
+                for (int i = 0; i < 100; i++) {
+                    int uniqueInt = (outerLoop * 100) + i;
+                    responses.add(new TestRequestCollapser(timer, uniqueInt).queue());
                 }
             }));
 
@@ -877,7 +865,7 @@ public class HystrixCollapserTest {
      */
     @Test
     public void testRequestCacheWithNullRequestArgument() throws Exception {
-        ConcurrentLinkedQueue<HystrixCommand<List<String>>> commands = new ConcurrentLinkedQueue<HystrixCommand<List<String>>>();
+        ConcurrentLinkedQueue<HystrixCommand<List<String>>> commands = new ConcurrentLinkedQueue<>();
 
         final TestCollapserTimer timer = new TestCollapserTimer();
         SuccessfulCacheableCollapsedCommand command1 = new SuccessfulCacheableCollapsedCommand(timer, null, true, commands);
@@ -915,7 +903,7 @@ public class HystrixCollapserTest {
 
     @Test
     public void testRequestCacheWithCommandError() {
-        ConcurrentLinkedQueue<HystrixCommand<List<String>>> commands = new ConcurrentLinkedQueue<HystrixCommand<List<String>>>();
+        ConcurrentLinkedQueue<HystrixCommand<List<String>>> commands = new ConcurrentLinkedQueue<>();
 
         final TestCollapserTimer timer = new TestCollapserTimer();
         SuccessfulCacheableCollapsedCommand command1 = new SuccessfulCacheableCollapsedCommand(timer, "FAILURE", true, commands);
@@ -965,7 +953,7 @@ public class HystrixCollapserTest {
      */
     @Test
     public void testRequestCacheWithCommandTimeout() {
-        ConcurrentLinkedQueue<HystrixCommand<List<String>>> commands = new ConcurrentLinkedQueue<HystrixCommand<List<String>>>();
+        ConcurrentLinkedQueue<HystrixCommand<List<String>>> commands = new ConcurrentLinkedQueue<>();
 
         final TestCollapserTimer timer = new TestCollapserTimer();
         SuccessfulCacheableCollapsedCommand command1 = new SuccessfulCacheableCollapsedCommand(timer, "TIMEOUT", true, commands);
@@ -1014,7 +1002,7 @@ public class HystrixCollapserTest {
      * Test how the collapser behaves when the circuit is short-circuited
      */
     @Test
-    public void testRequestWithCommandShortCircuited() throws Exception {
+    public void testRequestWithCommandShortCircuited() {
         TestCollapserTimer timer = new TestCollapserTimer();
         HystrixCollapser<List<String>, String, String> collapser1 = new TestRequestCollapserWithShortCircuitedCommand(timer, "1");
         Observable<String> response1 = collapser1.observe();
@@ -1058,8 +1046,8 @@ public class HystrixCollapserTest {
 
         // normally someone wouldn't wait on these, but we need to make sure they do in fact return
         // and not block indefinitely in case someone does call get()
-        assertEquals(null, response1.get(1000, TimeUnit.MILLISECONDS));
-        assertEquals(null, response2.get(1000, TimeUnit.MILLISECONDS));
+        assertNull(response1.get(1000, TimeUnit.MILLISECONDS));
+        assertNull(response2.get(1000, TimeUnit.MILLISECONDS));
 
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
 
@@ -1082,7 +1070,7 @@ public class HystrixCollapserTest {
 
         // we will fetch one of these just so we wait for completion ... but expect an error
         try {
-            assertEquals(null, response1.get(1000, TimeUnit.MILLISECONDS));
+            assertNull(response1.get(1000, TimeUnit.MILLISECONDS));
             fail("expected an error as mapResponseToRequests did not set responses");
         } catch (ExecutionException e) {
             assertTrue(e.getCause() instanceof IllegalStateException);
@@ -1098,10 +1086,9 @@ public class HystrixCollapserTest {
     /**
      * Test a Void response type with execute - response being set in mapResponseToRequest to null
      *
-     * @throws Exception
      */
     @Test
-    public void testVoidResponseTypeFireAndForgetCollapsing3() throws Exception {
+    public void testVoidResponseTypeFireAndForgetCollapsing3() {
         CollapserTimer timer = new RealCollapserTimer();
         TestCollapserWithVoidResponseType collapser1 = new TestCollapserWithVoidResponseType(timer, 1);
         assertNull(collapser1.execute());
@@ -1123,18 +1110,15 @@ public class HystrixCollapserTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        final AtomicReference<String> value1 = new AtomicReference<String>(null);
-        final AtomicReference<String> value2 = new AtomicReference<String>(null);
+        final AtomicReference<String> value1 = new AtomicReference<>(null);
+        final AtomicReference<String> value2 = new AtomicReference<>(null);
 
         Subscription s1 = response1
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
-                        latch1.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
+                    latch1.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s1 OnCompleted");
@@ -1155,14 +1139,11 @@ public class HystrixCollapserTest {
                 });
 
         Subscription s2 = response2
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
-                        latch2.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
+                    latch2.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s2 OnCompleted");
@@ -1213,18 +1194,15 @@ public class HystrixCollapserTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        final AtomicReference<String> value1 = new AtomicReference<String>(null);
-        final AtomicReference<String> value2 = new AtomicReference<String>(null);
+        final AtomicReference<String> value1 = new AtomicReference<>(null);
+        final AtomicReference<String> value2 = new AtomicReference<>(null);
 
         Subscription s1 = response1
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
-                        latch1.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
+                    latch1.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s1 OnCompleted");
@@ -1245,14 +1223,11 @@ public class HystrixCollapserTest {
                 });
 
         Subscription s2 = response2
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
-                        latch2.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
+                    latch2.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s2 OnCompleted");
@@ -1303,18 +1278,15 @@ public class HystrixCollapserTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        final AtomicReference<String> value1 = new AtomicReference<String>(null);
-        final AtomicReference<String> value2 = new AtomicReference<String>(null);
+        final AtomicReference<String> value1 = new AtomicReference<>(null);
+        final AtomicReference<String> value2 = new AtomicReference<>(null);
 
         Subscription s1 = response1
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
-                        latch1.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
+                    latch1.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s1 OnCompleted");
@@ -1335,14 +1307,11 @@ public class HystrixCollapserTest {
                 });
 
         Subscription s2 = response2
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
-                        latch2.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
+                    latch2.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s2 OnCompleted");
@@ -1388,18 +1357,15 @@ public class HystrixCollapserTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        final AtomicReference<String> value1 = new AtomicReference<String>(null);
-        final AtomicReference<String> value2 = new AtomicReference<String>(null);
+        final AtomicReference<String> value1 = new AtomicReference<>(null);
+        final AtomicReference<String> value2 = new AtomicReference<>(null);
 
         Subscription s1 = response1
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
-                        latch1.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
+                    latch1.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s1 OnCompleted");
@@ -1420,14 +1386,11 @@ public class HystrixCollapserTest {
                 });
 
         Subscription s2 = response2
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
-                        latch2.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
+                    latch2.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s2 OnCompleted");
@@ -1476,18 +1439,15 @@ public class HystrixCollapserTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        final AtomicReference<String> value1 = new AtomicReference<String>(null);
-        final AtomicReference<String> value2 = new AtomicReference<String>(null);
+        final AtomicReference<String> value1 = new AtomicReference<>(null);
+        final AtomicReference<String> value2 = new AtomicReference<>(null);
 
         Subscription s1 = response1
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
-                        latch1.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
+                    latch1.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s1 OnCompleted");
@@ -1508,14 +1468,11 @@ public class HystrixCollapserTest {
                 });
 
         Subscription s2 = response2
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
-                        latch2.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
+                    latch2.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s2 OnCompleted");
@@ -1568,20 +1525,17 @@ public class HystrixCollapserTest {
         final CountDownLatch latch3 = new CountDownLatch(1);
 
 
-        final AtomicReference<String> value1 = new AtomicReference<String>(null);
-        final AtomicReference<String> value2 = new AtomicReference<String>(null);
-        final AtomicReference<String> value3 = new AtomicReference<String>(null);
+        final AtomicReference<String> value1 = new AtomicReference<>(null);
+        final AtomicReference<String> value2 = new AtomicReference<>(null);
+        final AtomicReference<String> value3 = new AtomicReference<>(null);
 
 
         Subscription s1 = response1
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
-                        latch1.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
+                    latch1.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s1 OnCompleted");
@@ -1602,14 +1556,11 @@ public class HystrixCollapserTest {
                 });
 
         Subscription s2 = response2
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
-                        latch2.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
+                    latch2.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s2 OnCompleted");
@@ -1630,14 +1581,11 @@ public class HystrixCollapserTest {
                 });
 
         Subscription s3 = response3
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s3 Unsubscribed!");
-                        latch3.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s3 Unsubscribed!");
+                    latch3.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s3 OnCompleted");
@@ -1693,20 +1641,17 @@ public class HystrixCollapserTest {
         final CountDownLatch latch3 = new CountDownLatch(1);
 
 
-        final AtomicReference<String> value1 = new AtomicReference<String>(null);
-        final AtomicReference<String> value2 = new AtomicReference<String>(null);
-        final AtomicReference<String> value3 = new AtomicReference<String>(null);
+        final AtomicReference<String> value1 = new AtomicReference<>(null);
+        final AtomicReference<String> value2 = new AtomicReference<>(null);
+        final AtomicReference<String> value3 = new AtomicReference<>(null);
 
 
         Subscription s1 = response1
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
-                        latch1.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s1 Unsubscribed!");
+                    latch1.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s1 OnCompleted");
@@ -1727,14 +1672,11 @@ public class HystrixCollapserTest {
                 });
 
         Subscription s2 = response2
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
-                        latch2.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s2 Unsubscribed!");
+                    latch2.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s2 OnCompleted");
@@ -1755,14 +1697,11 @@ public class HystrixCollapserTest {
                 });
 
         Subscription s3 = response3
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : s3 Unsubscribed!");
-                        latch3.countDown();
-                    }
+                .doOnUnsubscribe(() -> {
+                    System.out.println(System.currentTimeMillis() + " : s3 Unsubscribed!");
+                    latch3.countDown();
                 })
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : s3 OnCompleted");
@@ -1807,7 +1746,7 @@ public class HystrixCollapserTest {
         boolean fallbackEmitExpected = false;
         int expectedFallbackEmitCount = 0;
 
-        List<HystrixEventType> condensedEmitExpectedEventTypes = new ArrayList<HystrixEventType>();
+        List<HystrixEventType> condensedEmitExpectedEventTypes = new ArrayList<>();
 
         for (HystrixEventType expectedEventType: expectedEventTypes) {
             if (expectedEventType.equals(HystrixEventType.EMIT)) {
@@ -1837,7 +1776,7 @@ public class HystrixCollapserTest {
     private static class TestRequestCollapser extends HystrixCollapser<List<String>, String, String> {
 
         private final String value;
-        private ConcurrentLinkedQueue<HystrixCommand<List<String>>> commandsExecuted;
+        private final ConcurrentLinkedQueue<HystrixCommand<List<String>>> commandsExecuted;
 
         public TestRequestCollapser(TestCollapserTimer timer, int value) {
             this(timer, String.valueOf(value));
@@ -1926,8 +1865,8 @@ public class HystrixCollapserTest {
 
         @Override
         protected Collection<Collection<CollapsedRequest<String, String>>> shardRequests(Collection<CollapsedRequest<String, String>> requests) {
-            Collection<CollapsedRequest<String, String>> typeA = new ArrayList<CollapsedRequest<String, String>>();
-            Collection<CollapsedRequest<String, String>> typeB = new ArrayList<CollapsedRequest<String, String>>();
+            Collection<CollapsedRequest<String, String>> typeA = new ArrayList<>();
+            Collection<CollapsedRequest<String, String>> typeB = new ArrayList<>();
 
             for (CollapsedRequest<String, String> request : requests) {
                 if (request.getArgument().endsWith("a")) {
@@ -1937,7 +1876,7 @@ public class HystrixCollapserTest {
                 }
             }
 
-            ArrayList<Collection<CollapsedRequest<String, String>>> shards = new ArrayList<Collection<CollapsedRequest<String, String>>>();
+            ArrayList<Collection<CollapsedRequest<String, String>>> shards = new ArrayList<>();
             shards.add(typeA);
             shards.add(typeB);
             return shards;
@@ -2019,7 +1958,7 @@ public class HystrixCollapserTest {
         protected List<String> run() {
             System.out.println(">>> TestCollapserCommand run() ... batch size: " + requests.size());
             // simulate a batch request
-            ArrayList<String> response = new ArrayList<String>();
+            ArrayList<String> response = new ArrayList<>();
             for (CollapsedRequest<String, String> request : requests) {
                 if (request.getArgument() == null) {
                     response.add("NULL");
@@ -2079,10 +2018,10 @@ public class HystrixCollapserTest {
         }
 
         @Override
-        protected List<String> run() throws Exception {
+        protected List<String> run() {
             System.out.println("*** execution (this shouldn't happen)");
             // this won't ever get called as we're forcing short-circuiting
-            ArrayList<String> values = new ArrayList<String>();
+            ArrayList<String> values = new ArrayList<>();
             values.add("hello");
             return values;
         }
@@ -2098,7 +2037,7 @@ public class HystrixCollapserTest {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void run() {
             System.out.println("*** FireAndForgetCommand execution: " + Thread.currentThread());
             return null;
         }
@@ -2107,7 +2046,7 @@ public class HystrixCollapserTest {
 
     /* package */ static class TestCollapserTimer implements CollapserTimer {
 
-        private final ConcurrentLinkedQueue<ATask> tasks = new ConcurrentLinkedQueue<ATask>();
+        private final ConcurrentLinkedQueue<ATask> tasks = new ConcurrentLinkedQueue<>();
 
         @Override
         public Reference<TimerListener> addListener(final TimerListener collapseTask) {
@@ -2119,15 +2058,11 @@ public class HystrixCollapserTest {
              * <p>
              * We do this so our unit tests know if the WeakReference is cleared correctly, and if so then the ATack is removed from 'tasks'
              */
-            return new SoftReference<TimerListener>(collapseTask) {
+            return new SoftReference<>(collapseTask) {
                 @Override
                 public void clear() {
                     // super.clear();
-                    for (ATask t : tasks) {
-                        if (t.task.actualListener.equals(collapseTask)) {
-                            tasks.remove(t);
-                        }
-                    }
+                    tasks.removeIf(t -> t.task.actualListener.equals(collapseTask));
                 }
 
             };
@@ -2213,14 +2148,7 @@ public class HystrixCollapserTest {
     }
 
     private static HystrixCollapserKey collapserKeyFromString(final Object o) {
-        return new HystrixCollapserKey() {
-
-            @Override
-            public String name() {
-                return String.valueOf(o);
-            }
-
-        };
+        return () -> String.valueOf(o);
     }
 
     private static class TestCollapserWithVoidResponseType extends HystrixCollapser<Void, Void, Integer> {
@@ -2240,7 +2168,7 @@ public class HystrixCollapserTest {
         @Override
         protected HystrixCommand<Void> createCommand(Collection<CollapsedRequest<Void, Integer>> requests) {
 
-            ArrayList<Integer> args = new ArrayList<Integer>();
+            ArrayList<Integer> args = new ArrayList<>();
             for (CollapsedRequest<Void, Integer> request : requests) {
                 args.add(request.getArgument());
             }
@@ -2273,7 +2201,7 @@ public class HystrixCollapserTest {
         @Override
         protected HystrixCommand<Void> createCommand(Collection<CollapsedRequest<Void, Integer>> requests) {
 
-            ArrayList<Integer> args = new ArrayList<Integer>();
+            ArrayList<Integer> args = new ArrayList<>();
             for (CollapsedRequest<Void, Integer> request : requests) {
                 args.add(request.getArgument());
             }

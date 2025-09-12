@@ -22,7 +22,6 @@ import com.netflix.hystrix.metric.HystrixEventStream;
 import org.HdrHistogram.Histogram;
 import rx.Observable;
 import rx.Subscription;
-import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.subjects.BehaviorSubject;
@@ -49,35 +48,16 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
     private final BehaviorSubject<CachedValuesHistogram> rollingDistribution = BehaviorSubject.create(CachedValuesHistogram.backedBy(CachedValuesHistogram.getNewHistogram()));
     private final Observable<CachedValuesHistogram> rollingDistributionStream;
 
-    private static final Func2<Histogram, Histogram, Histogram> distributionAggregator = new Func2<>() {
-        @Override
-        public Histogram call(Histogram initialDistribution, Histogram distributionToAdd) {
-            initialDistribution.add(distributionToAdd);
-            return initialDistribution;
-        }
+    private static final Func2<Histogram, Histogram, Histogram> distributionAggregator = (initialDistribution, distributionToAdd) -> {
+        initialDistribution.add(distributionToAdd);
+        return initialDistribution;
     };
 
-    private static final Func1<Observable<Histogram>, Observable<Histogram>> reduceWindowToSingleDistribution = new Func1<Observable<Histogram>, Observable<Histogram>>() {
-        @Override
-        public Observable<Histogram> call(Observable<Histogram> window) {
-            return window.reduce(distributionAggregator);
-        }
-    };
+    private static final Func1<Observable<Histogram>, Observable<Histogram>> reduceWindowToSingleDistribution = window -> window.reduce(distributionAggregator);
 
-    private static final Func1<Histogram, CachedValuesHistogram> cacheHistogramValues = new Func1<>() {
-        @Override
-        public CachedValuesHistogram call(Histogram histogram) {
-            return CachedValuesHistogram.backedBy(histogram);
-        }
-    };
+    private static final Func1<Histogram, CachedValuesHistogram> cacheHistogramValues = CachedValuesHistogram::backedBy;
 
-    private static final Func1<Observable<CachedValuesHistogram>, Observable<List<CachedValuesHistogram>>> convertToList =
-            new Func1<>() {
-                @Override
-                public Observable<List<CachedValuesHistogram>> call(Observable<CachedValuesHistogram> windowOf2) {
-                    return windowOf2.toList();
-                }
-            };
+    private static final Func1<Observable<CachedValuesHistogram>, Observable<List<CachedValuesHistogram>>> convertToList = Observable::toList;
 
     protected RollingDistributionStream(final HystrixEventStream<Event> stream, final int numBuckets, final int bucketSizeInMs,
                                         final Func2<Histogram, Event, Histogram> addValuesToBucket) {
@@ -86,17 +66,10 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
             emptyDistributionsToStart.add(CachedValuesHistogram.getNewHistogram());
         }
 
-        final Func1<Observable<Event>, Observable<Histogram>> reduceBucketToSingleDistribution = new Func1<>() {
-            @Override
-            public Observable<Histogram> call(Observable<Event> bucket) {
-                return bucket.reduce(CachedValuesHistogram.getNewHistogram(), addValuesToBucket);
-            }
-        };
-
         rollingDistributionStream = stream
                 .observe()
                 .window(bucketSizeInMs, TimeUnit.MILLISECONDS) //stream of unaggregated buckets
-                .flatMap(reduceBucketToSingleDistribution)     //stream of aggregated Histograms
+                .flatMap(bucket -> bucket.reduce(CachedValuesHistogram.getNewHistogram(), addValuesToBucket))     //stream of aggregated Histograms
                 .startWith(emptyDistributionsToStart)          //stream of aggregated Histograms that starts with n empty
                 .window(numBuckets, 1)                         //windowed stream: each OnNext is a stream of n Histograms
                 .flatMap(reduceWindowToSingleDistribution)     //reduced stream: each OnNext is a single Histogram

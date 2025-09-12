@@ -21,7 +21,6 @@ import com.netflix.hystrix.HystrixCommand.Setter;
 import org.junit.Test;
 import rx.Observable;
 import rx.Subscriber;
-import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ public class HystrixTest {
 
         assertNull(Hystrix.getCurrentThreadExecutingCommand());
 
-        HystrixCommand<Boolean> command = new HystrixCommand<Boolean>(Setter
+        HystrixCommand<Boolean> command = new HystrixCommand<>(Setter
                 .withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
                 .andCommandKey(HystrixCommandKey.Factory.asKey("CommandName"))) {
 
@@ -70,7 +69,7 @@ public class HystrixTest {
 
         assertNull(Hystrix.getCurrentThreadExecutingCommand());
 
-        HystrixCommand<Boolean> command = new HystrixCommand<Boolean>(Setter
+        HystrixCommand<Boolean> command = new HystrixCommand<>(Setter
                 .withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
                 .andCommandKey(HystrixCommandKey.Factory.asKey("CommandName"))) {
 
@@ -91,7 +90,7 @@ public class HystrixTest {
 
         final CountDownLatch latch = new CountDownLatch(1);
 
-        command.observe().subscribe(new Subscriber<Boolean>() {
+        command.observe().subscribe(new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();
@@ -127,7 +126,7 @@ public class HystrixTest {
     @Test
     public void testInsideNestedHystrixThread() {
 
-        HystrixCommand<Boolean> command = new HystrixCommand<Boolean>(Setter
+        HystrixCommand<Boolean> command = new HystrixCommand<>(Setter
                 .withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
                 .andCommandKey(HystrixCommandKey.Factory.asKey("OuterCommand"))) {
 
@@ -143,7 +142,7 @@ public class HystrixTest {
                     throw new RuntimeException("BEFORE expected it to run inside a thread");
                 }
 
-                HystrixCommand<Boolean> command2 = new HystrixCommand<Boolean>(Setter
+                HystrixCommand<Boolean> command2 = new HystrixCommand<>(Setter
                         .withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
                         .andCommandKey(HystrixCommandKey.Factory.asKey("InnerCommand"))) {
 
@@ -174,7 +173,7 @@ public class HystrixTest {
     @Test
     public void testInsideHystrixSemaphoreExecute() {
 
-        HystrixCommand<Boolean> command = new HystrixCommand<Boolean>(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
+        HystrixCommand<Boolean> command = new HystrixCommand<>(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
                 .andCommandKey(HystrixCommandKey.Factory.asKey("SemaphoreIsolatedCommandName"))
                 .andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE))) {
 
@@ -198,7 +197,7 @@ public class HystrixTest {
     @Test
     public void testInsideHystrixSemaphoreQueue() throws Exception {
 
-        HystrixCommand<Boolean> command = new HystrixCommand<Boolean>(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
+        HystrixCommand<Boolean> command = new HystrixCommand<>(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
                 .andCommandKey(HystrixCommandKey.Factory.asKey("SemaphoreIsolatedCommandName"))
                 .andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE))) {
 
@@ -220,9 +219,9 @@ public class HystrixTest {
     }
 
     @Test
-    public void testInsideHystrixSemaphoreObserve() throws Exception {
+    public void testInsideHystrixSemaphoreObserve() {
 
-        HystrixCommand<Boolean> command = new HystrixCommand<Boolean>(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
+        HystrixCommand<Boolean> command = new HystrixCommand<>(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
                 .andCommandKey(HystrixCommandKey.Factory.asKey("SemaphoreIsolatedCommandName"))
                 .andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE))) {
 
@@ -246,7 +245,7 @@ public class HystrixTest {
     @Test
     public void testThreadNestedInsideHystrixSemaphore() {
 
-        HystrixCommand<Boolean> command = new HystrixCommand<Boolean>(Setter
+        HystrixCommand<Boolean> command = new HystrixCommand<>(Setter
                 .withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
                 .andCommandKey(HystrixCommandKey.Factory.asKey("OuterSemaphoreCommand"))
                 .andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE))) {
@@ -262,7 +261,7 @@ public class HystrixTest {
                     throw new RuntimeException("BEFORE expected it to run inside a semaphore");
                 }
 
-                HystrixCommand<Boolean> command2 = new HystrixCommand<Boolean>(Setter
+                HystrixCommand<Boolean> command2 = new HystrixCommand<>(Setter
                         .withGroupKey(HystrixCommandGroupKey.Factory.asKey("TestUtil"))
                         .andCommandKey(HystrixCommandKey.Factory.asKey("InnerCommand"))) {
 
@@ -299,7 +298,7 @@ public class HystrixTest {
 
         final CountDownLatch latch = new CountDownLatch(1);
 
-        observableCmd.observe().subscribe(new Subscriber<Integer>() {
+        observableCmd.observe().subscribe(new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();
@@ -370,21 +369,16 @@ public class HystrixTest {
     @Test
     public void testMultipleSemaphoreObservableCommandsInFlight() throws InterruptedException {
         int NUM_COMMANDS = 50;
-        List<Observable<Integer>> commands = new ArrayList<Observable<Integer>>();
+        List<Observable<Integer>> commands = new ArrayList<>();
         for (int i = 0; i < NUM_COMMANDS; i++) {
-            commands.add(Observable.defer(new Func0<Observable<Integer>>() {
-                @Override
-                public Observable<Integer> call() {
-                    return new AsynchronousObservableCommand().observe();
-                }
-            }));
+            commands.add(Observable.defer(() -> new AsynchronousObservableCommand().observe()));
         }
 
         final AtomicBoolean exceptionFound = new AtomicBoolean(false);
 
         final CountDownLatch latch = new CountDownLatch(1);
 
-        Observable.merge(commands).subscribe(new Subscriber<Integer>() {
+        Observable.merge(commands).subscribe(new Subscriber<>() {
             @Override
             public void onCompleted() {
                 System.out.println("OnCompleted");
@@ -437,24 +431,21 @@ public class HystrixTest {
 
         @Override
         protected Observable<Integer> construct() {
-            return Observable.create(new Observable.OnSubscribe<Integer>() {
-                @Override
-                public void call(Subscriber<? super Integer> subscriber) {
-                    try {
-                        System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " SyncCommand construct()");
-                        assertEquals("SyncObservable", Hystrix.getCurrentThreadExecutingCommand().name());
-                        assertEquals(1, Hystrix.getCommandCount());
-                        Thread.sleep(10);
-                        System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " SyncCommand construct() -> OnNext(1)");
-                        subscriber.onNext(1);
-                        Thread.sleep(10);
-                        System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " SyncCommand construct() -> OnNext(2)");
-                        subscriber.onNext(2);
-                        System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " SyncCommand construct() -> OnCompleted");
-                        subscriber.onCompleted();
-                    } catch (Throwable ex) {
-                        subscriber.onError(ex);
-                    }
+            return Observable.create(subscriber -> {
+                try {
+                    System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " SyncCommand construct()");
+                    assertEquals("SyncObservable", Hystrix.getCurrentThreadExecutingCommand().name());
+                    assertEquals(1, Hystrix.getCommandCount());
+                    Thread.sleep(10);
+                    System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " SyncCommand construct() -> OnNext(1)");
+                    subscriber.onNext(1);
+                    Thread.sleep(10);
+                    System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " SyncCommand construct() -> OnNext(2)");
+                    subscriber.onNext(2);
+                    System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " SyncCommand construct() -> OnCompleted");
+                    subscriber.onCompleted();
+                } catch (Throwable ex) {
+                    subscriber.onError(ex);
                 }
             });
         }
@@ -471,22 +462,19 @@ public class HystrixTest {
 
         @Override
         protected Observable<Integer> construct() {
-            return Observable.create(new Observable.OnSubscribe<Integer>() {
-                @Override
-                public void call(Subscriber<? super Integer> subscriber) {
-                    try {
-                        System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " AsyncCommand construct()");
-                        Thread.sleep(10);
-                        System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " AsyncCommand construct() -> OnNext(1)");
-                        subscriber.onNext(1);
-                        Thread.sleep(10);
-                        System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " AsyncCommand construct() -> OnNext(2)");
-                        subscriber.onNext(2);
-                        System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " AsyncCommand construct() -> OnCompleted");
-                        subscriber.onCompleted();
-                    } catch (Throwable ex) {
-                        subscriber.onError(ex);
-                    }
+            return Observable.create((Subscriber<? super Integer> subscriber) -> {
+                try {
+                    System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " AsyncCommand construct()");
+                    Thread.sleep(10);
+                    System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " AsyncCommand construct() -> OnNext(1)");
+                    subscriber.onNext(1);
+                    Thread.sleep(10);
+                    System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " AsyncCommand construct() -> OnNext(2)");
+                    subscriber.onNext(2);
+                    System.out.println(Thread.currentThread().getName() + " : " + System.currentTimeMillis() + " AsyncCommand construct() -> OnCompleted");
+                    subscriber.onCompleted();
+                } catch (Throwable ex) {
+                    subscriber.onError(ex);
                 }
             }).subscribeOn(Schedulers.computation());
         }
@@ -502,7 +490,7 @@ public class HystrixTest {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean run() {
             return true;
         }
     }

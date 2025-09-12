@@ -45,7 +45,7 @@ public class CumulativeCommandEventCounterStreamTest extends CommandStreamTest {
     private static HystrixCommandGroupKey groupKey = HystrixCommandGroupKey.Factory.asKey("CumulativeCommandCounter");
 
     private static Subscriber<long[]> getSubscriber(final CountDownLatch latch) {
-        return new Subscriber<long[]>() {
+        return new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();

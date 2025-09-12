@@ -34,7 +34,7 @@ public class HystrixThreadPoolMetricsTest {
     }
 
     @Test
-    public void shouldYieldNoExecutedTasksOnStartup() throws Exception {
+    public void shouldYieldNoExecutedTasksOnStartup() {
         //given
         final Collection<HystrixThreadPoolMetrics> instances = HystrixThreadPoolMetrics.getInstances();
 
@@ -66,7 +66,7 @@ public class HystrixThreadPoolMetricsTest {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void run() {
             System.out.println("Run in thread : " + Thread.currentThread().getName());
             return null;
         }

@@ -271,7 +271,7 @@ public class HystrixCommandTestWithCustomConcurrencyStrategy {
 
         @Override
         public <T> Callable<T> wrapCallable(Callable<T> callable) {
-            return new LoggingCallable<T>(callable);
+            return new LoggingCallable<>(callable);
         }
 
         @Override
@@ -281,7 +281,7 @@ public class HystrixCommandTestWithCustomConcurrencyStrategy {
                 return super.getRequestVariable(rv);
             } else {
                 //this ignores the HystrixRequestContext
-                return new HystrixRequestVariableDefault<T>() {
+                return new HystrixRequestVariableDefault<>() {
                     @Override
                     public T initialValue() {
                         return null;

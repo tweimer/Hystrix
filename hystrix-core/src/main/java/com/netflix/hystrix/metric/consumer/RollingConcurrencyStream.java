@@ -20,7 +20,6 @@ import com.netflix.hystrix.metric.HystrixCommandExecutionStarted;
 import com.netflix.hystrix.metric.HystrixEventStream;
 import rx.Observable;
 import rx.Subscription;
-import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.subjects.BehaviorSubject;
@@ -47,26 +46,11 @@ public abstract class RollingConcurrencyStream {
     private final BehaviorSubject<Integer> rollingMax = BehaviorSubject.create(0);
     private final Observable<Integer> rollingMaxStream;
 
-    private static final Func2<Integer, Integer, Integer> reduceToMax = new Func2<>() {
-        @Override
-        public Integer call(Integer a, Integer b) {
-            return Math.max(a, b);
-        }
-    };
+    private static final Func2<Integer, Integer, Integer> reduceToMax = Math::max;
 
-    private static final Func1<Observable<Integer>, Observable<Integer>> reduceStreamToMax = new Func1<>() {
-        @Override
-        public Observable<Integer> call(Observable<Integer> observedConcurrency) {
-            return observedConcurrency.reduce(0, reduceToMax);
-        }
-    };
+    private static final Func1<Observable<Integer>, Observable<Integer>> reduceStreamToMax = observedConcurrency -> observedConcurrency.reduce(0, reduceToMax);
 
-    private static final Func1<HystrixCommandExecutionStarted, Integer> getConcurrencyCountFromEvent = new Func1<>() {
-        @Override
-        public Integer call(HystrixCommandExecutionStarted event) {
-            return event.getCurrentConcurrency();
-        }
-    };
+    private static final Func1<HystrixCommandExecutionStarted, Integer> getConcurrencyCountFromEvent = HystrixCommandExecutionStarted::getCurrentConcurrency;
 
     protected RollingConcurrencyStream(final HystrixEventStream<HystrixCommandExecutionStarted> inputEventStream, final int numBuckets, final int bucketSizeInMs) {
         final List<Integer> emptyRollingMaxBuckets = new ArrayList<>();

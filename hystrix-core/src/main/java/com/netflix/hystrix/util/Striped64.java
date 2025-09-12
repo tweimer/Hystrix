@@ -114,7 +114,7 @@ abstract class Striped64 extends Number {
         volatile long q0, q1, q2, q3, q4, q5, q6;
         Cell(long x) { value = x; }
 
-        final boolean cas(long cmp, long val) {
+        boolean cas(long cmp, long val) {
             return UNSAFE.compareAndSwapLong(this, valueOffset, cmp, val);
         }
 
@@ -307,9 +307,7 @@ abstract class Striped64 extends Number {
         Cell[] as = cells;
         base = initialValue;
         if (as != null) {
-            int n = as.length;
-            for (int i = 0; i < n; ++i) {
-                Cell a = as[i];
+            for (Cell a : as) {
                 if (a != null)
                     a.value = initialValue;
             }

@@ -18,7 +18,6 @@ package com.netflix.hystrix.metric.consumer;
 import com.netflix.hystrix.metric.HystrixEvent;
 import com.netflix.hystrix.metric.HystrixEventStream;
 import rx.Observable;
-import rx.functions.Action0;
 import rx.functions.Func2;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,18 +41,8 @@ public abstract class BucketedCumulativeCounterStream<Event extends HystrixEvent
         this.sourceStream = bucketedStream
                 .scan(getEmptyOutputValue(), reduceBucket)
                 .skip(numBuckets)
-                .doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        isSourceCurrentlySubscribed.set(true);
-                    }
-                })
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        isSourceCurrentlySubscribed.set(false);
-                    }
-                })
+                .doOnSubscribe(() -> isSourceCurrentlySubscribed.set(true))
+                .doOnUnsubscribe(() -> isSourceCurrentlySubscribed.set(false))
                 .share()                        //multiple subscribers should get same data
                 .onBackpressureDrop();          //if there are slow consumers, data should not buffer
     }

@@ -88,9 +88,7 @@ public class HystrixThreadPoolPropertiesTest {
 
     }
 
-    private static enum TestThreadPoolKey implements HystrixThreadPoolKey {
-        TEST
-    }
+    private enum TestThreadPoolKey implements HystrixThreadPoolKey { TEST }
 
     @After
     public void cleanup() {

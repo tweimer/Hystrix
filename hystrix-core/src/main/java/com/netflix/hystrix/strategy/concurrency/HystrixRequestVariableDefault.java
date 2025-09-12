@@ -132,7 +132,7 @@ public class HystrixRequestVariableDefault<T> implements HystrixRequestVariable<
      *            the value to set
      */
     public void set(T value) {
-        HystrixRequestContext.getContextForCurrentThread().state.put(this, new LazyInitializer<T>(this, value));
+        HystrixRequestContext.getContextForCurrentThread().state.put(this, new LazyInitializer<>(this, value));
     }
 
     /**

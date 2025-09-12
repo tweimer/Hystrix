@@ -32,7 +32,7 @@ import static org.junit.Assert.fail;
 public class HystrixCommandCompletionStreamTest {
 
     private <T> Subscriber<T> getLatchedSubscriber(final CountDownLatch latch) {
-        return new Subscriber<T>() {
+        return new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();

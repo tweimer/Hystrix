@@ -27,9 +27,6 @@ import org.junit.Test;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Func1;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 import java.util.concurrent.CountDownLatch;
@@ -67,7 +64,7 @@ public class HystrixUtilizationStreamTest extends CommandStreamTest {
         }
 
         stream.observe().take(NUM).subscribe(
-                new Subscriber<HystrixUtilization>() {
+                new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " OnCompleted");
@@ -107,13 +104,8 @@ public class HystrixUtilizationStreamTest extends CommandStreamTest {
         Subscription s1 = stream
                 .observe()
                 .take(100)
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch1.countDown();
-                    }
-                })
-                .subscribe(new Subscriber<HystrixUtilization>() {
+                .doOnUnsubscribe(latch1::countDown)
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Dashboard 1 OnCompleted");
@@ -136,13 +128,8 @@ public class HystrixUtilizationStreamTest extends CommandStreamTest {
         Subscription s2 = stream
                 .observe()
                 .take(100)
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch2.countDown();
-                    }
-                })
-                .subscribe(new Subscriber<HystrixUtilization>() {
+                .doOnUnsubscribe(latch2::countDown)
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Dashboard 2 OnCompleted");
@@ -188,13 +175,8 @@ public class HystrixUtilizationStreamTest extends CommandStreamTest {
         Subscription s1 = stream
                 .observe()
                 .take(100)
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch1.countDown();
-                    }
-                })
-                .subscribe(new Subscriber<HystrixUtilization>() {
+                .doOnUnsubscribe(latch1::countDown)
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Dashboard 1 OnCompleted");
@@ -217,13 +199,8 @@ public class HystrixUtilizationStreamTest extends CommandStreamTest {
         Subscription s2 = stream
                 .observe()
                 .take(100)
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch2.countDown();
-                    }
-                })
-                .subscribe(new Subscriber<HystrixUtilization>() {
+                .doOnUnsubscribe(latch2::countDown)
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Dashboard 2 OnCompleted");
@@ -271,28 +248,20 @@ public class HystrixUtilizationStreamTest extends CommandStreamTest {
         Observable<HystrixUtilization> slow = stream
                 .observe()
                 .observeOn(Schedulers.newThread())
-                .map(new Func1<HystrixUtilization, HystrixUtilization>() {
-                    @Override
-                    public HystrixUtilization call(HystrixUtilization util) {
-                        try {
-                            Thread.sleep(100);
-                            return util;
-                        } catch (InterruptedException ex) {
-                            return util;
-                        }
+                .map(util -> {
+                    try {
+                        Thread.sleep(100);
+                        return util;
+                    } catch (InterruptedException ex) {
+                        return util;
                     }
                 });
 
-        Observable<Boolean> checkZippedEqual = Observable.zip(fast, slow, new Func2<HystrixUtilization, HystrixUtilization, Boolean>() {
-            @Override
-            public Boolean call(HystrixUtilization payload, HystrixUtilization payload2) {
-                return payload == payload2;
-            }
-        });
+        Observable<Boolean> checkZippedEqual = Observable.zip(fast, slow, (payload, payload2) -> payload == payload2);
 
         Subscription s1 = checkZippedEqual
                 .take(10000)
-                .subscribe(new Subscriber<Boolean>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : OnCompleted");

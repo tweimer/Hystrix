@@ -115,7 +115,7 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
                         latch1.countDown();
                     }
                 })
-                .subscribe(new Subscriber<HystrixConfiguration>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Dashboard 1 OnCompleted");
@@ -138,13 +138,8 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
         Subscription s2 = stream
                 .observe()
                 .take(100)
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch2.countDown();
-                    }
-                })
-                .subscribe(new Subscriber<HystrixConfiguration>() {
+                .doOnUnsubscribe(latch2::countDown)
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Dashboard 2 OnCompleted");
@@ -190,13 +185,8 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
         Subscription s1 = stream
                 .observe()
                 .take(100)
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch1.countDown();
-                    }
-                })
-                .subscribe(new Subscriber<HystrixConfiguration>() {
+                .doOnUnsubscribe(latch1::countDown)
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Dashboard 1 OnCompleted");
@@ -219,13 +209,8 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
         Subscription s2 = stream
                 .observe()
                 .take(100)
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch2.countDown();
-                    }
-                })
-                .subscribe(new Subscriber<HystrixConfiguration>() {
+                .doOnUnsubscribe(latch2::countDown)
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : Dashboard 2 OnCompleted");
@@ -273,15 +258,12 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
         Observable<HystrixConfiguration> slow = stream
                 .observe()
                 .observeOn(Schedulers.newThread())
-                .map(new Func1<HystrixConfiguration, HystrixConfiguration>() {
-                    @Override
-                    public HystrixConfiguration call(HystrixConfiguration config) {
-                        try {
-                            Thread.sleep(100);
-                            return config;
-                        } catch (InterruptedException ex) {
-                            return config;
-                        }
+                .map(config -> {
+                    try {
+                        Thread.sleep(100);
+                        return config;
+                    } catch (InterruptedException ex) {
+                        return config;
                     }
                 });
 
@@ -294,7 +276,7 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
 
         Subscription s1 = checkZippedEqual
                 .take(10000)
-                .subscribe(new Subscriber<Boolean>() {
+                .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : OnCompleted");

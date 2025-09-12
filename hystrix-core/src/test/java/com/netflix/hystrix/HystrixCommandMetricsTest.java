@@ -25,7 +25,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import rx.Observable;
 import rx.Subscriber;
-import rx.observers.SafeSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +101,7 @@ public class HystrixCommandMetricsTest {
         String key = "cmd-metrics-B";
         try {
 
-            HystrixCommand<Boolean> cmd1 = new SuccessCommand(key ,1);
+            HystrixCommand<Boolean> cmd1 = new SuccessCommand(key, 1);
             HystrixCommandMetrics metrics = cmd1.metrics;
             cmd1.execute();
             Thread.sleep(100);
@@ -145,7 +144,7 @@ public class HystrixCommandMetricsTest {
         String key = "cmd-metrics-C";
 
         HystrixCommandMetrics metrics = null;
-        List<Observable<Boolean>> cmdResults = new ArrayList<Observable<Boolean>>();
+        List<Observable<Boolean>> cmdResults = new ArrayList<>();
 
         int NUM_CMDS = 8;
         for (int i = 0; i < NUM_CMDS; i++) {
@@ -166,7 +165,7 @@ public class HystrixCommandMetricsTest {
         assertEquals(NUM_CMDS, metrics.getCurrentConcurrentExecutionCount());
 
         final CountDownLatch latch = new CountDownLatch(1);
-        Observable.merge(cmdResults).subscribe(new Subscriber<Boolean>() {
+        Observable.merge(cmdResults).subscribe(new Subscriber<>() {
             @Override
             public void onCompleted() {
                 System.out.println("All commands done");
@@ -190,7 +189,7 @@ public class HystrixCommandMetricsTest {
         assertEquals(0, metrics.getCurrentConcurrentExecutionCount());
     }
 
-    private class Command extends HystrixCommand<Boolean> {
+    private static class Command extends HystrixCommand<Boolean> {
 
         private final boolean shouldFail;
         private final boolean shouldFailWithBadRequest;
@@ -225,28 +224,28 @@ public class HystrixCommandMetricsTest {
         }
     }
 
-    private class SuccessCommand extends Command {
+    private static class SuccessCommand extends Command {
 
         SuccessCommand(String commandKey, long latencyToAdd) {
             super(commandKey, false, false, latencyToAdd);
         }
     }
 
-    private class FailureCommand extends Command {
+    private static class FailureCommand extends Command {
 
         FailureCommand(String commandKey, long latencyToAdd) {
             super(commandKey, true, false, latencyToAdd);
         }
     }
 
-    private class TimeoutCommand extends Command {
+    private static class TimeoutCommand extends Command {
 
         TimeoutCommand(String commandKey) {
             super(commandKey, false, false, 2000);
         }
     }
 
-    private class BadRequestCommand extends Command {
+    private static class BadRequestCommand extends Command {
         BadRequestCommand(String commandKey, long latencyToAdd) {
             super(commandKey, false, true, latencyToAdd);
         }

@@ -1,8 +1,6 @@
 package com.netflix.hystrix;
 
 import rx.Observable;
-import rx.functions.Action0;
-import rx.functions.Action1;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

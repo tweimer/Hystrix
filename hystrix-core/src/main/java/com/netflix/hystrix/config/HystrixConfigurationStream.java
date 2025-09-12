@@ -116,7 +116,7 @@ public class HystrixConfigurationStream {
     }
 
     private static final Func1<Long, Map<HystrixCommandKey, HystrixCommandConfiguration>> getAllCommandConfig = timestamp -> {
-        Map<HystrixCommandKey, HystrixCommandConfiguration> commandConfigPerKey = new HashMap<HystrixCommandKey, HystrixCommandConfiguration>();
+        Map<HystrixCommandKey, HystrixCommandConfiguration> commandConfigPerKey = new HashMap<>();
         for (HystrixCommandMetrics commandMetrics : HystrixCommandMetrics.getInstances()) {
             HystrixCommandKey commandKey = commandMetrics.getCommandKey();
             HystrixThreadPoolKey threadPoolKey = commandMetrics.getThreadPoolKey();
