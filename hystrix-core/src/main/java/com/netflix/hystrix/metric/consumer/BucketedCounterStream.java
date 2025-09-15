@@ -54,13 +54,11 @@ public abstract class BucketedCounterStream<Event extends HystrixEvent, Bucket, 
             emptyEventCountsToStart.add(getEmptyBucketSummary());
         }
 
-        this.bucketedStream = Observable.defer(() -> {
-            return inputEventStream
-                    .observe()
-                    .window(bucketSizeInMs, TimeUnit.MILLISECONDS) //bucket it by the counter window so we can emit to the next operator in time chunks, not on every OnNext
-                    .flatMap(reduceBucketToSummary)                //for a given bucket, turn it into a long array containing counts of event types
-                    .startWith(emptyEventCountsToStart);           //start it with empty arrays to make consumer logic as generic as possible (windows are always full)
-        });
+        this.bucketedStream = Observable.defer(() -> inputEventStream.observe()
+            .window(bucketSizeInMs, TimeUnit.MILLISECONDS) //bucket it by the counter window so we can emit to the next operator in time chunks, not on every OnNext
+            .flatMap(reduceBucketToSummary)                //for a given bucket, turn it into a long array containing counts of event types
+            .startWith(emptyEventCountsToStart)           //start it with empty arrays to make consumer logic as generic as possible (windows are always full)
+        );
     }
 
     abstract Bucket getEmptyBucketSummary();
