@@ -17,6 +17,7 @@ package com.netflix.hystrix.strategy.concurrency;
 
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.netflix.hystrix.HystrixCollapser;
 import com.netflix.hystrix.HystrixCommand;
@@ -116,7 +117,7 @@ public class HystrixRequestContext implements Closeable {
      * 
      * Only HystrixRequestVariable has a reason to be accessing this field.
      */
-    ConcurrentHashMap<HystrixRequestVariableDefault<?>, HystrixRequestVariableDefault.LazyInitializer<?>> state = new ConcurrentHashMap<>();
+    ConcurrentMap<HystrixRequestVariableDefault<?>, HystrixRequestVariableDefault.LazyInitializer<?>> state = new ConcurrentHashMap<>();
 
     // instantiation should occur via static factory methods.
     private HystrixRequestContext() {

@@ -16,6 +16,7 @@
 package com.netflix.hystrix.strategy.properties;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.netflix.hystrix.HystrixCollapserKey;
 import com.netflix.hystrix.HystrixCollapserProperties;
@@ -35,6 +36,14 @@ import com.netflix.hystrix.strategy.HystrixPlugins;
  * @ExcludeFromJavadoc
  */
 public class HystrixPropertiesFactory {
+    // String is CommandKey.name() (we can't use CommandKey directly as we can't guarantee it implements hashcode/equals correctly)
+    private static final ConcurrentMap<String, HystrixCommandProperties> commandProperties = new ConcurrentHashMap<>();
+
+    // String is ThreadPoolKey.name() (we can't use ThreadPoolKey directly as we can't guarantee it implements hashcode/equals correctly)
+    private static final ConcurrentMap<String, HystrixThreadPoolProperties> threadPoolProperties = new ConcurrentHashMap<>();
+
+    // String is CollapserKey.name() (we can't use CollapserKey directly as we can't guarantee it implements hashcode/equals correctly)
+    private static final ConcurrentMap<String, HystrixCollapserProperties> collapserProperties = new ConcurrentHashMap<>();
 
     /**
      * Clears all the defaults in the static property cache. This makes it possible for property defaults to not persist for
@@ -46,8 +55,6 @@ public class HystrixPropertiesFactory {
         collapserProperties.clear();
     }
 
-    // String is CommandKey.name() (we can't use CommandKey directly as we can't guarantee it implements hashcode/equals correctly)
-    private static final ConcurrentHashMap<String, HystrixCommandProperties> commandProperties = new ConcurrentHashMap<>();
 
     /**
      * Get an instance of {@link HystrixCommandProperties} with the given factory {@link HystrixPropertiesStrategy} implementation for each {@link HystrixCommand} instance.
@@ -85,9 +92,6 @@ public class HystrixPropertiesFactory {
         }
     }
 
-    // String is ThreadPoolKey.name() (we can't use ThreadPoolKey directly as we can't guarantee it implements hashcode/equals correctly)
-    private static final ConcurrentHashMap<String, HystrixThreadPoolProperties> threadPoolProperties = new ConcurrentHashMap<>();
-
     /**
      * Get an instance of {@link HystrixThreadPoolProperties} with the given factory {@link HystrixPropertiesStrategy} implementation for each {@link HystrixThreadPool} instance.
      * 
@@ -123,9 +127,6 @@ public class HystrixPropertiesFactory {
             return hystrixPropertiesStrategy.getThreadPoolProperties(key, builder);
         }
     }
-
-    // String is CollapserKey.name() (we can't use CollapserKey directly as we can't guarantee it implements hashcode/equals correctly)
-    private static final ConcurrentHashMap<String, HystrixCollapserProperties> collapserProperties = new ConcurrentHashMap<>();
 
     /**
      * Get an instance of {@link HystrixCollapserProperties} with the given factory {@link HystrixPropertiesStrategy} implementation for each {@link HystrixCollapserKey} instance.

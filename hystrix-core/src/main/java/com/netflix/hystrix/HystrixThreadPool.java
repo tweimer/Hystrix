@@ -25,11 +25,7 @@ import org.slf4j.LoggerFactory;
 import rx.Scheduler;
 import rx.functions.Func0;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * ThreadPool used to executed {@link HystrixCommand#run()} on separate threads when configured to do so with {@link HystrixCommandProperties#executionIsolationStrategy()}.
@@ -90,7 +86,7 @@ public interface HystrixThreadPool {
          * Use the String from HystrixThreadPoolKey.name() instead of the HystrixThreadPoolKey instance as it's just an interface and we can't ensure the object
          * we receive implements hashcode/equals correctly and do not want the default hashcode/equals which would create a new threadpool for every object we get even if the name is the same
          */
-        final static ConcurrentHashMap<String, HystrixThreadPool> threadPools = new ConcurrentHashMap<>();
+        final static ConcurrentMap<String, HystrixThreadPool> threadPools = new ConcurrentHashMap<>();
 
         /**
          * Get the {@link HystrixThreadPool} instance for a given {@link HystrixThreadPoolKey}.

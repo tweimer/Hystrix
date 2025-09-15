@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
 public class UnsubscribedTasksRequestCacheTest {
 
     private final AtomicBoolean encounteredCommandException = new AtomicBoolean(false);
-    private final AtomicInteger numOfExecutions = new AtomicInteger(0);
+    private final AtomicInteger numOfExecutions = new AtomicInteger();
 
     public class CommandExecutionHook extends HystrixCommandExecutionHook {
 
@@ -85,11 +85,9 @@ public class UnsubscribedTasksRequestCacheTest {
 
         HystrixPlugins.getInstance().registerCommandExecutionHook(new CommandExecutionHook());
         final HystrixRequestContext context = HystrixRequestContext.initializeContext();
-        final AtomicInteger numCacheResponses = new AtomicInteger(0);
+        final AtomicInteger numCacheResponses = new AtomicInteger();
 
-        try {
-            ExecutorService executorService = Executors.newSingleThreadExecutor();
-
+        try (ExecutorService executorService = Executors.newSingleThreadExecutor()) {
             Future<?> futureCommand2a = executorService.submit(createCommandRunnable(context, numCacheResponses));
             Future<?> futureCommand2b = executorService.submit(createCommandRunnable(context, numCacheResponses));
 

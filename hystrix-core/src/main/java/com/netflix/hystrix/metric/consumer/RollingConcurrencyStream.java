@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * This is a stable value - there's no peeking into a bucket until it is emitted
  */
 public abstract class RollingConcurrencyStream {
-    private final AtomicReference<Subscription> rollingMaxSubscription = new AtomicReference<>(null);
+    private final AtomicReference<Subscription> rollingMaxSubscription = new AtomicReference<>();
     private final BehaviorSubject<Integer> rollingMax = BehaviorSubject.create(0);
     private final Observable<Integer> rollingMaxStream;
 

@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class BucketedCounterStream<Event extends HystrixEvent, Bucket, Output> {
     protected final int numBuckets;
     protected final Observable<Bucket> bucketedStream;
-    protected final AtomicReference<Subscription> subscription = new AtomicReference<>(null);
+    protected final AtomicReference<Subscription> subscription = new AtomicReference<>();
 
     private final Func1<Observable<Event>, Observable<Bucket>> reduceBucketToSummary;
 

@@ -15,9 +15,6 @@
  */
 package com.netflix.hystrix.collapser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -25,6 +22,8 @@ import java.util.concurrent.Future;
 import org.junit.Test;
 
 import rx.Observable;
+
+import static org.junit.Assert.*;
 
 public class CollapsedRequestSubjectTest {
     @Test
@@ -48,11 +47,11 @@ public class CollapsedRequestSubjectTest {
         cr.setResponse(null);
 
         // fetch value
-        assertEquals(null, v.get());
+        assertNull(v.get());
     }
 
     @Test
-    public void testSetException() throws InterruptedException, ExecutionException {
+    public void testSetException() throws InterruptedException {
         CollapsedRequestSubject<String, String> cr = new CollapsedRequestSubject<>("hello");
         Observable<String> o = cr.toObservable();
         Future<String> v = o.toBlocking().toFuture();
@@ -87,7 +86,7 @@ public class CollapsedRequestSubjectTest {
     }
 
     @Test
-    public void testSetResponseAfterException() throws InterruptedException, ExecutionException {
+    public void testSetResponseAfterException() throws InterruptedException {
         CollapsedRequestSubject<String, String> cr = new CollapsedRequestSubject<>("hello");
         Observable<String> o = cr.toObservable();
         Future<String> v = o.toBlocking().toFuture();

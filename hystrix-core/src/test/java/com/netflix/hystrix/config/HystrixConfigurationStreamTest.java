@@ -20,8 +20,6 @@ import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.netflix.hystrix.HystrixEventType;
-import com.netflix.hystrix.config.HystrixConfiguration;
-import com.netflix.hystrix.config.HystrixConfigurationStream;
 import com.netflix.hystrix.metric.CommandStreamTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,9 +27,6 @@ import org.junit.Test;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Func1;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 import java.util.concurrent.CountDownLatch;
@@ -69,7 +64,7 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
         }
 
         stream.observe().take(NUM).subscribe(
-                new Subscriber<HystrixConfiguration>() {
+                new Subscriber<>() {
                     @Override
                     public void onCompleted() {
                         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " OnCompleted");
@@ -109,12 +104,7 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
         Subscription s1 = stream
                 .observe()
                 .take(100)
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        latch1.countDown();
-                    }
-                })
+                .doOnUnsubscribe(latch1::countDown)
                 .subscribe(new Subscriber<>() {
                     @Override
                     public void onCompleted() {
@@ -267,12 +257,7 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
                     }
                 });
 
-        Observable<Boolean> checkZippedEqual = Observable.zip(fast, slow, new Func2<HystrixConfiguration, HystrixConfiguration, Boolean>() {
-            @Override
-            public Boolean call(HystrixConfiguration payload, HystrixConfiguration payload2) {
-                return payload == payload2;
-            }
-        });
+        Observable<Boolean> checkZippedEqual = Observable.zip(fast, slow, (payload, payload2) -> payload == payload2);
 
         Subscription s1 = checkZippedEqual
                 .take(10000)

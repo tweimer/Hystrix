@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * These values get produced and cached in this class.
  */
 public class RollingDistributionStream<Event extends HystrixEvent> {
-    private final AtomicReference<Subscription> rollingDistributionSubscription = new AtomicReference<>(null);
+    private final AtomicReference<Subscription> rollingDistributionSubscription = new AtomicReference<>();
     private final BehaviorSubject<CachedValuesHistogram> rollingDistribution = BehaviorSubject.create(CachedValuesHistogram.backedBy(CachedValuesHistogram.getNewHistogram()));
     private final Observable<CachedValuesHistogram> rollingDistributionStream;
 

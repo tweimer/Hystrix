@@ -15,7 +15,7 @@
  */
 package com.netflix.hystrix.strategy.concurrency;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +75,7 @@ public class HystrixRequestVariableDefault<T> implements HystrixRequestVariable<
         if (HystrixRequestContext.getContextForCurrentThread() == null) {
             throw new IllegalStateException(HystrixRequestContext.class.getSimpleName() + ".initializeContext() must be called at the beginning of each request before RequestVariable functionality can be used.");
         }
-        ConcurrentHashMap<HystrixRequestVariableDefault<?>, LazyInitializer<?>> variableMap = HystrixRequestContext.getContextForCurrentThread().state;
+        ConcurrentMap<HystrixRequestVariableDefault<?>, LazyInitializer<?>> variableMap = HystrixRequestContext.getContextForCurrentThread().state;
 
         // short-circuit the synchronized path below if we already have the value in the ConcurrentHashMap
         LazyInitializer<?> v = variableMap.get(this);
@@ -193,7 +193,7 @@ public class HystrixRequestVariableDefault<T> implements HystrixRequestVariable<
          * a null check in case initialValue() returns null
          */
         // @GuardedBy("synchronization on get() or construction")
-        private boolean initialized = false;
+        private boolean initialized;
 
         private final HystrixRequestVariableDefault<T> rv;
 

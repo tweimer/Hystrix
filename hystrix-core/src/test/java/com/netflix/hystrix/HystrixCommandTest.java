@@ -2796,7 +2796,7 @@ public class HystrixCommandTest extends CommonHystrixCommandTests<TestHystrixCom
     }
 
     @Test
-    public void testDoNotInterruptFutureOnTimeoutIfPropertySaysNotTo() throws InterruptedException, ExecutionException {
+    public void testDoNotInterruptFutureOnTimeoutIfPropertySaysNotTo() throws InterruptedException {
         // given
         InterruptibleCommand cmd = new InterruptibleCommand(new TestCircuitBreaker(), false);
 
@@ -2875,7 +2875,7 @@ public class HystrixCommandTest extends CommonHystrixCommandTests<TestHystrixCom
     }
 
     @Test
-    public void testCancelFutureWithoutInterruption() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testCancelFutureWithoutInterruption() throws InterruptedException, ExecutionException {
     	// given
     	InterruptibleCommand cmd = new InterruptibleCommand(new TestCircuitBreaker(), true, true, 1000);
 

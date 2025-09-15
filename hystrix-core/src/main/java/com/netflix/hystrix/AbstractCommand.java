@@ -1516,7 +1516,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo<R>, HystrixObs
      */
     static class TryableSemaphoreActual implements TryableSemaphore {
         protected final HystrixProperty<Integer> numberOfPermits;
-        private final AtomicInteger count = new AtomicInteger(0);
+        private final AtomicInteger count = new AtomicInteger();
 
         public TryableSemaphoreActual(HystrixProperty<Integer> numberOfPermits) {
             this.numberOfPermits = numberOfPermits;

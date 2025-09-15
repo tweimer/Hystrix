@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * All of the data available via this class is static and scoped at the JVM level
  */
 public class HystrixCounters {
-    private static final AtomicInteger concurrentThreadsExecuting = new AtomicInteger(0);
+    private static final AtomicInteger concurrentThreadsExecuting = new AtomicInteger();
 
     static int incrementGlobalConcurrentThreads() {
         return concurrentThreadsExecuting.incrementAndGet();

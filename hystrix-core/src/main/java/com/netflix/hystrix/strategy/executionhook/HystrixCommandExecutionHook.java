@@ -228,14 +228,14 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onExecutionStart}.
-     *
      * Invoked before {@link HystrixCommand#run()} is about to be executed.
      * 
      * @param commandInstance
      *            The executing HystrixCommand instance.
      * 
      * @since 1.2
+     *
+     * @deprecated  Change usages of this to {@link #onExecutionStart}.
      */
     @Deprecated
     public <T> void onRunStart(HystrixCommand<T> commandInstance) {
@@ -243,13 +243,11 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onExecutionStart}.
-     *
      * Invoked before {@link HystrixCommand#run()} is about to be executed.
      *
      * @param commandInstance
      *            The executing HystrixCommand instance.
-     *
+     * @deprecated Change usages of this to {@link #onExecutionStart}.
      * @since 1.2
      */
     @Deprecated
@@ -258,9 +256,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onExecutionEmit} if you want to add a hook for each value emitted by the command
-     * or to {@link #onExecutionSuccess} if you want to add a hook when the command successfully executes
-     *
      * Invoked after successful execution of {@link HystrixCommand#run()} with response value.
      * In a {@link HystrixCommand} using {@link ExecutionIsolationStrategy#THREAD}, this will get invoked if the Hystrix thread
      * successfully runs, regardless of whether the calling thread encountered a timeout.
@@ -270,7 +265,9 @@ public abstract class HystrixCommandExecutionHook {
      * @param response
      *            from {@link HystrixCommand#run()}
      * @return T response object that can be modified, decorated, replaced or just returned as a pass-thru.
-     * 
+     * @deprecated Change usages of this to {@link #onExecutionEmit} if you want to add a hook for each value emitted by the command
+     *      or to {@link #onExecutionSuccess} if you want to add a hook when the command successfully executes
+     *
      * @since 1.2
      */
     @Deprecated
@@ -280,9 +277,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onExecutionEmit} if you want to add a hook for each value emitted by the command
-     * or to {@link #onExecutionSuccess} if you want to add a hook when the command successfully executes
-     *
      * Invoked after successful execution of {@link HystrixCommand#run()} with response value.
      * In a {@link HystrixCommand} using {@link ExecutionIsolationStrategy#THREAD}, this will get invoked if the Hystrix thread
      * successfully runs, regardless of whether the calling thread encountered a timeout.
@@ -292,6 +286,9 @@ public abstract class HystrixCommandExecutionHook {
      * @param response
      *            from {@link HystrixCommand#run()}
      * @return T response object that can be modified, decorated, replaced or just returned as a pass-thru.
+     *
+     * @deprecated Change usages of this to {@link #onExecutionEmit} if you want to add a hook for each value emitted by the command
+     *      or to {@link #onExecutionSuccess} if you want to add a hook when the command successfully executes
      *
      * @since 1.2
      */
@@ -302,8 +299,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onExecutionError}
-     *
      * Invoked after failed execution of {@link HystrixCommand#run()} with thrown Exception.
      * 
      * @param commandInstance
@@ -311,6 +306,8 @@ public abstract class HystrixCommandExecutionHook {
      * @param e
      *            Exception thrown by {@link HystrixCommand#run()}
      * @return Exception that can be decorated, replaced or just returned as a pass-thru.
+     *
+     * @deprecated Change usages of this to {@link #onExecutionError}
      * 
      * @since 1.2
      */
@@ -321,8 +318,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onExecutionError}
-     *
      * Invoked after failed execution of {@link HystrixCommand#run()} with thrown Exception.
      *
      * @param commandInstance
@@ -330,6 +325,8 @@ public abstract class HystrixCommandExecutionHook {
      * @param e
      *            Exception thrown by {@link HystrixCommand#run()}
      * @return Exception that can be decorated, replaced or just returned as a pass-thru.
+     *
+     * @deprecated Change usages of this to {@link #onExecutionError}
      *
      * @since 1.2
      */
@@ -340,12 +337,12 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onFallbackStart}
-     *
      * Invoked before {@link HystrixCommand#getFallback()} is about to be executed.
      * 
      * @param commandInstance
      *            The executing HystrixCommand instance.
+     *
+     * @deprecated Change usages of this to {@link #onFallbackStart}
      * 
      * @since 1.2
      */
@@ -355,9 +352,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onFallbackEmit} if you want to write a hook that handles each emitted fallback value
-     * or to {@link #onFallbackSuccess} if you want to write a hook that handles success of the fallback method
-     *
      * Invoked after successful execution of {@link HystrixCommand#getFallback()} with response value.
      * 
      * @param commandInstance
@@ -365,7 +359,10 @@ public abstract class HystrixCommandExecutionHook {
      * @param fallbackResponse
      *            from {@link HystrixCommand#getFallback()}
      * @return T response object that can be modified, decorated, replaced or just returned as a pass-thru.
-     * 
+     *
+     * @deprecated Change usages of this to {@link #onFallbackEmit} if you want to write a hook that handles each emitted fallback value
+     *      or to {@link #onFallbackSuccess} if you want to write a hook that handles success of the fallback method
+     *
      * @since 1.2
      */
     @Deprecated
@@ -375,9 +372,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onFallbackEmit} if you want to write a hook that handles each emitted fallback value
-     * or to {@link #onFallbackSuccess} if you want to write a hook that handles success of the fallback method
-     *
      * Invoked after successful execution of {@link HystrixCommand#getFallback()} with response value.
      *
      * @param commandInstance
@@ -385,6 +379,9 @@ public abstract class HystrixCommandExecutionHook {
      * @param fallbackResponse
      *            from {@link HystrixCommand#getFallback()}
      * @return T response object that can be modified, decorated, replaced or just returned as a pass-thru.
+     *
+     * @deprecated Change usages of this to {@link #onFallbackEmit} if you want to write a hook that handles each emitted fallback value
+     *    or to {@link #onFallbackSuccess} if you want to write a hook that handles success of the fallback method
      *
      * @since 1.2
      */
@@ -395,8 +392,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onFallbackError}.
-     *
      * Invoked after failed execution of {@link HystrixCommand#getFallback()} with thrown exception.
      * 
      * @param commandInstance
@@ -404,6 +399,8 @@ public abstract class HystrixCommandExecutionHook {
      * @param e
      *            Exception thrown by {@link HystrixCommand#getFallback()}
      * @return Exception that can be decorated, replaced or just returned as a pass-thru.
+     *
+     * @deprecated Change usages of this to {@link #onFallbackError}.
      * 
      * @since 1.2
      */
@@ -414,12 +411,12 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onStart}.
-     *
      * Invoked before {@link HystrixCommand} executes.
      * 
      * @param commandInstance
      *            The executing HystrixCommand instance.
+     *
+     * @deprecated Change usages of this to {@link #onStart}.
      * 
      * @since 1.2
      */
@@ -429,9 +426,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onEmit} if you want to write a hook that handles each emitted command value
-     * or to {@link #onSuccess} if you want to write a hook that handles success of the command
-     *
      * Invoked after completion of {@link HystrixCommand} execution that results in a response.
      * <p>
      * The response can come either from {@link HystrixCommand#run()} or {@link HystrixCommand#getFallback()}.
@@ -441,7 +435,10 @@ public abstract class HystrixCommandExecutionHook {
      * @param response
      *            from {@link HystrixCommand#run()} or {@link HystrixCommand#getFallback()}.
      * @return T response object that can be modified, decorated, replaced or just returned as a pass-thru.
-     * 
+     *
+     * @deprecated Change usages of this to {@link #onEmit} if you want to write a hook that handles each emitted command value
+     *      or to {@link #onSuccess} if you want to write a hook that handles success of the command
+     *
      * @since 1.2
      */
     @Deprecated
@@ -451,9 +448,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onEmit} if you want to write a hook that handles each emitted command value
-     * or to {@link #onSuccess} if you want to write a hook that handles success of the command
-     *
      * Invoked after completion of {@link HystrixCommand} execution that results in a response.
      * <p>
      * The response can come either from {@link HystrixCommand#run()} or {@link HystrixCommand#getFallback()}.
@@ -463,6 +457,9 @@ public abstract class HystrixCommandExecutionHook {
      * @param response
      *            from {@link HystrixCommand#run()} or {@link HystrixCommand#getFallback()}.
      * @return T response object that can be modified, decorated, replaced or just returned as a pass-thru.
+     *
+     * @deprecated Change usages of this to {@link #onEmit} if you want to write a hook that handles each emitted command value
+     *     or to {@link #onSuccess} if you want to write a hook that handles success of the command
      *
      * @since 1.2
      */
@@ -473,8 +470,6 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onError}.
-     *
      * Invoked after failed completion of {@link HystrixCommand} execution.
      * 
      * @param commandInstance
@@ -486,6 +481,8 @@ public abstract class HystrixCommandExecutionHook {
      * @param e
      *            Exception thrown by {@link HystrixCommand}
      * @return Exception that can be decorated, replaced or just returned as a pass-thru.
+     *
+     * @deprecated Change usages of this to {@link #onError}.
      * 
      * @since 1.2
      */
@@ -496,12 +493,12 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onThreadStart}.
-     *
      * Invoked at start of thread execution when {@link HystrixCommand} is executed using {@link ExecutionIsolationStrategy#THREAD}.
      * 
      * @param commandInstance
      *            The executing HystrixCommand instance.
+     *
+     * @deprecated Change usages of this to {@link #onThreadStart}.
      * 
      * @since 1.2
      */
@@ -511,14 +508,14 @@ public abstract class HystrixCommandExecutionHook {
     }
 
     /**
-     * DEPRECATED: Change usages of this to {@link #onThreadComplete}.
-     *
      * Invoked at completion of thread execution when {@link HystrixCommand} is executed using {@link ExecutionIsolationStrategy#THREAD}.
      * This will get invoked if the Hystrix thread successfully executes, regardless of whether the calling thread
      * encountered a timeout.
      * 
      * @param commandInstance
      *            The executing HystrixCommand instance.
+     *
+     * @deprecated Change usages of this to {@link #onThreadComplete}.
      * 
      * @since 1.2
      */

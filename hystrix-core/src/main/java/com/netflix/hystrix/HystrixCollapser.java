@@ -38,6 +38,7 @@ import rx.subjects.ReplaySubject;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 
 /**
@@ -159,10 +160,10 @@ public abstract class HystrixCollapser<BatchReturnType, ResponseType, RequestArg
 
             @Override
             public Observable<Void> mapResponseToRequests(Observable<BatchReturnType> batchResponse, final Collection<CollapsedRequest<ResponseType, RequestArgumentType>> requests) {
-                return batchResponse.single().doOnNext(batchReturnType -> {
-                    // this is a blocking call in HystrixCollapser
-                    self.mapResponseToRequests(batchReturnType, requests);
-                }).ignoreElements().cast(Void.class);
+                return batchResponse.single()
+                 // this is a blocking call in HystrixCollapse
+                .doOnNext(batchReturnType -> self.mapResponseToRequests(batchReturnType, requests))
+                .ignoreElements().cast(Void.class);
             }
 
             @Override
@@ -596,6 +597,6 @@ public abstract class HystrixCollapser<BatchReturnType, ResponseType, RequestArg
     // this is a micro-optimization but saves about 1-2microseconds (on 2011 MacBook Pro) 
     // on the repetitive string processing that will occur on the same classes over and over again
     @SuppressWarnings("rawtypes")
-    private static final ConcurrentHashMap<Class<? extends HystrixCollapser>, String> defaultNameCache = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<? extends HystrixCollapser>, String> defaultNameCache = new ConcurrentHashMap<>();
 
 }

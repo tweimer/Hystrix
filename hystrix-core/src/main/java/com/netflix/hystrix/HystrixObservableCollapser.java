@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Collapse multiple requests into a single {@link HystrixCommand} execution based on a time window and optionally a max batch size.
@@ -562,6 +563,6 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
     // this is a micro-optimization but saves about 1-2microseconds (on 2011 MacBook Pro) 
     // on the repetitive string processing that will occur on the same classes over and over again
     @SuppressWarnings("rawtypes")
-    private static final ConcurrentHashMap<Class<? extends HystrixObservableCollapser>, String> defaultNameCache = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<? extends HystrixObservableCollapser>, String> defaultNameCache = new ConcurrentHashMap<>();
 
 }

@@ -422,7 +422,7 @@ public class HystrixRollingNumber {
     /**
      * Cumulative counters (from start of JVM) from each Type
      */
-    /* package */static class CumulativeSum {
+    static class CumulativeSum {
         final LongAdder[] adderForCounterType;
         final LongMaxUpdater[] updaterForCounterType;
 

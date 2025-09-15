@@ -29,6 +29,7 @@ import rx.functions.Func2;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Used by {@link HystrixCollapser} to record metrics.
@@ -40,7 +41,7 @@ public class HystrixCollapserMetrics extends HystrixMetrics {
     private static final Logger logger = LoggerFactory.getLogger(HystrixCollapserMetrics.class);
 
     // String is HystrixCollapserKey.name() (we can't use HystrixCollapserKey directly as we can't guarantee it implements hashcode/equals correctly)
-    private static final ConcurrentHashMap<String, HystrixCollapserMetrics> metrics = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, HystrixCollapserMetrics> metrics = new ConcurrentHashMap<>();
 
     /**
      * Get or create the {@link HystrixCollapserMetrics} instance for a given {@link HystrixCollapserKey}.

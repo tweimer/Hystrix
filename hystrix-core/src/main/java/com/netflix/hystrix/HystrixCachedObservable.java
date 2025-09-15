@@ -15,8 +15,7 @@ public class HystrixCachedObservable<R> {
 
         this.cachedObservable = replaySubject
                 .doOnUnsubscribe(() -> {
-                    outstandingSubscriptions--;
-                    if (outstandingSubscriptions == 0) {
+                    if (--outstandingSubscriptions == 0) {
                         originalSubscription.unsubscribe();
                     }
                 })

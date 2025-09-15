@@ -31,7 +31,6 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import rx.*;
-import rx.Observable.OnSubscribe;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func0;
@@ -2887,7 +2886,7 @@ public class HystrixObservableCommandTest extends CommonHystrixCommandTests<Test
 
     private RequestContextTestResults testRequestContextOnFailureWithFallback(ExecutionIsolationStrategy isolation, final Scheduler userScheduler) {
         final RequestContextTestResults results = new RequestContextTestResults();
-        TestHystrixObservableCommand<Boolean> command = new TestHystrixObservableCommand<Boolean>(TestHystrixObservableCommand.testPropsBuilder(new TestCircuitBreaker())
+        TestHystrixObservableCommand<Boolean> command = new TestHystrixObservableCommand<>(TestHystrixObservableCommand.testPropsBuilder(new TestCircuitBreaker())
                 .setCommandPropertiesDefaults(HystrixCommandPropertiesTest.getUnitTestPropertiesSetter().withExecutionIsolationStrategy(isolation))) {
 
             @Override
@@ -3830,10 +3829,10 @@ public class HystrixObservableCommandTest extends CommonHystrixCommandTests<Test
         RequestContextTestResults results = testRequestContextOnShortCircuitedWithFallback(ExecutionIsolationStrategy.THREAD, Schedulers.immediate());
 
         assertTrue(results.isContextInitialized.get());
-        assertTrue(results.originThread.get().equals(Thread.currentThread())); // fallback is performed by the calling thread
+        assertEquals(results.originThread.get(), Thread.currentThread()); // fallback is performed by the calling thread
 
         assertTrue(results.isContextInitializedObserveOn.get());
-        assertTrue(results.observeOnThread.get().equals(Thread.currentThread())); // rejected so we stay on calling thread
+        assertEquals(results.observeOnThread.get(), Thread.currentThread()); // rejected so we stay on calling thread
 
         // thread isolated ... but rejected so not executed in a thread
         assertFalse(results.command.isExecutedInThread());
@@ -5161,20 +5160,15 @@ public class HystrixObservableCommandTest extends CommonHystrixCommandTests<Test
 
         @Override
         protected Observable<Boolean> construct() {
-            return Observable.create(new OnSubscribe<Boolean>() {
-
-                @Override
-                public void call(Subscriber<? super Boolean> s) {
-                    try {
-                        Thread.sleep(executionSleep);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    s.onNext(true);
-                    s.onCompleted();
+            return Observable.create((Subscriber<? super Boolean> s) -> {
+                try {
+                    Thread.sleep(executionSleep);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
 
+                s.onNext(true);
+                s.onCompleted();
             }).subscribeOn(Schedulers.io());
         }
 

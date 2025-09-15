@@ -472,7 +472,7 @@ public class HystrixPluginsTest {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void run() throws InterruptedException {
             System.out.println("requestId (run) = " + testRequestIdThreadLocal.get());
             Thread.sleep(2000);
             return null;

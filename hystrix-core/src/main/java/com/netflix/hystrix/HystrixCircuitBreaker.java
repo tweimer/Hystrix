@@ -16,6 +16,7 @@
 package com.netflix.hystrix;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -69,7 +70,7 @@ public interface HystrixCircuitBreaker {
      */
     class Factory {
         // String is HystrixCommandKey.name() (we can't use HystrixCommandKey directly as we can't guarantee it implements hashcode/equals correctly)
-        private static final ConcurrentHashMap<String, HystrixCircuitBreaker> circuitBreakersByCommand = new ConcurrentHashMap<>();
+        private static final ConcurrentMap<String, HystrixCircuitBreaker> circuitBreakersByCommand = new ConcurrentHashMap<>();
 
         /**
          * Get the {@link HystrixCircuitBreaker} instance for a given {@link HystrixCommandKey}.
@@ -88,7 +89,7 @@ public interface HystrixCircuitBreaker {
          */
         public static HystrixCircuitBreaker getInstance(HystrixCommandKey key, HystrixCommandGroupKey group, HystrixCommandProperties properties, HystrixCommandMetrics metrics) {
             // this should find it for all but the first time
-            HystrixCircuitBreaker previouslyCached = circuitBreakersByCommand.get(key.name());
+            var previouslyCached = circuitBreakersByCommand.get(key.name());
             if (previouslyCached != null) {
                 return previouslyCached;
             }
@@ -98,7 +99,7 @@ public interface HystrixCircuitBreaker {
             // Create and add to the map ... use putIfAbsent to atomically handle the possible race-condition of
             // 2 threads hitting this point at the same time and let ConcurrentHashMap provide us our thread-safety
             // If 2 threads hit here only one will get added and the other will get a non-null response instead.
-            HystrixCircuitBreaker cbForCommand = circuitBreakersByCommand.putIfAbsent(key.name(), new HystrixCircuitBreakerImpl(key, group, properties, metrics));
+            var cbForCommand = circuitBreakersByCommand.putIfAbsent(key.name(), new HystrixCircuitBreakerImpl(key, group, properties, metrics));
             if (cbForCommand == null) {
                 // this means the putIfAbsent step just created a new one so let's retrieve and return it
                 return circuitBreakersByCommand.get(key.name());
@@ -143,7 +144,7 @@ public interface HystrixCircuitBreaker {
 
         private final AtomicReference<Status> status = new AtomicReference<>(Status.CLOSED);
         private final AtomicLong circuitOpened = new AtomicLong(-1);
-        private final AtomicReference<Subscription> activeSubscription = new AtomicReference<>(null);
+        private final AtomicReference<Subscription> activeSubscription = new AtomicReference<>();
 
         protected HystrixCircuitBreakerImpl(HystrixCommandKey key, HystrixCommandGroupKey commandGroup, final HystrixCommandProperties properties, HystrixCommandMetrics metrics) {
             this.properties = properties;

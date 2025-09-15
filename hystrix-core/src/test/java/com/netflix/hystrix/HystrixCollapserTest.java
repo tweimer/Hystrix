@@ -298,8 +298,8 @@ public class HystrixCollapserTest {
 
         Thread.sleep(100);
 
-        AtomicInteger numErrors = new AtomicInteger(0);
-        AtomicInteger numValues = new AtomicInteger(0);
+        AtomicInteger numErrors = new AtomicInteger();
+        AtomicInteger numValues = new AtomicInteger();
 
         // only the first subscriber should receive the value.
         // the others should get an error that the batch contains duplicates

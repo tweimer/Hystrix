@@ -24,7 +24,7 @@ import com.netflix.hystrix.strategy.properties.HystrixDynamicProperty;
  * @author agentgt
  * @ExcludeFromJavadoc
  */
-/* package */ public class HystrixDynamicPropertiesArchaius implements HystrixDynamicProperties {
+public class HystrixDynamicPropertiesArchaius implements HystrixDynamicProperties {
 
     /**
      * @ExcludeFromJavadoc

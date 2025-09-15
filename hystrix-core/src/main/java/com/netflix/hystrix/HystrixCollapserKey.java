@@ -16,6 +16,7 @@
 package com.netflix.hystrix;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * A key to represent a {@link HystrixCollapser} for monitoring, circuit-breakers, metrics publishing, caching and other such uses.
@@ -37,7 +38,7 @@ public interface HystrixCollapserKey {
         }
 
         // used to intern instances so we don't keep re-creating them millions of times for the same key
-        private static final ConcurrentHashMap<String, HystrixCollapserKey> intern = new ConcurrentHashMap<>();
+        private static final ConcurrentMap<String, HystrixCollapserKey> intern = new ConcurrentHashMap<>();
 
         /**
          * Retrieve (or create) an interned HystrixCollapserKey instance for a given name.

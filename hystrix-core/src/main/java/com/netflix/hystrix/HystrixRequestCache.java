@@ -45,15 +45,15 @@ public class HystrixRequestCache {
      * <p>
      * Key => CommandPrefix + CacheKey : Future<?> from queue()
      */
-    private static final HystrixRequestVariableHolder<ConcurrentHashMap<ValueCacheKey, HystrixCachedObservable<?>>> requestVariableForCache = new HystrixRequestVariableHolder<>(new HystrixRequestVariableLifecycle<>() {
+    private static final HystrixRequestVariableHolder<ConcurrentMap<ValueCacheKey, HystrixCachedObservable<?>>> requestVariableForCache = new HystrixRequestVariableHolder<>(new HystrixRequestVariableLifecycle<>() {
 
         @Override
-        public ConcurrentHashMap<ValueCacheKey, HystrixCachedObservable<?>> initialValue() {
+        public ConcurrentMap<ValueCacheKey, HystrixCachedObservable<?>> initialValue() {
             return new ConcurrentHashMap<>();
         }
 
         @Override
-        public void shutdown(ConcurrentHashMap<ValueCacheKey, HystrixCachedObservable<?>> value) {
+        public void shutdown(ConcurrentMap<ValueCacheKey, HystrixCachedObservable<?>> value) {
             // nothing to shutdown
         }
 
@@ -98,7 +98,7 @@ public class HystrixRequestCache {
     <T> HystrixCachedObservable<T> get(String cacheKey) {
         ValueCacheKey key = getRequestCacheKey(cacheKey);
         if (key != null) {
-            ConcurrentHashMap<ValueCacheKey, HystrixCachedObservable<?>> cacheInstance = requestVariableForCache.get(concurrencyStrategy);
+            ConcurrentMap<ValueCacheKey, HystrixCachedObservable<?>> cacheInstance = requestVariableForCache.get(concurrencyStrategy);
             if (cacheInstance == null) {
                 throw new IllegalStateException("Request caching is not available. Maybe you need to initialize the HystrixRequestContext?");
             }
@@ -126,7 +126,7 @@ public class HystrixRequestCache {
         ValueCacheKey key = getRequestCacheKey(cacheKey);
         if (key != null) {
             /* look for the stored value */
-            ConcurrentHashMap<ValueCacheKey, HystrixCachedObservable<?>> cacheInstance = requestVariableForCache.get(concurrencyStrategy);
+            ConcurrentMap<ValueCacheKey, HystrixCachedObservable<?>> cacheInstance = requestVariableForCache.get(concurrencyStrategy);
             if (cacheInstance == null) {
                 throw new IllegalStateException("Request caching is not available. Maybe you need to initialize the HystrixRequestContext?");
             }
@@ -147,7 +147,7 @@ public class HystrixRequestCache {
     public void clear(String cacheKey) {
         ValueCacheKey key = getRequestCacheKey(cacheKey);
         if (key != null) {
-            ConcurrentHashMap<ValueCacheKey, HystrixCachedObservable<?>> cacheInstance = requestVariableForCache.get(concurrencyStrategy);
+            ConcurrentMap<ValueCacheKey, HystrixCachedObservable<?>> cacheInstance = requestVariableForCache.get(concurrencyStrategy);
             if (cacheInstance == null) {
                 throw new IllegalStateException("Request caching is not available. Maybe you need to initialize the HystrixRequestContext?");
             }

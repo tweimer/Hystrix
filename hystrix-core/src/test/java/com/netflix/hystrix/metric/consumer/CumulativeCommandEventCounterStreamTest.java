@@ -17,7 +17,6 @@ package com.netflix.hystrix.metric.consumer;
 
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
-import com.netflix.hystrix.HystrixCommandMetrics;
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixEventType;
 import com.netflix.hystrix.HystrixRequestLog;
@@ -29,7 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.functions.Action0;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +40,7 @@ public class CumulativeCommandEventCounterStreamTest extends CommandStreamTest {
     HystrixRequestContext context;
     CumulativeCommandEventCounterStream stream;
 
-    private static HystrixCommandGroupKey groupKey = HystrixCommandGroupKey.Factory.asKey("CumulativeCommandCounter");
+    private static final HystrixCommandGroupKey groupKey = HystrixCommandGroupKey.Factory.asKey("CumulativeCommandCounter");
 
     private static Subscriber<long[]> getSubscriber(final CountDownLatch latch) {
         return new Subscriber<>() {
@@ -287,7 +285,7 @@ public class CumulativeCommandEventCounterStreamTest extends CommandStreamTest {
         //submit 2 more requests and they should be SEMAPHORE_REJECTED
         //should see 10 SUCCESSes, 2 SEMAPHORE_REJECTED and 2 FALLBACK_SUCCESSes
 
-        List<Command> saturators = new ArrayList<Command>();
+        List<Command> saturators = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
             saturators.add(Command.from(groupKey, key, HystrixEventType.SUCCESS, 500, HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE));
@@ -297,12 +295,7 @@ public class CumulativeCommandEventCounterStreamTest extends CommandStreamTest {
         Command rejected2 = Command.from(groupKey, key, HystrixEventType.SUCCESS, 0, HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE);
 
         for (final Command saturator : saturators) {
-            new Thread(new HystrixContextRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    saturator.observe();
-                }
-            })).start();
+            new Thread(new HystrixContextRunnable(saturator::observe)).start();
         }
 
         try {
@@ -344,7 +337,7 @@ public class CumulativeCommandEventCounterStreamTest extends CommandStreamTest {
         //submit 2 more requests and they should be THREADPOOL_REJECTED
         //should see 10 SUCCESSes, 2 THREADPOOL_REJECTED and 2 FALLBACK_SUCCESSes
 
-        List<Command> saturators = new ArrayList<Command>();
+        List<Command> saturators = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
             saturators.add(Command.from(groupKey, key, HystrixEventType.SUCCESS, 500));
@@ -447,7 +440,7 @@ public class CumulativeCommandEventCounterStreamTest extends CommandStreamTest {
         //fallback semaphore size is 5.  So let 5 commands saturate that semaphore, then
         //let 2 more commands go to fallback.  they should get rejected by the fallback-semaphore
 
-        List<Command> fallbackSaturators = new ArrayList<Command>();
+        List<Command> fallbackSaturators = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             fallbackSaturators.add(Command.from(groupKey, key, HystrixEventType.FAILURE, 20, HystrixEventType.FALLBACK_SUCCESS, 400));
         }
@@ -495,28 +488,23 @@ public class CumulativeCommandEventCounterStreamTest extends CommandStreamTest {
 
         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : about to observe and subscribe");
         Subscription s = toCancel.observe().
-                doOnUnsubscribe(new Action0() {
+                doOnUnsubscribe(() -> System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : UnSubscribe from command.observe()")).
+                subscribe(new Subscriber<>() {
                     @Override
-                    public void call() {
-                        System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : UnSubscribe from command.observe()");
+                    public void onCompleted() {
+                        System.out.println("Command OnCompleted");
                     }
-                }).
-                subscribe(new Subscriber<Integer>() {
-            @Override
-            public void onCompleted() {
-                System.out.println("Command OnCompleted");
-            }
 
-            @Override
-            public void onError(Throwable e) {
-                System.out.println("Command OnError : " + e);
-            }
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("Command OnError : " + e);
+                    }
 
-            @Override
-            public void onNext(Integer i) {
-                System.out.println("Command OnNext : " + i);
-            }
-        });
+                    @Override
+                    public void onNext(Integer i) {
+                        System.out.println("Command OnNext : " + i);
+                    }
+                });
 
         System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName() + " : about to unsubscribe");
         s.unsubscribe();

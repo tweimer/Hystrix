@@ -208,6 +208,7 @@ public class ExecutionResult {
         for (HystrixEventType eventType: eventTypes) {
             if (didExecutionOccur(eventType)) {
                 didExecutionOccur = true;
+                break;
             }
         }
         return new ExecutionResult(new EventCounts(eventTypes), -1L, -1, -1, null, null, didExecutionOccur, false, null);
@@ -215,11 +216,12 @@ public class ExecutionResult {
 
     private static boolean didExecutionOccur(HystrixEventType eventType) {
         switch (eventType) {
-            case SUCCESS: return true;
-            case FAILURE: return true;
-            case BAD_REQUEST: return true;
-            case TIMEOUT: return true;
-            case CANCELLED: return true;
+            case SUCCESS:
+            case BAD_REQUEST:
+            case FAILURE:
+            case TIMEOUT:
+            case CANCELLED:
+                return true;
             default: return false;
         }
     }
@@ -341,7 +343,7 @@ public class ExecutionResult {
     }
 
     public List<HystrixEventType> getOrderedList() {
-        List<HystrixEventType> eventList = new ArrayList<HystrixEventType>();
+        List<HystrixEventType> eventList = new ArrayList<>();
         for (HystrixEventType eventType: ALL_EVENT_TYPES) {
             if (eventCounts.contains(eventType)) {
                 eventList.add(eventType);

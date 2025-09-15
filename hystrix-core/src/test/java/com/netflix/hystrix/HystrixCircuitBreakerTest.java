@@ -687,7 +687,7 @@ public class HystrixCircuitBreakerTest {
         }
     }
 
-    public class TestCommand extends HystrixCommand<String> {
+    public static class TestCommand extends HystrixCommand<String> {
 
         boolean error;
 
@@ -718,7 +718,7 @@ public class HystrixCircuitBreakerTest {
 
     }
 
-    private class Command extends HystrixCommand<Boolean> {
+    private static class Command extends HystrixCommand<Boolean> {
 
         private final boolean shouldFail;
         private final boolean shouldFailWithBadRequest;
@@ -757,7 +757,7 @@ public class HystrixCircuitBreakerTest {
         }
     }
 
-    private class SuccessCommand extends Command {
+    private static class SuccessCommand extends Command {
 
         SuccessCommand(String commandKey, long latencyToAdd) {
             super(commandKey, false, latencyToAdd);
@@ -768,7 +768,7 @@ public class HystrixCircuitBreakerTest {
         }
     }
 
-    private class FailureCommand extends Command {
+    private static class FailureCommand extends Command {
 
         FailureCommand(String commandKey, long latencyToAdd) {
             super(commandKey, true, latencyToAdd);
@@ -783,7 +783,7 @@ public class HystrixCircuitBreakerTest {
         }
     }
 
-    private class TimeoutCommand extends Command {
+    private static class TimeoutCommand extends Command {
 
         TimeoutCommand(String commandKey) {
             super(commandKey, false, 2000);
@@ -794,7 +794,7 @@ public class HystrixCircuitBreakerTest {
         }
     }
 
-    private class BadRequestCommand extends Command {
+    private static class BadRequestCommand extends Command {
         BadRequestCommand(String commandKey, long latencyToAdd) {
             super(commandKey, false, true, latencyToAdd, 200, 1);
         }

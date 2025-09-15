@@ -21,7 +21,6 @@ import com.netflix.hystrix.HystrixEventType;
 import com.netflix.hystrix.HystrixThreadPoolKey;
 import org.junit.Test;
 import rx.Subscriber;
-import rx.functions.Action1;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -48,7 +47,7 @@ public class HystrixThreadEventStreamTest {
     }
 
     private <T> Subscriber<T> getLatchedSubscriber(final CountDownLatch latch) {
-        return new Subscriber<T>() {
+        return new Subscriber<>() {
             @Override
             public void onCompleted() {
                 latch.countDown();
@@ -272,12 +271,9 @@ public class HystrixThreadEventStreamTest {
 
         Subscriber<List<HystrixCommandCompletion>> commandListSubscriber = getLatchedSubscriber(commandLatch);
         readCommandStream.observe().buffer(500, TimeUnit.MILLISECONDS).take(1)
-                .doOnNext(new Action1<List<HystrixCommandCompletion>>() {
-                    @Override
-                    public void call(List<HystrixCommandCompletion> hystrixCommandCompletions) {
-                        System.out.println("LIST : " + hystrixCommandCompletions);
-                        assertEquals(3, hystrixCommandCompletions.size());
-                    }
+                .doOnNext(hystrixCommandCompletions -> {
+                    System.out.println("LIST : " + hystrixCommandCompletions);
+                    assertEquals(3, hystrixCommandCompletions.size());
                 })
                 .subscribe(commandListSubscriber);
 
@@ -302,12 +298,9 @@ public class HystrixThreadEventStreamTest {
 
         Subscriber<List<HystrixCommandCompletion>> commandListSubscriber = getLatchedSubscriber(commandLatch);
         readCommandStream.observe().buffer(500, TimeUnit.MILLISECONDS).take(1)
-                .doOnNext(new Action1<List<HystrixCommandCompletion>>() {
-                    @Override
-                    public void call(List<HystrixCommandCompletion> hystrixCommandCompletions) {
-                        System.out.println("LIST : " + hystrixCommandCompletions);
-                        assertEquals(3, hystrixCommandCompletions.size());
-                    }
+                .doOnNext(hystrixCommandCompletions -> {
+                    System.out.println("LIST : " + hystrixCommandCompletions);
+                    assertEquals(3, hystrixCommandCompletions.size());
                 })
                 .subscribe(commandListSubscriber);
 
