@@ -15,6 +15,26 @@ subprojects {
 
     group = "com.netflix.hystrix"
 
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release.set(17)
+        // Fallback for older Gradle/JVM toolchains
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    // 🚨 Fix for subprojects that set old source/target after evaluation
+    afterEvaluate {
+        if (project.plugins.hasPlugin("java")) {
+            project.sourceCompatibility = JavaVersion.VERSION_17
+            project.targetCompatibility = JavaVersion.VERSION_17
+        }
+    }
     tasks.withType(Javadoc).configureEach {
         failOnError = false
     }
