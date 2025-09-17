@@ -83,7 +83,7 @@ task ajcTest(type: Test) {
 check.dependsOn test, ajcTest
 
 ext {
-    aspectjVersion = '1.8.6'
+    aspectjVersion = '1.9.21'
     springframeworkVesion = '4.3.2.RELEASE'
 }
 
