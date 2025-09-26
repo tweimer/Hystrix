@@ -146,14 +146,14 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
 
             @Override
             public Collection<Collection<CollapsedRequest<ResponseType, RequestArgumentType>>> shardRequests(Collection<CollapsedRequest<ResponseType, RequestArgumentType>> requests) {
-                Collection<Collection<CollapsedRequest<ResponseType, RequestArgumentType>>> shards = self.shardRequests(requests);
+                var shards = self.shardRequests(requests);
                 self.metrics.markShards(shards.size());
                 return shards;
             }
 
             @Override
             public Observable<BatchReturnType> createObservableCommand(Collection<CollapsedRequest<ResponseType, RequestArgumentType>> requests) {
-                HystrixObservableCommand<BatchReturnType> command = self.createCommand(requests);
+                var command = self.createCommand(requests);
 
                 // mark the number of requests being collapsed together
                 command.markAsCollapsedCommand(this.getCollapserKey(), requests.size());
@@ -168,9 +168,9 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
                 final Func1<BatchReturnType, ResponseType> mapBatchTypeToResponseType = self.getBatchReturnTypeToResponseTypeMapper();
 
                 // index the requests by key
-                final Map<K, CollapsedRequest<ResponseType, RequestArgumentType>> requestsByKey = new HashMap<>(requests.size());
-                for (CollapsedRequest<ResponseType, RequestArgumentType> cr : requests) {
-                    K requestArg = requestKeySelector.call(cr.getArgument());
+                final var requestsByKey = new HashMap<K, CollapsedRequest<ResponseType, RequestArgumentType>>(requests.size());
+                for (var cr : requests) {
+                    var requestArg = requestKeySelector.call(cr.getArgument());
                     requestsByKey.put(requestArg, cr);
                 }
                 final Set<K> seenKeys = new HashSet<>();
@@ -179,8 +179,8 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
                 return batchResponse
                         .doOnNext(batchReturnType -> {
                             try {
-                                K responseKey = batchResponseKeySelector.call(batchReturnType);
-                                CollapsedRequest<ResponseType, RequestArgumentType> requestForResponse = requestsByKey.get(responseKey);
+                                var responseKey = batchResponseKeySelector.call(batchReturnType);
+                                var requestForResponse = requestsByKey.get(responseKey);
                                 if (requestForResponse != null) {
                                     requestForResponse.emitResponse(mapBatchTypeToResponseType.call(batchReturnType));
                                     // now add this to seenKeys, so we can later check what was seen, and what was unseen
@@ -193,15 +193,15 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
                             }
                         })
                         .doOnError(t -> {
-                            Exception ex = getExceptionFromThrowable(t);
-                            for (CollapsedRequest<ResponseType, RequestArgumentType> collapsedReq : requestsByKey.values()) {
+                            var ex = getExceptionFromThrowable(t);
+                            for (var collapsedReq : requestsByKey.values()) {
                                 collapsedReq.setException(ex);
                             }
                         })
                         .doOnCompleted(() -> {
-                            for (Map.Entry<K, CollapsedRequest<ResponseType, RequestArgumentType>> entry : requestsByKey.entrySet()) {
-                                K key = entry.getKey();
-                                CollapsedRequest<ResponseType, RequestArgumentType> collapsedReq = entry.getValue();
+                            for (var entry : requestsByKey.entrySet()) {
+                                var key = entry.getKey();
+                                var collapsedReq = entry.getValue();
                                 if (!seenKeys.contains(key)) {
                                     try {
                                         onMissingResponse(collapsedReq);
@@ -433,8 +433,8 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
                 }
             }
 
-            RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> requestCollapser = collapserFactory.getRequestCollapser(collapserInstanceWrapper);
-            Observable<ResponseType> response = requestCollapser.submitRequest(getRequestArgument());
+            var requestCollapser = collapserFactory.getRequestCollapser(collapserInstanceWrapper);
+            var response = requestCollapser.submitRequest(getRequestArgument());
             metrics.markRequestBatched();
             if (isRequestCacheEnabled) {
                 /*
@@ -446,8 +446,8 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
                  * If this is an issue we can make a lazy-future that gets set in the cache
                  * then only the winning 'put' will be invoked to actually call 'submitRequest'
                  */
-                HystrixCachedObservable<ResponseType> toCache = HystrixCachedObservable.from(response);
-                HystrixCachedObservable<ResponseType> fromCache = requestCache.putIfAbsent(getCacheKey(), toCache);
+                var toCache = HystrixCachedObservable.from(response);
+                var fromCache = requestCache.putIfAbsent(getCacheKey(), toCache);
                 if (fromCache == null) {
                     return toCache.toObservable();
                 } else {

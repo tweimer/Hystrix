@@ -53,12 +53,12 @@ public class RollingCollapserEventCounterStream extends BucketedRollingCounterSt
     }
 
     public static RollingCollapserEventCounterStream getInstance(HystrixCollapserKey collapserKey, int numBuckets, int bucketSizeInMs) {
-        RollingCollapserEventCounterStream initialStream = streams.get(collapserKey.name());
+        var initialStream = streams.get(collapserKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {
             synchronized (RollingCollapserEventCounterStream.class) {
-                RollingCollapserEventCounterStream existingStream = streams.get(collapserKey.name());
+                var existingStream = streams.get(collapserKey.name());
                 if (existingStream == null) {
                     RollingCollapserEventCounterStream newStream = new RollingCollapserEventCounterStream(collapserKey, numBuckets, bucketSizeInMs, HystrixCollapserMetrics.appendEventToBucket, HystrixCollapserMetrics.bucketAggregator);
                     streams.putIfAbsent(collapserKey.name(), newStream);

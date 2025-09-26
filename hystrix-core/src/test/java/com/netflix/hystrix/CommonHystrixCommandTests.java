@@ -171,7 +171,7 @@ public abstract class CommonHystrixCommandTests<C extends AbstractTestHystrixCom
         }
     }
 
-    protected void assertCommandExecutionEvents(HystrixInvokableInfo<?> command, HystrixEventType... expectedEventTypes) {
+    protected void assertCommandExecutionEvents(HystrixInvokableInfo command, HystrixEventType... expectedEventTypes) {
         boolean emitExpected = false;
         int expectedEmitCount = 0;
 

@@ -42,7 +42,7 @@ public class HystrixConfigurationStream {
 
     private final int intervalInMilliseconds;
     private final Observable<HystrixConfiguration> allConfigurationStream;
-    private final AtomicBoolean isSourceCurrentlySubscribed = new AtomicBoolean(false);
+    private final AtomicBoolean isSourceCurrentlySubscribed = new AtomicBoolean();
 
     private static final DynamicIntProperty dataEmissionIntervalInMs =
             DynamicPropertyFactory.getInstance().getIntProperty("hystrix.stream.config.intervalInMilliseconds", 5000);

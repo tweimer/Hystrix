@@ -53,12 +53,7 @@ public class HystrixMetricsStreamController extends AbstractHystrixStreamControl
 	private static DynamicIntProperty maxConcurrentConnections = DynamicPropertyFactory.getInstance().getIntProperty("hystrix.config.stream.maxConcurrentConnections", 5);
 
 	public HystrixMetricsStreamController() {
-		super(HystrixDashboardStream.getInstance().observe().concatMap(new Func1<HystrixDashboardStream.DashboardData, Observable<String>>() {
-			@Override
-			public Observable<String> call(HystrixDashboardStream.DashboardData dashboardData) {
-				return Observable.from(SerialHystrixDashboardData.toMultipleJsonStrings(dashboardData));
-			}
-		}));
+		super(HystrixDashboardStream.getInstance().observe().concatMap(dashboardData -> Observable.from(SerialHystrixDashboardData.toMultipleJsonStrings(dashboardData))));
 	}
 
 	@GET

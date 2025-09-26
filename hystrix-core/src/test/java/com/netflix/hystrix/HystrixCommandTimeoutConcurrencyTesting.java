@@ -51,7 +51,7 @@ public class HystrixCommandTimeoutConcurrencyTesting {
                     }
                 }
 
-                for (HystrixInvokableInfo<?> hi : HystrixRequestLog.getCurrentRequest().getAllExecutedCommands()) {
+                for (HystrixInvokableInfo hi : HystrixRequestLog.getCurrentRequest().getAllExecutedCommands()) {
                     if (!hi.isResponseTimedOut()) {
                         System.err.println("Timeout not found in executed command");
                         throw new RuntimeException("Timeout not found in executed command");

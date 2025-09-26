@@ -51,7 +51,7 @@ public abstract class BasicCommandTest extends BasicHystrixTest {
 
         assertEquals("name: 1", f1.get().getName());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        com.netflix.hystrix.HystrixInvokableInfo<?> command = getCommand();
+        com.netflix.hystrix.HystrixInvokableInfo command = getCommand();
         // assert the command key name is the we're expecting
         assertEquals("GetUserCommand", command.getCommandKey().name());
         // assert the command group key name is the we're expecting
@@ -95,7 +95,7 @@ public abstract class BasicCommandTest extends BasicHystrixTest {
         User user = genericUserService.getByKeyForceFail("1", 2L);
         assertEquals("name: 2", user.getName());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
 
         assertEquals("getByKeyForceFail", command.getCommandKey().name());
@@ -109,14 +109,14 @@ public abstract class BasicCommandTest extends BasicHystrixTest {
     private void assertGetUserSnycCommandExecuted(User u1) {
         assertEquals("name: 1", u1.getName());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        com.netflix.hystrix.HystrixInvokableInfo<?> command = getCommand();
+        com.netflix.hystrix.HystrixInvokableInfo command = getCommand();
         assertEquals("getUserSync", command.getCommandKey().name());
         assertEquals("UserGroup", command.getCommandGroup().name());
         assertEquals("UserGroup", command.getThreadPoolKey().name());
         assertTrue(command.getExecutionEvents().contains(HystrixEventType.SUCCESS));
     }
 
-    private com.netflix.hystrix.HystrixInvokableInfo<?> getCommand() {
+    private com.netflix.hystrix.HystrixInvokableInfo getCommand() {
         return HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
     }
 

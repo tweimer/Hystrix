@@ -44,7 +44,7 @@ public class HystrixRequestEventsStream {
         writeOnlyRequestEventsSubject.onCompleted();
     }
 
-    public void write(Collection<HystrixInvokableInfo<?>> executions) {
+    public void write(Collection<HystrixInvokableInfo> executions) {
         HystrixRequestEvents requestEvents = new HystrixRequestEvents(executions);
         writeOnlyRequestEventsSubject.onNext(requestEvents);
     }

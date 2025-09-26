@@ -42,9 +42,9 @@ public class HystrixCollapserEventStream implements HystrixEventStream<HystrixCo
             return initialStream;
         } else {
             synchronized (HystrixCollapserEventStream.class) {
-                HystrixCollapserEventStream existingStream = streams.get(collapserKey.name());
+                var existingStream = streams.get(collapserKey.name());
                 if (existingStream == null) {
-                    HystrixCollapserEventStream newStream = new HystrixCollapserEventStream(collapserKey);
+                    var newStream = new HystrixCollapserEventStream(collapserKey);
                     streams.putIfAbsent(collapserKey.name(), newStream);
                     return newStream;
                 } else {

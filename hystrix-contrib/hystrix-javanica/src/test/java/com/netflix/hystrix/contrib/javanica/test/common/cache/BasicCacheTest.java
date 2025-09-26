@@ -15,7 +15,6 @@
  */
 package com.netflix.hystrix.contrib.javanica.test.common.cache;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.netflix.hystrix.HystrixInvokableInfo;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -76,7 +75,7 @@ public abstract class BasicCacheTest extends BasicHystrixTest {
     public void testGetSetGetUserCache_givenTwoCommands() {
 
         User user = userService.getUserById("1");
-        HystrixInvokableInfo<?> getUserByIdCommand = getLastExecutedCommand();
+        HystrixInvokableInfo getUserByIdCommand = getLastExecutedCommand();
         // this is the first time we've executed this command with
         // the value of "1" so it should not be from cache
         assertFalse(getUserByIdCommand.isResponseFromCache());
@@ -119,7 +118,7 @@ public abstract class BasicCacheTest extends BasicHystrixTest {
     @Test
     public void testGetSetGetUserCache_givenGetUserByEmailAndUpdateProfile() {
         User user = userService.getUserByEmail("email");
-        HystrixInvokableInfo<?> getUserByIdCommand = getLastExecutedCommand();
+        HystrixInvokableInfo getUserByIdCommand = getLastExecutedCommand();
         // this is the first time we've executed this command with
         // the value of "1" so it should not be from cache
         assertFalse(getUserByIdCommand.isResponseFromCache());
@@ -166,7 +165,7 @@ public abstract class BasicCacheTest extends BasicHystrixTest {
     public void testGetSetGetUserCache_givenOneCommandAndOneMethodAnnotatedWithCacheRemove() {
         // given
         User user = userService.getUserById("1");
-        HystrixInvokableInfo<?> getUserByIdCommand = getLastExecutedCommand();
+        HystrixInvokableInfo getUserByIdCommand = getLastExecutedCommand();
         // this is the first time we've executed this command with
         // the value of "1" so it should not be from cache
         assertFalse(getUserByIdCommand.isResponseFromCache());

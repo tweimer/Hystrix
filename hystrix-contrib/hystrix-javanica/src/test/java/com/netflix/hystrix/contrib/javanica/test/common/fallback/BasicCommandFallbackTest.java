@@ -57,7 +57,7 @@ public abstract class BasicCommandFallbackTest extends BasicHystrixTest {
 
         assertEquals("def", f1.get().getName());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("getUserAsync", command.getCommandKey().name());
 
@@ -74,7 +74,7 @@ public abstract class BasicCommandFallbackTest extends BasicHystrixTest {
 
         assertEquals("def", u1.getName());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
 
         assertEquals("getUserSync", command.getCommandKey().name());
@@ -98,7 +98,7 @@ public abstract class BasicCommandFallbackTest extends BasicHystrixTest {
         assertEquals("def", f1.get().getName());
 
         assertEquals(3, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> getUserAsyncFallbackCommand = getHystrixCommandByKey(
+        HystrixInvokableInfo getUserAsyncFallbackCommand = getHystrixCommandByKey(
                 "getUserAsyncFallbackCommand");
         com.netflix.hystrix.HystrixInvokableInfo firstFallbackCommand = getHystrixCommandByKey("firstFallbackCommand");
         com.netflix.hystrix.HystrixInvokableInfo secondFallbackCommand = getHystrixCommandByKey("secondFallbackCommand");
@@ -119,7 +119,7 @@ public abstract class BasicCommandFallbackTest extends BasicHystrixTest {
         assertEquals("def", f1.get().getName());
 
         assertEquals(4, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> getUserAsyncFallbackAsyncCommand = getHystrixCommandByKey(
+        HystrixInvokableInfo getUserAsyncFallbackAsyncCommand = getHystrixCommandByKey(
                 "getUserAsyncFallbackAsyncCommand");
         com.netflix.hystrix.HystrixInvokableInfo firstAsyncFallbackCommand = getHystrixCommandByKey("firstAsyncFallbackCommand");
         com.netflix.hystrix.HystrixInvokableInfo secondAsyncFallbackCommand = getHystrixCommandByKey("secondAsyncFallbackCommand");
@@ -142,7 +142,7 @@ public abstract class BasicCommandFallbackTest extends BasicHystrixTest {
 
         assertEquals("def", u1.getName());
         assertEquals(3, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> getUserSyncFallbackCommand = getHystrixCommandByKey(
+        HystrixInvokableInfo getUserSyncFallbackCommand = getHystrixCommandByKey(
                 "getUserSyncFallbackCommand");
         com.netflix.hystrix.HystrixInvokableInfo firstFallbackCommand = getHystrixCommandByKey("firstFallbackCommand");
         com.netflix.hystrix.HystrixInvokableInfo secondFallbackCommand = getHystrixCommandByKey("secondFallbackCommand");
@@ -162,7 +162,7 @@ public abstract class BasicCommandFallbackTest extends BasicHystrixTest {
         User user = userFuture.get();
         assertEquals("def", user.getId());
         assertEquals(2, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> asyncCommandWithAsyncFallbackCommand = getHystrixCommandByKey("asyncCommandWithAsyncFallbackCommand");
+        HystrixInvokableInfo asyncCommandWithAsyncFallbackCommand = getHystrixCommandByKey("asyncCommandWithAsyncFallbackCommand");
         com.netflix.hystrix.HystrixInvokableInfo asyncFallbackCommand = getHystrixCommandByKey("asyncFallbackCommand");
         // confirm that command has failed
         assertTrue(asyncCommandWithAsyncFallbackCommand.getExecutionEvents().contains(HystrixEventType.FAILURE));
@@ -213,7 +213,7 @@ public abstract class BasicCommandFallbackTest extends BasicHystrixTest {
         try {
             userService.commandThrowsHystrixBadRequestExceptionWithNoCause(null, null);
         } finally {
-            HystrixInvokableInfo<?> asyncCommandWithAsyncFallbackCommand = getHystrixCommandByKey("commandThrowsHystrixBadRequestExceptionWithNoCause");
+            HystrixInvokableInfo asyncCommandWithAsyncFallbackCommand = getHystrixCommandByKey("commandThrowsHystrixBadRequestExceptionWithNoCause");
             assertFalse(asyncCommandWithAsyncFallbackCommand.getExecutionEvents().contains(HystrixEventType.FALLBACK_SUCCESS));
         }
     }
@@ -224,7 +224,7 @@ public abstract class BasicCommandFallbackTest extends BasicHystrixTest {
             userService.getUserWithoutFallback(null, null);
         } catch (Exception e) {}
 
-        HystrixInvokableInfo<?> command = getHystrixCommandByKey("getUserWithoutFallback");
+        HystrixInvokableInfo command = getHystrixCommandByKey("getUserWithoutFallback");
         assertTrue("expected event: FALLBACK_MISSING", command.getExecutionEvents().contains(HystrixEventType.FALLBACK_MISSING));
     }
 

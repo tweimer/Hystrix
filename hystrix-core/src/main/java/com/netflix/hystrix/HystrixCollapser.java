@@ -136,21 +136,21 @@ public abstract class HystrixCollapser<BatchReturnType, ResponseType, RequestArg
          /* strategy: HystrixMetricsPublisherCollapser */
         HystrixMetricsPublisherFactory.createOrRetrievePublisherForCollapser(collapserKey, this.metrics, properties);
 
-        /**
+        /*
          * Used to pass public method invocation to the underlying implementation in a separate package while leaving the methods 'protected' in this class.
          */
         collapserInstanceWrapper = new HystrixCollapserBridge<>() {
 
             @Override
             public Collection<Collection<CollapsedRequest<ResponseType, RequestArgumentType>>> shardRequests(Collection<CollapsedRequest<ResponseType, RequestArgumentType>> requests) {
-                Collection<Collection<CollapsedRequest<ResponseType, RequestArgumentType>>> shards = self.shardRequests(requests);
+                var shards = self.shardRequests(requests);
                 self.metrics.markShards(shards.size());
                 return shards;
             }
 
             @Override
             public Observable<BatchReturnType> createObservableCommand(Collection<CollapsedRequest<ResponseType, RequestArgumentType>> requests) {
-                final HystrixCommand<BatchReturnType> command = self.createCommand(requests);
+                final var command = self.createCommand(requests);
 
                 command.markAsCollapsedCommand(this.getCollapserKey(), requests.size());
                 self.metrics.markBatch(requests.size());
@@ -322,7 +322,7 @@ public abstract class HystrixCollapser<BatchReturnType, ResponseType, RequestArg
      * Use {@link #toObservable(rx.Scheduler)} to schedule the callback differently.
      * <p>
      * See https://github.com/Netflix/RxJava/wiki for more information.
-     * 
+     *
      * @return {@code Observable<R>} that executes and calls back with the result of of {@link HystrixCommand}{@code <BatchReturnType>} execution after passing through {@link #mapResponseToRequests}
      *         to transform the {@code <BatchReturnType>} into {@code <ResponseType>}
      */
@@ -380,12 +380,12 @@ public abstract class HystrixCollapser<BatchReturnType, ResponseType, RequestArg
                 }
             }
 
-            RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> requestCollapser = collapserFactory.getRequestCollapser(collapserInstanceWrapper);
-            Observable<ResponseType> response = requestCollapser.submitRequest(getRequestArgument());
+            var requestCollapser = collapserFactory.getRequestCollapser(collapserInstanceWrapper);
+            var response = requestCollapser.submitRequest(getRequestArgument());
 
             if (isRequestCacheEnabled && cacheKey != null) {
-                HystrixCachedObservable<ResponseType> toCache = HystrixCachedObservable.from(response);
-                HystrixCachedObservable<ResponseType> fromCache = requestCache.putIfAbsent(cacheKey, toCache);
+                var toCache = HystrixCachedObservable.from(response);
+                var fromCache = requestCache.putIfAbsent(cacheKey, toCache);
                 if (fromCache == null) {
                     return toCache.toObservable();
                 } else {

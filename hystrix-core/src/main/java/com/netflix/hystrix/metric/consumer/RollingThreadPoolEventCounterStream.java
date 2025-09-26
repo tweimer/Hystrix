@@ -54,15 +54,14 @@ public class RollingThreadPoolEventCounterStream extends BucketedRollingCounterS
     }
 
     public static RollingThreadPoolEventCounterStream getInstance(HystrixThreadPoolKey threadPoolKey, int numBuckets, int bucketSizeInMs) {
-        RollingThreadPoolEventCounterStream initialStream = streams.get(threadPoolKey.name());
+        var initialStream = streams.get(threadPoolKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {
             synchronized (RollingThreadPoolEventCounterStream.class) {
-                RollingThreadPoolEventCounterStream existingStream = streams.get(threadPoolKey.name());
+                var existingStream = streams.get(threadPoolKey.name());
                 if (existingStream == null) {
-                    RollingThreadPoolEventCounterStream newStream =
-                            new RollingThreadPoolEventCounterStream(threadPoolKey, numBuckets, bucketSizeInMs,
+                    var newStream = new RollingThreadPoolEventCounterStream(threadPoolKey, numBuckets, bucketSizeInMs,
                                     HystrixThreadPoolMetrics.appendEventToBucket, HystrixThreadPoolMetrics.counterAggregator);
                     streams.putIfAbsent(threadPoolKey.name(), newStream);
                     return newStream;

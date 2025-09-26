@@ -37,7 +37,7 @@ public abstract class BasicDefaultFallbackTest extends BasicHystrixTest {
         String res = serviceWithDefaultFallback.requestString("");
         assertEquals(ServiceWithDefaultFallback.DEFAULT_RESPONSE, res);
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("requestString", command.getCommandKey().name());
 
@@ -52,7 +52,7 @@ public abstract class BasicDefaultFallbackTest extends BasicHystrixTest {
         Integer res = serviceWithDefaultFallback.commandWithSpecificFallback("");
         assertEquals(Integer.valueOf(res), res);
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("commandWithSpecificFallback", command.getCommandKey().name());
 
@@ -68,7 +68,7 @@ public abstract class BasicDefaultFallbackTest extends BasicHystrixTest {
         Long res = serviceWithDefaultFallback.commandWithDefaultFallback(1L);
         assertEquals(Long.valueOf(0L), res);
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("commandWithDefaultFallback", command.getCommandKey().name());
 
@@ -85,7 +85,7 @@ public abstract class BasicDefaultFallbackTest extends BasicHystrixTest {
 
 
         assertEquals(2, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> requestStringCommand = getHystrixCommandByKey("requestString");
+        HystrixInvokableInfo requestStringCommand = getHystrixCommandByKey("requestString");
         com.netflix.hystrix.HystrixInvokableInfo fallback = getHystrixCommandByKey("classDefaultFallback");
 
         assertEquals("requestString", requestStringCommand.getCommandKey().name());
@@ -103,7 +103,7 @@ public abstract class BasicDefaultFallbackTest extends BasicHystrixTest {
 
 
         assertEquals(2, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> requestStringCommand = getHystrixCommandByKey("commandWithDefaultFallback");
+        HystrixInvokableInfo requestStringCommand = getHystrixCommandByKey("commandWithDefaultFallback");
         com.netflix.hystrix.HystrixInvokableInfo fallback = getHystrixCommandByKey("defaultCommandFallback");
 
         assertEquals("commandWithDefaultFallback", requestStringCommand.getCommandKey().name());

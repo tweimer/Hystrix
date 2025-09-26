@@ -79,9 +79,9 @@ public class RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> {
                 if (argumentMap.size() >= maxBatchSize) {
                     return null;
                 } else {
-                    CollapsedRequestSubject<ResponseType, RequestArgumentType> collapsedRequest = new CollapsedRequestSubject<>(arg, this);
-                    final CollapsedRequestSubject<ResponseType, RequestArgumentType> existing = (CollapsedRequestSubject<ResponseType, RequestArgumentType>) argumentMap.putIfAbsent(arg, collapsedRequest);
-                    /**
+                    var collapsedRequest = new CollapsedRequestSubject<>(arg, this);
+                    final var existing = (CollapsedRequestSubject<ResponseType, RequestArgumentType>) argumentMap.putIfAbsent(arg, collapsedRequest);
+                    /*
                      * If the argument already exists in the batch, then there are 2 options:
                      * A) If request caching is ON (the default): only keep 1 argument in the batch and let all responses
                      * be hooked up to that argument
@@ -167,54 +167,41 @@ public class RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> {
                 for (final Collection<CollapsedRequest<ResponseType, RequestArgumentType>> shardRequests : shards) {
                     try {
                         // create a new command to handle this batch of requests
-                        Observable<BatchReturnType> o = commandCollapser.createObservableCommand(shardRequests);
+                        var o = commandCollapser.createObservableCommand(shardRequests);
 
-                        commandCollapser.mapResponseToRequests(o, shardRequests).doOnError(new Action1<>() {
-
-                            /**
-                             * This handles failed completions
-                             */
-                            @Override
-                            public void call(Throwable e) {
-                                // handle Throwable in case anything is thrown so we don't block Observers waiting for onError/onCompleted
-                                Exception ee;
-                                if (e instanceof Exception) {
-                                    ee = (Exception) e;
-                                } else {
-                                    ee = new RuntimeException("Throwable caught while executing batch and mapping responses.", e);
-                                }
-                                logger.debug("Exception mapping responses to requests.", e);
-                                // if a failure occurs we want to pass that exception to all of the Futures that we've returned
-                                for (CollapsedRequest<ResponseType, RequestArgumentType> request : argumentMap.values()) {
-                                    try {
-                                        ((CollapsedRequestSubject<ResponseType, RequestArgumentType>) request).setExceptionIfResponseNotReceived(ee);
-                                    } catch (IllegalStateException e2) {
-                                        // if we have partial responses set in mapResponseToRequests
-                                        // then we may get IllegalStateException as we loop over them
-                                        // so we'll log but continue to the rest
-                                        logger.error("Partial success of 'mapResponseToRequests' resulted in IllegalStateException while setting Exception. Continuing ... ", e2);
-                                    }
+                        /**
+                         * This handles failed completions
+                         */
+                        commandCollapser.mapResponseToRequests(o, shardRequests).doOnError(e -> {
+                            // handle Throwable in case anything is thrown so we don't block Observers waiting for onError/onCompleted
+                            Exception ee;
+                            if (e instanceof Exception) {
+                                ee = (Exception) e;
+                            } else {
+                                ee = new RuntimeException("Throwable caught while executing batch and mapping responses.", e);
+                            }
+                            logger.debug("Exception mapping responses to requests.", e);
+                            // if a failure occurs we want to pass that exception to all of the Futures that we've returned
+                            for (var request : argumentMap.values()) {
+                                try {
+                                    ((CollapsedRequestSubject<ResponseType, RequestArgumentType>) request).setExceptionIfResponseNotReceived(ee);
+                                } catch (IllegalStateException e2) {
+                                    // if we have partial responses set in mapResponseToRequests
+                                    // then we may get IllegalStateException as we loop over them
+                                    // so we'll log but continue to the rest
+                                    logger.error("Partial success of 'mapResponseToRequests' resulted in IllegalStateException while setting Exception. Continuing ... ", e2);
                                 }
                             }
-
-                        }).doOnCompleted(new Action0() {
-
-                            /**
-                             * This handles successful completions
-                             */
-                            @Override
-                            public void call() {
-                                // check that all requests had setResponse or setException invoked in case 'mapResponseToRequests' was implemented poorly
-                                Exception e = null;
-                                for (CollapsedRequest<ResponseType, RequestArgumentType> request : shardRequests) {
-                                    try {
-                                       e = ((CollapsedRequestSubject<ResponseType, RequestArgumentType>) request).setExceptionIfResponseNotReceived(e,"No response set by " + commandCollapser.getCollapserKey().name() + " 'mapResponseToRequests' implementation.");
-                                    } catch (IllegalStateException e2) {
-                                        logger.debug("Partial success of 'mapResponseToRequests' resulted in IllegalStateException while setting 'No response set' Exception. Continuing ... ", e2);
-                                    }
+                        }).doOnCompleted(() -> {
+                            // check that all requests had setResponse or setException invoked in case 'mapResponseToRequests' was implemented poorly
+                            Exception e = null;
+                            for (var request : shardRequests) {
+                                try {
+                                   e = ((CollapsedRequestSubject<ResponseType, RequestArgumentType>) request).setExceptionIfResponseNotReceived(e,"No response set by " + commandCollapser.getCollapserKey().name() + " 'mapResponseToRequests' implementation.");
+                                } catch (IllegalStateException e2) {
+                                    logger.debug("Partial success of 'mapResponseToRequests' resulted in IllegalStateException while setting 'No response set' Exception. Continuing ... ", e2);
                                 }
                             }
-
                         }).subscribe();
                         
                     } catch (Exception e) {
@@ -233,7 +220,7 @@ public class RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> {
             } catch (Exception e) {
                 logger.error("Exception while sharding requests.", e);
                 // same error handling as we do around the shards, but this is a wider net in case the shardRequest method fails
-                for (CollapsedRequest<ResponseType, RequestArgumentType> request : argumentMap.values()) {
+                for (var request : argumentMap.values()) {
                     try {
                         request.setException(e);
                     } catch (IllegalStateException e2) {
@@ -262,13 +249,13 @@ public class RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> {
                      * 
                      * This safety-net just prevents the CollapsedRequestFutureImpl.get() from waiting on the CountDownLatch until its max timeout.
                      */
-                    for (CollapsedRequest<ResponseType, RequestArgumentType> request : argumentMap.values()) {
+                    for (var request : argumentMap.values()) {
                         try {
                             ((CollapsedRequestSubject<ResponseType, RequestArgumentType>) request).setExceptionIfResponseNotReceived(new IllegalStateException("Requests not executed before shutdown."));
                         } catch (Exception e) {
                             logger.debug("Failed to setException on CollapsedRequestFutureImpl instances.", e);
                         }
-                        /**
+                        /*
                          * https://github.com/Netflix/Hystrix/issues/78 Include more info when collapsed requests remain in queue
                          */
                         logger.warn("Request still in queue but not be executed due to RequestCollapser shutdown. Argument => " + request.getArgument() + "   Request Object => " + request, new IllegalStateException());

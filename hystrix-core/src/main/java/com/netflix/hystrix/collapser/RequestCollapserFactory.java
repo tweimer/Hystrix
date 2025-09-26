@@ -98,13 +98,13 @@ public class RequestCollapserFactory<BatchReturnType, ResponseType, RequestArgum
 
     @SuppressWarnings("unchecked")
     private RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> getCollapserForGlobalScope(HystrixCollapserBridge<BatchReturnType, ResponseType, RequestArgumentType> commandCollapser) {
-        RequestCollapser<?, ?, ?> collapser = globalScopedCollapsers.get(collapserKey.name());
+        var collapser = globalScopedCollapsers.get(collapserKey.name());
         if (collapser != null) {
             return (RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType>) collapser;
         }
         // create new collapser using 'this' first instance as the one that will get cached for future executions ('this' is stateless so we can do that)
         RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> newCollapser = new RequestCollapser<>(commandCollapser, properties, timer, concurrencyStrategy);
-        RequestCollapser<?, ?, ?> existing = globalScopedCollapsers.putIfAbsent(collapserKey.name(), newCollapser);
+        var existing = globalScopedCollapsers.putIfAbsent(collapserKey.name(), newCollapser);
         if (existing == null) {
             // we won
             return newCollapser;
@@ -142,7 +142,7 @@ public class RequestCollapserFactory<BatchReturnType, ResponseType, RequestArgum
             // create new collapser using 'this' first instance as the one that will get cached for future executions ('this' is stateless so we can do that)
             @SuppressWarnings({ "rawtypes" })
             HystrixRequestVariableHolder newCollapser = new RequestCollapserRequestVariable(commandCollapser, properties, timer, concurrencyStrategy);
-            HystrixRequestVariableHolder<RequestCollapser<?, ?, ?>> existing = requestScopedCollapsers.putIfAbsent(commandCollapser.getCollapserKey().name(), newCollapser);
+            var existing = requestScopedCollapsers.putIfAbsent(commandCollapser.getCollapserKey().name(), newCollapser);
             if (existing == null) {
                 // this thread won, so return the one we just created
                 requestVariable = newCollapser;

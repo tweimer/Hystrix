@@ -112,7 +112,7 @@ public class CommandCollapserGetValueForKey extends HystrixCollapser<List<String
                 System.err.println("HystrixRequestLog.getCurrentRequest().getAllExecutedCommands(): " + HystrixRequestLog.getCurrentRequest().getAllExecutedCommands());
 
                 int numLogs = 0;
-                for (HystrixInvokableInfo<?> command : HystrixRequestLog.getCurrentRequest().getAllExecutedCommands()) {
+                for (HystrixInvokableInfo command : HystrixRequestLog.getCurrentRequest().getAllExecutedCommands()) {
                     numLogs++;
                     
                     // assert the command is the one we're expecting

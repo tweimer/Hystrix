@@ -40,6 +40,6 @@ public interface HystrixNetworkAuditorEventListener {
      * } </pre>
      * 
      */
-    public void handleNetworkEvent();
+    void handleNetworkEvent();
 
 }

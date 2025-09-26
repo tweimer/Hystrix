@@ -46,11 +46,10 @@ public abstract class HystrixSampleSseServlet extends HttpServlet {
     private final Object responseWriteLock = new Object();
 
     /* Set to true upon shutdown, so it's OK to be shared among all SampleSseServlets */
-    private static volatile boolean isDestroyed = false;
+    private static volatile boolean isDestroyed;
 
     protected HystrixSampleSseServlet(Observable<String> sampleStream) {
-        this.sampleStream = sampleStream;
-        this.pausePollerThreadDelayInMs = DEFAULT_PAUSE_POLLER_THREAD_DELAY_IN_MS;
+        this(sampleStream, DEFAULT_PAUSE_POLLER_THREAD_DELAY_IN_MS);
     }
 
     protected HystrixSampleSseServlet(Observable<String> sampleStream, int pausePollerThreadDelayInMs) {
@@ -88,7 +87,7 @@ public abstract class HystrixSampleSseServlet extends HttpServlet {
     }
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         isDestroyed = false;
     }
 
@@ -109,10 +108,9 @@ public abstract class HystrixSampleSseServlet extends HttpServlet {
      *
      * @param request  incoming HTTP Request
      * @param response outgoing HTTP Response (as a streaming response)
-     * @throws javax.servlet.ServletException
      * @throws java.io.IOException
      */
-    private void handleRequest(HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+    private void handleRequest(HttpServletRequest request, final HttpServletResponse response) throws IOException {
         final AtomicBoolean moreDataWillBeSent = new AtomicBoolean(true);
         Subscription sampleSubscription = null;
 
@@ -134,7 +132,7 @@ public abstract class HystrixSampleSseServlet extends HttpServlet {
                 //since writing to the servlet response is blocking, use the Rx IO thread for the write that occurs in the onNext
                 sampleSubscription = sampleStream
                         .observeOn(Schedulers.io())
-                        .subscribe(new Subscriber<String>() {
+                        .subscribe(new Subscriber<>() {
                             @Override
                             public void onCompleted() {
                                 logger.error("HystrixSampleSseServlet: ({}) received unexpected OnCompleted from sample stream", getClass().getSimpleName());

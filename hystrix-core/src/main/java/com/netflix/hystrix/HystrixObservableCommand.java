@@ -32,7 +32,7 @@ import com.netflix.hystrix.strategy.eventnotifier.HystrixEventNotifier;
  * 
  * @ThreadSafe
  */
-public abstract class HystrixObservableCommand<R> extends AbstractCommand<R> implements HystrixObservable<R>, HystrixInvokableInfo<R> {
+public abstract class HystrixObservableCommand<R> extends AbstractCommand<R> implements HystrixObservable<R>, HystrixInvokableInfo {
 
     /**
      * Construct a {@link HystrixObservableCommand} with defined {@link HystrixCommandGroupKey}.

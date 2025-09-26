@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import rx.Observable;
@@ -44,43 +45,33 @@ import com.netflix.hystrix.contrib.metrics.HystrixStreamingOutputProvider;
 
 public class StreamingOutputProviderTest {
 
-	private final Observable<String> streamOfOnNexts = Observable.interval(100, TimeUnit.MILLISECONDS).map(new Func1<Long, String>() {
-		@Override
-		public String call(Long timestamp) {
-			return "test-stream";
-		}
-	});
+	private final Observable<String> streamOfOnNexts = Observable.interval(100, TimeUnit.MILLISECONDS)
+			.map(timestamp -> "test-stream");
 
-	private final Observable<String> streamOfOnNextThenOnError = Observable.create(new Observable.OnSubscribe<String>() {
-		@Override
-		public void call(Subscriber<? super String> subscriber) {
-			try {
-				Thread.sleep(100);
-				subscriber.onNext("test-stream");
-				Thread.sleep(100);
-				subscriber.onError(new RuntimeException("stream failure"));
-			} catch (InterruptedException ex) {
-				ex.printStackTrace();
-			}
-		}
-	}).subscribeOn(Schedulers.computation());
+	private final Observable<String> streamOfOnNextThenOnError = Observable.create((Subscriber<? super String> subscriber) -> {
+        try {
+            Thread.sleep(100);
+            subscriber.onNext("test-stream");
+            Thread.sleep(100);
+            subscriber.onError(new RuntimeException("stream failure"));
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+    }).subscribeOn(Schedulers.computation());
 
-	private final Observable<String> streamOfOnNextThenOnCompleted = Observable.create(new Observable.OnSubscribe<String>() {
-		@Override
-		public void call(Subscriber<? super String> subscriber) {
-			try {
-				Thread.sleep(100);
-				subscriber.onNext("test-stream");
-				Thread.sleep(100);
-				subscriber.onCompleted();
-			} catch (InterruptedException ex) {
-				ex.printStackTrace();
-			}
-		}
-	}).subscribeOn(Schedulers.computation());
+	private final Observable<String> streamOfOnNextThenOnCompleted = Observable.create((Subscriber<? super String> subscriber) -> {
+        try {
+            Thread.sleep(100);
+            subscriber.onNext("test-stream");
+            Thread.sleep(100);
+            subscriber.onCompleted();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+    }).subscribeOn(Schedulers.computation());
 
-	private AbstractHystrixStreamController sse = new AbstractHystrixStreamController(streamOfOnNexts) {
-		private  final AtomicInteger concurrentConnections = new AtomicInteger(0);
+	private final AbstractHystrixStreamController sse = new AbstractHystrixStreamController(streamOfOnNexts) {
+		private final AtomicInteger concurrentConnections = new AtomicInteger();
 		@Override
 		protected int getMaxNumberConcurrentConnectionsAllowed() {
 			return 2;
@@ -147,7 +138,7 @@ public class StreamingOutputProviderTest {
 
 	// as the concurrentConnections count is decremented asynchronously, we need to potentially give the check a little bit of time
 	private static boolean hasNoMoreConcurrentConnections(AtomicInteger concurrentConnectionsCount, long waitDuration, long pollInterval, TimeUnit timeUnit) throws InterruptedException {
-		long period = (pollInterval > waitDuration) ? waitDuration : pollInterval;
+		long period = Math.min(pollInterval, waitDuration);
 
 		for (long i = 0; i < waitDuration; i += period) {
 			if (concurrentConnectionsCount.get() == 0) {
@@ -172,54 +163,38 @@ public class StreamingOutputProviderTest {
 		is.close();
 
 		System.out.println("Total lines:" + writes.get());
-		assertTrue(writes.get() == 1);
+        Assert.assertEquals(1, writes.get());
 
 		assertTrue(hasNoMoreConcurrentConnections(stream.getConcurrentConnections(), 200, 10, TimeUnit.MILLISECONDS));
 	}
 
 	private static Thread startStreamingThread(final HystrixStream stream, final OutputStream outputSteam) {
-		Thread th1 = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					final HystrixStreamingOutputProvider provider = new HystrixStreamingOutputProvider();
-					provider.writeTo(stream, null, null, null, null, null, outputSteam);
-				} catch (IOException e) {
-					fail(e.getMessage());
-				}
-			}
-		});
+		Thread th1 = new Thread(() -> {
+            try {
+                final HystrixStreamingOutputProvider provider = new HystrixStreamingOutputProvider();
+                provider.writeTo(stream, null, null, null, null, null, outputSteam);
+            } catch (IOException e) {
+                fail(e.getMessage());
+            }
+        });
 		th1.start();
 		return th1;
 	}
 
 	private static void verifyStream(final InputStream is, final AtomicInteger lineCount) {
-		Thread th2 = new Thread(new Runnable() {
-			public void run() {
-				BufferedReader br = null;
-				try {
-					br = new BufferedReader(new InputStreamReader(is));
-					String line;
-					while ((line = br.readLine()) != null) {
-						if (!"".equals(line)) {
-							System.out.println(line);
-							lineCount.incrementAndGet();
-						}
-					}
-				} catch (IOException e) {
-					fail("Failed while verifying streaming output.Stacktrace:" + e.getMessage());
-				} finally {
-					if (br != null) {
-						try {
-							br.close();
-						} catch (IOException e) {
-							fail("Failed while verifying streaming output.Stacktrace:" + e.getMessage());
-						}
-					}
-				}
-
-			}
-		});
+		Thread th2 = new Thread(() -> {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (!line.isEmpty()) {
+                        System.out.println(line);
+                        lineCount.incrementAndGet();
+                    }
+                }
+            } catch (IOException e) {
+                fail("Failed while verifying streaming output.Stacktrace:" + e.getMessage());
+            }
+        });
 		th2.start();
 	}
 }

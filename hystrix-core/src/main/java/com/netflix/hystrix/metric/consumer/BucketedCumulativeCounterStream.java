@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class BucketedCumulativeCounterStream<Event extends HystrixEvent, Bucket, Output> extends BucketedCounterStream<Event, Bucket, Output> {
     private final Observable<Output> sourceStream;
-    private final AtomicBoolean isSourceCurrentlySubscribed = new AtomicBoolean(false);
+    private final AtomicBoolean isSourceCurrentlySubscribed = new AtomicBoolean();
 
     protected BucketedCumulativeCounterStream(HystrixEventStream<Event> stream, int numBuckets, int bucketSizeInMs,
                                               Func2<Bucket, Event, Bucket> reduceCommandCompletion,

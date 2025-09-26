@@ -61,7 +61,7 @@ public class HystrixCollapserMetrics extends HystrixMetrics {
         // it doesn't exist so we need to create it
         collapserMetrics = new HystrixCollapserMetrics(key, properties);
         // attempt to store it (race other threads)
-        HystrixCollapserMetrics existing = metrics.putIfAbsent(key.name(), collapserMetrics);
+        var existing = metrics.putIfAbsent(key.name(), collapserMetrics);
         if (existing == null) {
             // we won the thread-race to store the instance we created
             return collapserMetrics;
@@ -83,8 +83,8 @@ public class HystrixCollapserMetrics extends HystrixMetrics {
     private static final HystrixEventType.Collapser[] ALL_EVENT_TYPES = HystrixEventType.Collapser.values();
 
     public static final Func2<long[], HystrixCollapserEvent, long[]> appendEventToBucket = (initialCountArray, collapserEvent) -> {
-        HystrixEventType.Collapser eventType = collapserEvent.getEventType();
-        int count = collapserEvent.getCount();
+        var eventType = collapserEvent.getEventType();
+        var count = collapserEvent.getCount();
         initialCountArray[eventType.ordinal()] += count;
         return initialCountArray;
     };

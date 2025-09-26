@@ -62,30 +62,30 @@ public class HystrixStreamingOutputProvider implements MessageBodyWriter<Hystrix
 		final AtomicBoolean moreDataWillBeSent = new AtomicBoolean(true);
 		try {
 
-			sampleSubscription = o.getSampleStream().observeOn(Schedulers.io()).subscribe(new Subscriber<String>() {
-				@Override
-				public void onCompleted() {
-					LOGGER.error("HystrixSampleSseServlet: ({}) received unexpected OnCompleted from sample stream", getClass().getSimpleName());
-					moreDataWillBeSent.set(false);
-				}
+			sampleSubscription = o.getSampleStream().observeOn(Schedulers.io()).subscribe(new Subscriber<>() {
+                @Override
+                public void onCompleted() {
+                    LOGGER.error("HystrixSampleSseServlet: ({}) received unexpected OnCompleted from sample stream", getClass().getSimpleName());
+                    moreDataWillBeSent.set(false);
+                }
 
-				@Override
-				public void onError(Throwable e) {
-					moreDataWillBeSent.set(false);
-				}
+                @Override
+                public void onError(Throwable e) {
+                    moreDataWillBeSent.set(false);
+                }
 
-				@Override
-				public void onNext(String sampleDataAsString) {
-					if (sampleDataAsString != null) {
-						try {
-							entity.write(("data: " + sampleDataAsString + "\n\n").getBytes());
-							entity.flush();
-						} catch (IOException ioe) {
-							moreDataWillBeSent.set(false);
-						}
-					}
-				}
-			});
+                @Override
+                public void onNext(String sampleDataAsString) {
+                    if (sampleDataAsString != null) {
+                        try {
+                            entity.write(("data: " + sampleDataAsString + "\n\n").getBytes());
+                            entity.flush();
+                        } catch (IOException ioe) {
+                            moreDataWillBeSent.set(false);
+                        }
+                    }
+                }
+            });
 
 			while (moreDataWillBeSent.get()) {
 				try {

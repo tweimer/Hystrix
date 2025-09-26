@@ -215,15 +215,10 @@ public class ExecutionResult {
     }
 
     private static boolean didExecutionOccur(HystrixEventType eventType) {
-        switch (eventType) {
-            case SUCCESS:
-            case BAD_REQUEST:
-            case FAILURE:
-            case TIMEOUT:
-            case CANCELLED:
-                return true;
-            default: return false;
-        }
+        return switch (eventType) {
+            case SUCCESS, BAD_REQUEST, FAILURE, TIMEOUT, CANCELLED -> true;
+            default -> false;
+        };
     }
 
     public ExecutionResult setExecutionOccurred() {

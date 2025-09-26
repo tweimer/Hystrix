@@ -50,12 +50,9 @@ public class HystrixConfigSseServletTest {
 
     HystrixConfigSseServlet servlet;
 
-    private final Observable<HystrixConfiguration> streamOfOnNexts = Observable.interval(100, TimeUnit.MILLISECONDS).map(new Func1<Long, HystrixConfiguration>() {
-        @Override
-        public HystrixConfiguration call(Long timestamp) {
-            return mockConfig;
-        }
-    });
+    private final Observable<HystrixConfiguration> streamOfOnNexts = Observable
+            .interval(100, TimeUnit.MILLISECONDS)
+            .map(timestamp -> mockConfig);
 
     private final Observable<HystrixConfiguration> streamOfOnNextThenOnError = Observable.create(new Observable.OnSubscribe<HystrixConfiguration>() {
         @Override
@@ -93,19 +90,15 @@ public class HystrixConfigSseServletTest {
     @After
     public void tearDown() {
         servlet.destroy();
-        servlet.shutdown();
+        HystrixSampleSseServlet.shutdown();
     }
 
     @Test
     public void shutdownServletShouldRejectRequests() throws ServletException, IOException {
         servlet = new HystrixConfigSseServlet(streamOfOnNexts, 10);
-        try {
-            servlet.init();
-        } catch (ServletException ex) {
+        servlet.init();
 
-        }
-
-        servlet.shutdown();
+        HystrixSampleSseServlet.shutdown();
 
         servlet.doGet(mockReq, mockResp);
 
@@ -115,39 +108,29 @@ public class HystrixConfigSseServletTest {
     @Test
     public void testConfigDataWithInfiniteOnNextStream() throws IOException, InterruptedException {
         servlet = new HystrixConfigSseServlet(streamOfOnNexts, 10);
-        try {
-            servlet.init();
-        } catch (ServletException ex) {
+        servlet.init();
 
-        }
-
-        final AtomicInteger writes = new AtomicInteger(0);
+        final AtomicInteger writes = new AtomicInteger();
 
         when(mockReq.getParameter("delay")).thenReturn("100");
         when(mockResp.getWriter()).thenReturn(mockPrintWriter);
-        Mockito.doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                String written = (String) invocation.getArguments()[0];
-                System.out.println("ARG : " + written);
+        Mockito.doAnswer( invocation -> {
+            String written = (String) invocation.getArguments()[0];
+            System.out.println("ARG : " + written);
 
-                if (!written.contains("ping")) {
-                    writes.incrementAndGet();
-                }
-                return null;
+            if (!written.contains("ping")) {
+                writes.incrementAndGet();
             }
+            return null;
         }).when(mockPrintWriter).print(Mockito.anyString());
 
-        Runnable simulateClient = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    servlet.doGet(mockReq, mockResp);
-                } catch (ServletException ex) {
-                    fail(ex.getMessage());
-                } catch (IOException ex) {
-                    fail(ex.getMessage());
-                }
+        Runnable simulateClient = () -> {
+            try {
+                servlet.doGet(mockReq, mockResp);
+            } catch (ServletException ex) {
+                fail(ex.getMessage());
+            } catch (IOException ex) {
+                fail(ex.getMessage());
             }
         };
 
@@ -177,39 +160,29 @@ public class HystrixConfigSseServletTest {
     @Test
     public void testConfigDataWithStreamOnError() throws IOException, InterruptedException {
         servlet = new HystrixConfigSseServlet(streamOfOnNextThenOnError, 10);
-        try {
-            servlet.init();
-        } catch (ServletException ex) {
+        servlet.init();
 
-        }
-
-        final AtomicInteger writes = new AtomicInteger(0);
+        final AtomicInteger writes = new AtomicInteger();
 
         when(mockReq.getParameter("delay")).thenReturn("100");
         when(mockResp.getWriter()).thenReturn(mockPrintWriter);
-        Mockito.doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                String written = (String) invocation.getArguments()[0];
-                System.out.println("ARG : " + written);
+        Mockito.doAnswer(invocation -> {
+            String written = (String) invocation.getArguments()[0];
+            System.out.println("ARG : " + written);
 
-                if (!written.contains("ping")) {
-                    writes.incrementAndGet();
-                }
-                return null;
+            if (!written.contains("ping")) {
+                writes.incrementAndGet();
             }
+            return null;
         }).when(mockPrintWriter).print(Mockito.anyString());
 
-        Runnable simulateClient = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    servlet.doGet(mockReq, mockResp);
-                } catch (ServletException ex) {
-                    fail(ex.getMessage());
-                } catch (IOException ex) {
-                    fail(ex.getMessage());
-                }
+        Runnable simulateClient = () -> {
+            try {
+                servlet.doGet(mockReq, mockResp);
+            } catch (ServletException ex) {
+                fail(ex.getMessage());
+            } catch (IOException ex) {
+                fail(ex.getMessage());
             }
         };
 
@@ -230,39 +203,29 @@ public class HystrixConfigSseServletTest {
     @Test
     public void testConfigDataWithStreamOnCompleted() throws IOException, InterruptedException {
         servlet = new HystrixConfigSseServlet(streamOfOnNextThenOnCompleted, 10);
-        try {
-            servlet.init();
-        } catch (ServletException ex) {
+        servlet.init();
 
-        }
-
-        final AtomicInteger writes = new AtomicInteger(0);
+        final AtomicInteger writes = new AtomicInteger();
 
         when(mockReq.getParameter("delay")).thenReturn("100");
         when(mockResp.getWriter()).thenReturn(mockPrintWriter);
-        Mockito.doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                String written = (String) invocation.getArguments()[0];
-                System.out.println("ARG : " + written);
+        Mockito.doAnswer((Answer<Void>) invocation -> {
+            String written = (String) invocation.getArguments()[0];
+            System.out.println("ARG : " + written);
 
-                if (!written.contains("ping")) {
-                    writes.incrementAndGet();
-                }
-                return null;
+            if (!written.contains("ping")) {
+                writes.incrementAndGet();
             }
+            return null;
         }).when(mockPrintWriter).print(Mockito.anyString());
 
-        Runnable simulateClient = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    servlet.doGet(mockReq, mockResp);
-                } catch (ServletException ex) {
-                    fail(ex.getMessage());
-                } catch (IOException ex) {
-                    fail(ex.getMessage());
-                }
+        Runnable simulateClient = () -> {
+            try {
+                servlet.doGet(mockReq, mockResp);
+            } catch (ServletException ex) {
+                fail(ex.getMessage());
+            } catch (IOException ex) {
+                fail(ex.getMessage());
             }
         };
 
@@ -283,38 +246,28 @@ public class HystrixConfigSseServletTest {
     @Test
     public void testConfigDataWithIoExceptionOnWrite() throws IOException, InterruptedException {
         servlet = new HystrixConfigSseServlet(streamOfOnNexts, 10);
-        try {
-            servlet.init();
-        } catch (ServletException ex) {
+        servlet.init();
 
-        }
-
-        final AtomicInteger writes = new AtomicInteger(0);
+        final AtomicInteger writes = new AtomicInteger();
 
         when(mockResp.getWriter()).thenReturn(mockPrintWriter);
-        Mockito.doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                String written = (String) invocation.getArguments()[0];
-                System.out.println("ARG : " + written);
+        Mockito.doAnswer(invocation -> {
+            String written = (String) invocation.getArguments()[0];
+            System.out.println("ARG : " + written);
 
-                if (!written.contains("ping")) {
-                    writes.incrementAndGet();
-                }
-                throw new IOException("simulated IO Exception");
+            if (!written.contains("ping")) {
+                writes.incrementAndGet();
             }
+            throw new IOException("simulated IO Exception");
         }).when(mockPrintWriter).print(Mockito.anyString());
 
-        Runnable simulateClient = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    servlet.doGet(mockReq, mockResp);
-                } catch (ServletException ex) {
-                    fail(ex.getMessage());
-                } catch (IOException ex) {
-                    fail(ex.getMessage());
-                }
+        Runnable simulateClient = () -> {
+            try {
+                servlet.doGet(mockReq, mockResp);
+            } catch (ServletException ex) {
+                fail(ex.getMessage());
+            } catch (IOException ex) {
+                fail(ex.getMessage());
             }
         };
 

@@ -320,9 +320,5 @@ public abstract class HystrixThreadPoolProperties {
             this.rollingStatisticalWindowBuckets = value;
             return this;
         }
-
-
-
-
     }
 }

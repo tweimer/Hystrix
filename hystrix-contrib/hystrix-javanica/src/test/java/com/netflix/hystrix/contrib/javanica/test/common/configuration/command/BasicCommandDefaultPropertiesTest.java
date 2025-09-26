@@ -30,7 +30,7 @@ public abstract class BasicCommandDefaultPropertiesTest extends BasicHystrixTest
     @Test
     public void testCommandInheritsDefaultGroupKey() {
         service.commandInheritsDefaultProperties();
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("DefaultGroupKey", command.getCommandGroup().name());
     }
@@ -38,7 +38,7 @@ public abstract class BasicCommandDefaultPropertiesTest extends BasicHystrixTest
     @Test
     public void testCommandOverridesDefaultGroupKey() {
         service.commandOverridesGroupKey();
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("SpecificGroupKey", command.getCommandGroup().name());
     }
@@ -46,7 +46,7 @@ public abstract class BasicCommandDefaultPropertiesTest extends BasicHystrixTest
     @Test
     public void testCommandInheritsDefaultThreadPoolKey() {
         service.commandInheritsDefaultProperties();
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("DefaultThreadPoolKey", command.getThreadPoolKey().name());
     }
@@ -54,7 +54,7 @@ public abstract class BasicCommandDefaultPropertiesTest extends BasicHystrixTest
     @Test
     public void testCommandOverridesDefaultThreadPoolKey() {
         service.commandOverridesThreadPoolKey();
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("SpecificThreadPoolKey", command.getThreadPoolKey().name());
     }
@@ -62,7 +62,7 @@ public abstract class BasicCommandDefaultPropertiesTest extends BasicHystrixTest
     @Test
     public void testCommandInheritsDefaultCommandProperties() {
         service.commandInheritsDefaultProperties();
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals(456, command.getProperties().executionTimeoutInMilliseconds().get().intValue());
     }
@@ -70,7 +70,7 @@ public abstract class BasicCommandDefaultPropertiesTest extends BasicHystrixTest
     @Test
     public void testCommandOverridesDefaultCommandProperties() {
         service.commandOverridesDefaultCommandProperties();
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals(654, command.getProperties().executionTimeoutInMilliseconds().get().intValue());
     }
@@ -78,7 +78,7 @@ public abstract class BasicCommandDefaultPropertiesTest extends BasicHystrixTest
     @Test
     public void testCommandInheritsThreadPollProperties() {
         service.commandInheritsDefaultProperties();
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
 
         HystrixThreadPoolProperties properties = getThreadPoolProperties(command);
@@ -89,7 +89,7 @@ public abstract class BasicCommandDefaultPropertiesTest extends BasicHystrixTest
     @Test
     public void testCommandOverridesDefaultThreadPollProperties() {
         service.commandOverridesDefaultThreadPoolProperties();
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
 
         HystrixThreadPoolProperties properties = getThreadPoolProperties(command);

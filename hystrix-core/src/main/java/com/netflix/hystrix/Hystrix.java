@@ -167,8 +167,8 @@ public class Hystrix {
         }
 
         public int size() {
-            int currentSize = 0;
-            Node<E> current = top.get();
+            var currentSize = 0;
+            var current = top.get();
             while (current != null) {
                 currentSize++;
                 current = current.next;
@@ -177,7 +177,7 @@ public class Hystrix {
         }
 
         public E peek() {
-            Node<E> eNode = top.get();
+            var eNode = top.get();
             if (eNode == null) {
                 return null;
             } else {

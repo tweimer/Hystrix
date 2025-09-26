@@ -49,16 +49,11 @@ import com.netflix.hystrix.serial.SerialHystrixConfiguration;
 @Path("/hystrix/config.stream")
 public class HystrixConfigSseController extends AbstractHystrixStreamController {
 
-	private static final AtomicInteger concurrentConnections = new AtomicInteger(0);
-	private static DynamicIntProperty maxConcurrentConnections = DynamicPropertyFactory.getInstance().getIntProperty("hystrix.config.stream.maxConcurrentConnections", 5);
+	private static final AtomicInteger concurrentConnections = new AtomicInteger();
+	private static final DynamicIntProperty maxConcurrentConnections = DynamicPropertyFactory.getInstance().getIntProperty("hystrix.config.stream.maxConcurrentConnections", 5);
 
 	public HystrixConfigSseController() {
-		super(HystrixConfigurationStream.getInstance().observe().map(new Func1<HystrixConfiguration, String>() {
-			@Override
-			public String call(HystrixConfiguration hystrixConfiguration) {
-				return SerialHystrixConfiguration.toJsonString(hystrixConfiguration);
-			}
-		}));
+		super(HystrixConfigurationStream.getInstance().observe().map(SerialHystrixConfiguration::toJsonString));
 	}
 
 	@GET

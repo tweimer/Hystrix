@@ -94,11 +94,11 @@ public class CommandWithFallbackViaNetwork extends HystrixCommand<String> {
             try {
                 assertEquals(null, new CommandWithFallbackViaNetwork(1).execute());
 
-                HystrixInvokableInfo<?> command1 = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().toArray(new HystrixInvokableInfo<?>[2])[0];
+                HystrixInvokableInfo command1 = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().toArray(new HystrixInvokableInfo[2])[0];
                 assertEquals("GetValueCommand", command1.getCommandKey().name());
                 assertTrue(command1.getExecutionEvents().contains(HystrixEventType.FAILURE));
 
-                HystrixInvokableInfo<?> command2 = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().toArray(new HystrixInvokableInfo<?>[2])[1];
+                HystrixInvokableInfo command2 = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().toArray(new HystrixInvokableInfo[2])[1];
                 assertEquals("GetValueFallbackCommand", command2.getCommandKey().name());
                 assertTrue(command2.getExecutionEvents().contains(HystrixEventType.FAILURE));
             } finally {

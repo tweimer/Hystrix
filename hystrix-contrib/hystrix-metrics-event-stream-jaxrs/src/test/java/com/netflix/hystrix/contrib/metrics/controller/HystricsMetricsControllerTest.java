@@ -51,12 +51,12 @@ import com.netflix.hystrix.contrib.metrics.HystrixStreamFeature;
  */
 @Path("/hystrix")
 public class HystricsMetricsControllerTest extends JerseyTest {
-	protected static final AtomicInteger requestCount = new AtomicInteger(0);
+	protected static final AtomicInteger requestCount = new AtomicInteger();
 
 	@POST
 	@Path("/command")
 	@Consumes(APPLICATION_JSON)
-	public void command() throws Exception {
+	public void command() {
 		TestHystrixCommand command = new TestHystrixCommand();
 		command.execute();
 	}

@@ -40,7 +40,7 @@ public abstract class BasicHystrixTest {
         request.reset();
     }
 
-    protected final HystrixThreadPoolProperties getThreadPoolProperties(HystrixInvokableInfo<?> command) {
+    protected final HystrixThreadPoolProperties getThreadPoolProperties(HystrixInvokableInfo command) {
         try {
             Field field = command.getClass().getSuperclass().getSuperclass().getSuperclass().getDeclaredField("threadPool");
             field.setAccessible(true);

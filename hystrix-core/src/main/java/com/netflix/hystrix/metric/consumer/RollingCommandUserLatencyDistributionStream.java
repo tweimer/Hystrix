@@ -72,7 +72,7 @@ public class RollingCommandUserLatencyDistributionStream extends RollingDistribu
             return initialStream;
         } else {
             synchronized (RollingCommandUserLatencyDistributionStream.class) {
-                RollingCommandUserLatencyDistributionStream existingStream = streams.get(commandKey.name());
+                var existingStream = streams.get(commandKey.name());
                 if (existingStream == null) {
                     RollingCommandUserLatencyDistributionStream newStream = new RollingCommandUserLatencyDistributionStream(commandKey, numBuckets, bucketSizeInMs);
                     streams.putIfAbsent(commandKey.name(), newStream);

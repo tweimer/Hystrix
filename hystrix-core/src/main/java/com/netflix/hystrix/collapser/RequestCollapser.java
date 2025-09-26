@@ -85,12 +85,12 @@ public class RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType
 
         // loop until succeed (compare-and-set spin-loop)
         while (true) {
-            final RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> b = batch.get();
+            final var b = batch.get();
             if (b == null) {
                 return Observable.error(new IllegalStateException("Submitting requests after collapser is shutdown"));
             }
 
-            final Observable<ResponseType> response = b.offer(arg != null ? arg : (RequestArgumentType) NULL_SENTINEL);
+            final var response = b.offer(arg != null ? arg : (RequestArgumentType) NULL_SENTINEL);
             // it will always get an Observable unless we hit the max batch size
             if (response != null) {
                 return response;

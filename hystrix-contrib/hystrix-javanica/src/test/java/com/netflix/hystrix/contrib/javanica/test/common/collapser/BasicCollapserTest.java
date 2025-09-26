@@ -72,7 +72,7 @@ public abstract class BasicCollapserTest extends BasicHystrixTest {
         // assert that the batch command 'getUserByIds' was in fact
         // executed and that it executed only once
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         // assert the command is the one we're expecting
         assertEquals("getUserByIds", command.getCommandKey().name());
@@ -99,7 +99,7 @@ public abstract class BasicCollapserTest extends BasicHystrixTest {
         }
         assertEquals(expectedIds.isEmpty(), true);
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         // assert the command is the one we're expecting
         assertEquals("getUserByIds", command.getCommandKey().name());
@@ -124,7 +124,7 @@ public abstract class BasicCollapserTest extends BasicHystrixTest {
         assertEquals("name: 5", f5.get().getName());
         // two command should be executed: "getUserByIdWithFallback" and "getUserByIdsWithFallback"
         assertEquals(2, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> getUserByIdsWithFallback = getHystrixCommandByKey("getUserByIdsWithFallback");
+        HystrixInvokableInfo getUserByIdsWithFallback = getHystrixCommandByKey("getUserByIdsWithFallback");
         com.netflix.hystrix.HystrixInvokableInfo getUserByIdsFallback = getHystrixCommandByKey("getUserByIdsFallback");
         // confirm that command has failed
         assertTrue(getUserByIdsWithFallback.getExecutionEvents().contains(HystrixEventType.FAILURE));
@@ -148,7 +148,7 @@ public abstract class BasicCollapserTest extends BasicHystrixTest {
         assertEquals("name: 5", f5.get().getName());
         // 4 commands should be executed
         assertEquals(4, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> batchCommand = getHystrixCommandByKey("getUserByIdsThrowsException");
+        HystrixInvokableInfo batchCommand = getHystrixCommandByKey("getUserByIdsThrowsException");
         com.netflix.hystrix.HystrixInvokableInfo fallback1 = getHystrixCommandByKey("getUserByIdsFallbackWithThrowableParam1");
         com.netflix.hystrix.HystrixInvokableInfo fallback2 = getHystrixCommandByKey("getUserByIdsFallbackWithThrowableParam2");
         com.netflix.hystrix.HystrixInvokableInfo fallback3 = getHystrixCommandByKey("getUserByIdsFallbackWithThrowableParam3");

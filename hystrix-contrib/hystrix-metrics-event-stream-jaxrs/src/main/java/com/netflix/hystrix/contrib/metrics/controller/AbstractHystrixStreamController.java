@@ -63,7 +63,7 @@ public abstract class AbstractHystrixStreamController {
 	 * @return JAX-RS Response - Serialization will be handled by {@link HystrixStreamingOutputProvider}
 	 */
 	protected Response handleRequest() {
-		ResponseBuilder builder = null;
+		ResponseBuilder builder;
 		/* ensure we aren't allowing more connections than we want */
 		int numberConnections = getCurrentConnections().get();
 		int maxNumberConnectionsAllowed = getMaxNumberConcurrentConnectionsAllowed(); // may change at runtime, so look this up for each request

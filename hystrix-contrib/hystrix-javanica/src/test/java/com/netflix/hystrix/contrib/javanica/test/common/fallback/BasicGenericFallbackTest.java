@@ -116,7 +116,7 @@ public abstract class BasicGenericFallbackTest extends BasicHystrixTest {
         try {
             executeCommand(p);
 
-            HystrixInvokableInfo<?> command = getHystrixCommandByKey("command");
+            HystrixInvokableInfo command = getHystrixCommandByKey("command");
 
             assertTrue(command.getExecutionEvents().contains(HystrixEventType.FAILURE));
             assertTrue(command.getExecutionEvents().contains(HystrixEventType.FALLBACK_SUCCESS));

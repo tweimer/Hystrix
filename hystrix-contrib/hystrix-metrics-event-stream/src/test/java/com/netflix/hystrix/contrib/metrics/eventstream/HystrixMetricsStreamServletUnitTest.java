@@ -46,7 +46,7 @@ public class HystrixMetricsStreamServletUnitTest {
     HystrixMetricsStreamServlet servlet;
 
     private final Observable<HystrixDashboardStream.DashboardData> streamOfOnNexts =
-            Observable.interval(100, TimeUnit.MILLISECONDS).map(new Func1<Long, HystrixDashboardStream.DashboardData>() {
+            Observable.interval(100, TimeUnit.MILLISECONDS).map(new Func1<>() {
                 @Override
                 public HystrixDashboardStream.DashboardData call(Long timestamp) {
                     return mockDashboard;

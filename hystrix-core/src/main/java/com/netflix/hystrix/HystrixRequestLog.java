@@ -70,7 +70,7 @@ public class HystrixRequestLog {
     /**
      * History of {@link HystrixInvokableInfo} executed in this request.
      */
-    private final LinkedBlockingQueue<HystrixInvokableInfo<?>> allExecutedCommands = new LinkedBlockingQueue<>(MAX_STORAGE);
+    private final LinkedBlockingQueue<HystrixInvokableInfo> allExecutedCommands = new LinkedBlockingQueue<>(MAX_STORAGE);
 
     // prevent public instantiation
     private HystrixRequestLog() {
@@ -112,7 +112,7 @@ public class HystrixRequestLog {
      * 
      * @return {@code Collection<HystrixCommand<?>>}
      */
-    public Collection<HystrixInvokableInfo<?>> getAllExecutedCommands() {
+    public Collection<HystrixInvokableInfo> getAllExecutedCommands() {
         return Collections.unmodifiableCollection(allExecutedCommands);
     }
 
@@ -122,7 +122,7 @@ public class HystrixRequestLog {
      * @param command
      *            {@code HystrixCommand<?>}
      */
-    void addExecutedCommand(HystrixInvokableInfo<?> command) {
+    void addExecutedCommand(HystrixInvokableInfo command) {
         if (!allExecutedCommands.offer(command)) {
             // see RequestLog: Reduce Chance of Memory Leak https://github.com/Netflix/Hystrix/issues/53
             logger.warn("RequestLog ignoring command after reaching limit of " + MAX_STORAGE + ". See https://github.com/Netflix/Hystrix/issues/53 for more information.");
@@ -177,7 +177,7 @@ public class HystrixRequestLog {
 
             StringBuilder builder = new StringBuilder();
             int estimatedLength = 0;
-            for (HystrixInvokableInfo<?> command : allExecutedCommands) {
+            for (HystrixInvokableInfo command : allExecutedCommands) {
                 builder.setLength(0);
                 builder.append(command.getCommandKey().name());
 

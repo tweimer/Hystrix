@@ -62,7 +62,7 @@ public abstract class BasicCollapserPropertiesTest extends BasicHystrixTest {
         assertEquals("name: 3", u3.getName());
         assertEquals("name: 4", u4.getName());
         assertEquals(4, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("getUsers", command.getCommandKey().name());
         // confirm that it was a COLLAPSED command execution

@@ -69,9 +69,9 @@ public class RollingCollapserBatchSizeDistributionStream extends RollingDistribu
             return initialStream;
         } else {
             synchronized (RollingCollapserBatchSizeDistributionStream.class) {
-                RollingCollapserBatchSizeDistributionStream existingStream = streams.get(collapserKey.name());
+                var existingStream = streams.get(collapserKey.name());
                 if (existingStream == null) {
-                    RollingCollapserBatchSizeDistributionStream newStream = new RollingCollapserBatchSizeDistributionStream(collapserKey, numBuckets, bucketSizeInMs);
+                    var newStream = new RollingCollapserBatchSizeDistributionStream(collapserKey, numBuckets, bucketSizeInMs);
                     streams.putIfAbsent(collapserKey.name(), newStream);
                     return newStream;
                 } else {

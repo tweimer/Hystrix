@@ -66,14 +66,12 @@ public class HystrixSampleSseServletTest {
     @After
     public void tearDown() {
         servlet.destroy();
-        servlet.shutdown();
+        HystrixSampleSseServlet.shutdown();
     }
 
     @Test
-    public void testNoConcurrentResponseWrites() throws IOException, InterruptedException {
-        final Observable<HystrixConfiguration> limitedOnNexts = Observable.create(new Observable.OnSubscribe<HystrixConfiguration>() {
-            @Override
-            public void call(Subscriber<? super HystrixConfiguration> subscriber) {
+    public void testNoConcurrentResponseWrites() throws IOException {
+        final Observable<HystrixConfiguration> limitedOnNexts = Observable.create((Subscriber<? super HystrixConfiguration> subscriber) -> {
                 try {
                     for (int i = 0; i < 500; i++) {
                         Thread.sleep(10);
@@ -86,7 +84,7 @@ public class HystrixSampleSseServletTest {
                     subscriber.onCompleted();
                 }
             }
-        }).subscribeOn(Schedulers.computation());
+        ).subscribeOn(Schedulers.computation());
 
         servlet = new TestHystrixConfigSseServlet(limitedOnNexts, 1);
         try {
@@ -99,33 +97,27 @@ public class HystrixSampleSseServletTest {
 
         when(mockReq.getParameter("delay")).thenReturn("100");
         when(mockResp.getWriter()).thenReturn(mockPrintWriter);
-        Mockito.doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                String written = (String) invocation.getArguments()[0];
-                if (written.contains("ping")) {
-                    buffer.append(INTERJECTED_CHARACTER);
-                } else {
-                    // slow down the append to increase chances to interleave
-                    for (int i = 0; i < written.length(); i++) {
-                        Thread.sleep(5);
-                        buffer.append(written.charAt(i));
-                    }
+        Mockito.doAnswer(invocation -> {
+            String written = (String) invocation.getArguments()[0];
+            if (written.contains("ping")) {
+                buffer.append(INTERJECTED_CHARACTER);
+            } else {
+                // slow down the append to increase chances to interleave
+                for (int i = 0; i < written.length(); i++) {
+                    Thread.sleep(5);
+                    buffer.append(written.charAt(i));
                 }
-                return null;
             }
+            return null;
         }).when(mockPrintWriter).print(Mockito.anyString());
 
-        Runnable simulateClient = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    servlet.doGet(mockReq, mockResp);
-                } catch (ServletException ex) {
-                    fail(ex.getMessage());
-                } catch (IOException ex) {
-                    fail(ex.getMessage());
-                }
+        Runnable simulateClient = () -> {
+            try {
+                servlet.doGet(mockReq, mockResp);
+            } catch (ServletException ex) {
+                fail(ex.getMessage());
+            } catch (IOException ex) {
+                fail(ex.getMessage());
             }
         };
 
@@ -146,20 +138,15 @@ public class HystrixSampleSseServletTest {
 
     private static class TestHystrixConfigSseServlet extends HystrixSampleSseServlet {
 
-        private static AtomicInteger concurrentConnections = new AtomicInteger(0);
-        private static DynamicIntProperty maxConcurrentConnections = DynamicPropertyFactory.getInstance().getIntProperty("hystrix.config.stream.maxConcurrentConnections", 5);
+        private static final AtomicInteger concurrentConnections = new AtomicInteger();
+        private static final DynamicIntProperty maxConcurrentConnections = DynamicPropertyFactory.getInstance().getIntProperty("hystrix.config.stream.maxConcurrentConnections", 5);
 
         public TestHystrixConfigSseServlet() {
             this(HystrixConfigurationStream.getInstance().observe(), DEFAULT_PAUSE_POLLER_THREAD_DELAY_IN_MS);
         }
 
         TestHystrixConfigSseServlet(Observable<HystrixConfiguration> sampleStream, int pausePollerThreadDelayInMs) {
-            super(sampleStream.map(new Func1<HystrixConfiguration, String>() {
-                @Override
-                public String call(HystrixConfiguration hystrixConfiguration) {
-                    return "{}";
-                }
-            }), pausePollerThreadDelayInMs);
+            super(sampleStream.map(hystrixConfiguration -> "{}"), pausePollerThreadDelayInMs);
         }
 
         @Override

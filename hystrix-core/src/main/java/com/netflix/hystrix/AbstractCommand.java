@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-abstract class AbstractCommand<R> implements HystrixInvokableInfo<R>, HystrixObservable<R> {
+abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObservable<R> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
     protected final HystrixCircuitBreaker circuitBreaker;
     protected final HystrixThreadPool threadPool;
@@ -139,13 +139,13 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo<R>, HystrixObs
     protected static ConcurrentMap<HystrixCommandKey, Boolean> commandContainsFallback = new ConcurrentHashMap<>();
 
     static String getDefaultNameFromClass(Class<?> cls) {
-        String fromCache = defaultNameCache.get(cls);
+        var fromCache = defaultNameCache.get(cls);
         if (fromCache != null) {
             return fromCache;
         }
         // generate the default
         // default HystrixCommandKey to use if the method is not overridden
-        String name = cls.getSimpleName();
+        var name = cls.getSimpleName();
         if (name.isEmpty()) {
             // we don't have a SimpleName (anonymous inner class) so use the full class name
             name = cls.getName();
@@ -194,7 +194,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo<R>, HystrixObs
 
     private static HystrixCommandKey initCommandKey(final HystrixCommandKey fromConstructor, Class<?> clazz) {
         if (fromConstructor == null || fromConstructor.name().isBlank()) {
-            final String keyName = getDefaultNameFromClass(clazz);
+            final var keyName = getDefaultNameFromClass(clazz);
             return HystrixCommandKey.Factory.asKey(keyName);
         } else {
             return fromConstructor;

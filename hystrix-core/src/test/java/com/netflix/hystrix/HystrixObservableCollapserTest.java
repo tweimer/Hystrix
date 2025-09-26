@@ -114,7 +114,7 @@ public class HystrixObservableCollapserTest {
 
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
 
-        Iterator<HystrixInvokableInfo<?>> cmdIterator = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator();
+        Iterator<HystrixInvokableInfo> cmdIterator = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator();
         assertEquals(2, cmdIterator.next().getNumberCollapsed());
     }
 
@@ -696,7 +696,7 @@ public class HystrixObservableCollapserTest {
         HystrixCollapserMetrics metrics = collapser1.getMetrics();
         assertSame(metrics, collapser2.getMetrics());
 
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
         assertEquals(1, command.getNumberCollapsed()); //1 should have been removed from batch
     }
 
@@ -780,7 +780,7 @@ public class HystrixObservableCollapserTest {
         HystrixCollapserMetrics metrics = collapser1.getMetrics();
         assertSame(metrics, collapser2.getMetrics());
 
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
         assertEquals(1, command.getNumberCollapsed()); //1 should have been removed from batch
     }
 
@@ -940,7 +940,7 @@ public class HystrixObservableCollapserTest {
         System.out.println("ReqLog : " + HystrixRequestLog.getCurrentRequest().getExecutedCommandsAsString());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
 
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
         assertCommandExecutionEvents(command, HystrixEventType.EMIT, HystrixEventType.SUCCESS, HystrixEventType.COLLAPSED);
         assertEquals(1, command.getNumberCollapsed()); //should only be 1 collapsed - other came from cache, then was cancelled
     }
@@ -1022,7 +1022,7 @@ public class HystrixObservableCollapserTest {
         System.out.println("ReqLog : " + HystrixRequestLog.getCurrentRequest().getExecutedCommandsAsString());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
 
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
         assertCommandExecutionEvents(command, HystrixEventType.EMIT, HystrixEventType.SUCCESS, HystrixEventType.COLLAPSED);
         assertEquals(1, command.getNumberCollapsed()); //should only be 1 collapsed - other came from cache, then was cancelled
     }
@@ -1138,7 +1138,7 @@ public class HystrixObservableCollapserTest {
         System.out.println("ReqLog : " + HystrixRequestLog.getCurrentRequest().getExecutedCommandsAsString());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
 
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().iterator().next();
         assertCommandExecutionEvents(command, HystrixEventType.EMIT, HystrixEventType.SUCCESS, HystrixEventType.COLLAPSED);
         assertEquals(1, command.getNumberCollapsed()); //should only be 1 collapsed - other came from cache, then was cancelled
     }
@@ -1409,7 +1409,7 @@ public class HystrixObservableCollapserTest {
         assertEquals(NUM - 1, numErrors.get());
     }
 
-    protected void assertCommandExecutionEvents(HystrixInvokableInfo<?> command, HystrixEventType... expectedEventTypes) {
+    protected void assertCommandExecutionEvents(HystrixInvokableInfo command, HystrixEventType... expectedEventTypes) {
         boolean emitExpected = false;
         int expectedEmitCount = 0;
 

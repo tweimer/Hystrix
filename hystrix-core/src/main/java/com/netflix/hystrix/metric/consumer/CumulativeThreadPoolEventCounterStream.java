@@ -59,7 +59,7 @@ public class CumulativeThreadPoolEventCounterStream extends BucketedCumulativeCo
             return initialStream;
         } else {
             synchronized (CumulativeThreadPoolEventCounterStream.class) {
-                CumulativeThreadPoolEventCounterStream existingStream = streams.get(threadPoolKey.name());
+                var existingStream = streams.get(threadPoolKey.name());
                 if (existingStream == null) {
                     CumulativeThreadPoolEventCounterStream newStream =
                             new CumulativeThreadPoolEventCounterStream(threadPoolKey, numBuckets, bucketSizeInMs,

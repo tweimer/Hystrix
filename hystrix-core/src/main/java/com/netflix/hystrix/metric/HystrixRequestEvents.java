@@ -27,20 +27,20 @@ import java.util.List;
 import java.util.Map;
 
 public class HystrixRequestEvents {
-    private final Collection<HystrixInvokableInfo<?>> executions;
+    private final Collection<HystrixInvokableInfo> executions;
 
-    public HystrixRequestEvents(Collection<HystrixInvokableInfo<?>> executions) {
+    public HystrixRequestEvents(Collection<HystrixInvokableInfo> executions) {
         this.executions = executions;
     }
 
-    public Collection<HystrixInvokableInfo<?>> getExecutions() {
+    public Collection<HystrixInvokableInfo> getExecutions() {
         return executions;
     }
 
     public Map<ExecutionSignature, List<Integer>> getExecutionsMappedToLatencies() {
         Map<CommandAndCacheKey, Integer> cachingDetector = new HashMap<>();
-        List<HystrixInvokableInfo<?>> nonCachedExecutions = new ArrayList<>(executions.size());
-        for (HystrixInvokableInfo<?> execution: executions) {
+        List<HystrixInvokableInfo> nonCachedExecutions = new ArrayList<>(executions.size());
+        for (HystrixInvokableInfo execution: executions) {
             if (execution.getPublicCacheKey() != null) {
                 //eligible for caching - might be the initial, or might be from cache
                 CommandAndCacheKey key = new CommandAndCacheKey(execution.getCommandKey().name(), execution.getPublicCacheKey());
@@ -59,7 +59,7 @@ public class HystrixRequestEvents {
         }
 
         Map<ExecutionSignature, List<Integer>> commandDeduper = new HashMap<>();
-        for (HystrixInvokableInfo<?> execution: nonCachedExecutions) {
+        for (HystrixInvokableInfo execution: nonCachedExecutions) {
             int cachedCount = 0;
             String cacheKey = execution.getPublicCacheKey();
             if (cacheKey != null) {
@@ -141,11 +141,11 @@ public class HystrixRequestEvents {
             this.collapserBatchSize = collapserBatchSize;
         }
 
-        public static ExecutionSignature from(HystrixInvokableInfo<?> execution) {
+        public static ExecutionSignature from(HystrixInvokableInfo execution) {
             return new ExecutionSignature(execution.getCommandKey(), execution.getEventCounts(), null, 0, execution.getOriginatingCollapserKey(), execution.getNumberCollapsed());
         }
 
-        public static ExecutionSignature from(HystrixInvokableInfo<?> execution, String cacheKey, int cachedCount) {
+        public static ExecutionSignature from(HystrixInvokableInfo execution, String cacheKey, int cachedCount) {
             return new ExecutionSignature(execution.getCommandKey(), execution.getEventCounts(), cacheKey, cachedCount, execution.getOriginatingCollapserKey(), execution.getNumberCollapsed());
         }
 

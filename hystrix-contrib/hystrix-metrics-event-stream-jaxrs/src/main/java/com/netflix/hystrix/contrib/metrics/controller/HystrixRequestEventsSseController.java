@@ -54,12 +54,7 @@ public class HystrixRequestEventsSseController extends AbstractHystrixStreamCont
 	private static DynamicIntProperty maxConcurrentConnections = DynamicPropertyFactory.getInstance().getIntProperty("hystrix.config.stream.maxConcurrentConnections", 5);
 
 	public HystrixRequestEventsSseController() {
-		super(HystrixRequestEventsStream.getInstance().observe().map(new Func1<HystrixRequestEvents, String>() {
-			@Override
-			public String call(HystrixRequestEvents requestEvents) {
-				return SerialHystrixRequestEvents.toJsonString(requestEvents);
-			}
-		}));
+		super(HystrixRequestEventsStream.getInstance().observe().map(SerialHystrixRequestEvents::toJsonString));
 	}
 
 	@GET

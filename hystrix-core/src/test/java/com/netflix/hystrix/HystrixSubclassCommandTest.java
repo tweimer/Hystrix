@@ -54,15 +54,15 @@ public class HystrixSubclassCommandTest {
         System.out.println("REQ LOG : " + HystrixRequestLog.getCurrentRequest().getExecutedCommandsAsString());
         HystrixRequestLog reqLog = HystrixRequestLog.getCurrentRequest();
         assertEquals(3, reqLog.getAllExecutedCommands().size());
-        List<HystrixInvokableInfo<?>> infos = new ArrayList<>(reqLog.getAllExecutedCommands());
-        HystrixInvokableInfo<?> info1 = infos.get(0);
+        List<HystrixInvokableInfo> infos = new ArrayList<>(reqLog.getAllExecutedCommands());
+        HystrixInvokableInfo info1 = infos.get(0);
         assertEquals("SuperCommand", info1.getCommandKey().name());
         assertEquals(1, info1.getExecutionEvents().size());
-        HystrixInvokableInfo<?> info2 = infos.get(1);
+        HystrixInvokableInfo info2 = infos.get(1);
         assertEquals("SuperCommand", info2.getCommandKey().name());
         assertEquals(2, info2.getExecutionEvents().size());
         assertEquals(HystrixEventType.RESPONSE_FROM_CACHE, info2.getExecutionEvents().get(1));
-        HystrixInvokableInfo<?> info3 = infos.get(2);
+        HystrixInvokableInfo info3 = infos.get(2);
         assertEquals("SuperCommand", info3.getCommandKey().name());
         assertEquals(1, info3.getExecutionEvents().size());
     }
@@ -78,15 +78,15 @@ public class HystrixSubclassCommandTest {
         System.out.println("REQ LOG : " + HystrixRequestLog.getCurrentRequest().getExecutedCommandsAsString());
         HystrixRequestLog reqLog = HystrixRequestLog.getCurrentRequest();
         assertEquals(3, reqLog.getAllExecutedCommands().size());
-        List<HystrixInvokableInfo<?>> infos = new ArrayList<>(reqLog.getAllExecutedCommands());
-        HystrixInvokableInfo<?> info1 = infos.get(0);
+        List<HystrixInvokableInfo> infos = new ArrayList<>(reqLog.getAllExecutedCommands());
+        HystrixInvokableInfo info1 = infos.get(0);
         assertEquals("SubCommandNoOverride", info1.getCommandKey().name());
         assertEquals(1, info1.getExecutionEvents().size());
-        HystrixInvokableInfo<?> info2 = infos.get(1);
+        HystrixInvokableInfo info2 = infos.get(1);
         assertEquals("SubCommandNoOverride", info2.getCommandKey().name());
         assertEquals(2, info2.getExecutionEvents().size());
         assertEquals(HystrixEventType.RESPONSE_FROM_CACHE, info2.getExecutionEvents().get(1));
-        HystrixInvokableInfo<?> info3 = infos.get(2);
+        HystrixInvokableInfo info3 = infos.get(2);
         assertEquals("SubCommandNoOverride", info3.getCommandKey().name());
         assertEquals(1, info3.getExecutionEvents().size());
     }
@@ -98,7 +98,7 @@ public class HystrixSubclassCommandTest {
         System.out.println("REQ LOG : " + HystrixRequestLog.getCurrentRequest().getExecutedCommandsAsString());
         HystrixRequestLog reqLog = HystrixRequestLog.getCurrentRequest();
         assertEquals(1, reqLog.getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> info = reqLog.getAllExecutedCommands().iterator().next();
+        HystrixInvokableInfo info = reqLog.getAllExecutedCommands().iterator().next();
         assertEquals("SuperCommand", info.getCommandKey().name());
     }
 
@@ -109,7 +109,7 @@ public class HystrixSubclassCommandTest {
         System.out.println("REQ LOG : " + HystrixRequestLog.getCurrentRequest().getExecutedCommandsAsString());
         HystrixRequestLog reqLog = HystrixRequestLog.getCurrentRequest();
         assertEquals(1, reqLog.getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> info = reqLog.getAllExecutedCommands().iterator().next();
+        HystrixInvokableInfo info = reqLog.getAllExecutedCommands().iterator().next();
         assertEquals("SubCommandNoOverride", info.getCommandKey().name());
     }
 

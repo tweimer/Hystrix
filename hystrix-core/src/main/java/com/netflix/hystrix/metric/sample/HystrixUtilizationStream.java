@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class HystrixUtilizationStream {
     private final int intervalInMilliseconds;
     private final Observable<HystrixUtilization> allUtilizationStream;
-    private final AtomicBoolean isSourceCurrentlySubscribed = new AtomicBoolean(false);
+    private final AtomicBoolean isSourceCurrentlySubscribed = new AtomicBoolean();
 
     private static final DynamicIntProperty dataEmissionIntervalInMs =
             DynamicPropertyFactory.getInstance().getIntProperty("hystrix.stream.utilization.intervalInMilliseconds", 500);

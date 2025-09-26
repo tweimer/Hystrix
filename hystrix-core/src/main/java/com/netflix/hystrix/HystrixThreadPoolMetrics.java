@@ -108,18 +108,17 @@ public class HystrixThreadPoolMetrics extends HystrixMetrics {
         return threadPoolMetrics.getCurrentCompletedTaskCount().intValue() > 0;
     }
 
-    public static final Func2<long[], HystrixCommandCompletion, long[]> appendEventToBucket
-            = (initialCountArray, execution) -> {
-                ExecutionResult.EventCounts eventCounts = execution.getEventCounts();
-                for (HystrixEventType eventType: ALL_COMMAND_EVENT_TYPES) {
-                    long eventCount = eventCounts.getCount(eventType);
-                    HystrixEventType.ThreadPool threadPoolEventType = HystrixEventType.ThreadPool.from(eventType);
-                    if (threadPoolEventType != null) {
-                        initialCountArray[threadPoolEventType.ordinal()] += eventCount;
-                    }
-                }
-                return initialCountArray;
-            };
+    public static final Func2<long[], HystrixCommandCompletion, long[]> appendEventToBucket = (initialCountArray, execution) -> {
+        ExecutionResult.EventCounts eventCounts = execution.getEventCounts();
+        for (HystrixEventType eventType: ALL_COMMAND_EVENT_TYPES) {
+            long eventCount = eventCounts.getCount(eventType);
+            HystrixEventType.ThreadPool threadPoolEventType = HystrixEventType.ThreadPool.from(eventType);
+            if (threadPoolEventType != null) {
+                initialCountArray[threadPoolEventType.ordinal()] += eventCount;
+            }
+        }
+        return initialCountArray;
+    };
 
     public static final Func2<long[], long[], long[]> counterAggregator = (cumulativeEvents, bucketEventCounts) -> {
         for (int i = 0; i < NUMBER_THREADPOOL_EVENT_TYPES; i++) {

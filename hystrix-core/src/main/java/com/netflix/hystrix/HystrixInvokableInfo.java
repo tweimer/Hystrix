@@ -17,7 +17,7 @@ package com.netflix.hystrix;
 
 import java.util.List;
 
-public interface HystrixInvokableInfo<R> {
+public interface HystrixInvokableInfo {
 
     HystrixCommandGroupKey getCommandGroup();
 

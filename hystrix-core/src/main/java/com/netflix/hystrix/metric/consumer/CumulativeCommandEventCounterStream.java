@@ -60,9 +60,9 @@ public class CumulativeCommandEventCounterStream extends BucketedCumulativeCount
             return initialStream;
         } else {
             synchronized (CumulativeCommandEventCounterStream.class) {
-                CumulativeCommandEventCounterStream existingStream = streams.get(commandKey.name());
+                var existingStream = streams.get(commandKey.name());
                 if (existingStream == null) {
-                    CumulativeCommandEventCounterStream newStream = new CumulativeCommandEventCounterStream(commandKey, numBuckets, bucketSizeInMs,
+                    var newStream = new CumulativeCommandEventCounterStream(commandKey, numBuckets, bucketSizeInMs,
                             HystrixCommandMetrics.appendEventToBucket, HystrixCommandMetrics.bucketAggregator);
                     streams.putIfAbsent(commandKey.name(), newStream);
                     return newStream;

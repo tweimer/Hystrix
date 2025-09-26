@@ -71,7 +71,7 @@ public abstract class BasicCommandPropertiesTest extends BasicHystrixTest {
         User u1 = userService.getUser("1", "name: ");
         assertEquals("name: 1", u1.getName());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("GetUserCommand", command.getCommandKey().name());
         assertEquals("UserGroupKey", command.getCommandGroup().name());
@@ -98,7 +98,7 @@ public abstract class BasicCommandPropertiesTest extends BasicHystrixTest {
         User u1 = userService.getUserDefProperties("1", "name: ");
         assertEquals("name: 1", u1.getName());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("getUserDefProperties", command.getCommandKey().name());
         assertEquals("UserService", command.getCommandGroup().name());
@@ -111,7 +111,7 @@ public abstract class BasicCommandPropertiesTest extends BasicHystrixTest {
         User u1 = userService.getUserDefGroupKeyWithSpecificThreadPoolKey("1", "name: ");
         assertEquals("name: 1", u1.getName());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertEquals("getUserDefGroupKeyWithSpecificThreadPoolKey", command.getCommandKey().name());
         assertEquals("UserService", command.getCommandGroup().name());
@@ -124,7 +124,7 @@ public abstract class BasicCommandPropertiesTest extends BasicHystrixTest {
         User u1 = userService.getUsingAllCommandProperties("1", "name: ");
         assertEquals("name: 1", u1.getName());
         assertEquals(1, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
-        HystrixInvokableInfo<?> command = HystrixRequestLog.getCurrentRequest()
+        HystrixInvokableInfo command = HystrixRequestLog.getCurrentRequest()
                 .getAllExecutedCommands().iterator().next();
         assertTrue(command.getExecutionEvents().contains(HystrixEventType.SUCCESS));
         // assert properties
