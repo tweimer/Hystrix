@@ -77,15 +77,18 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
 
     /**
      * The scope of request collapsing.
-     * <ul>
-     * <li>REQUEST: Requests within the scope of a {@link HystrixRequestContext} will be collapsed.
-     * <p>
-     * Typically this means that requests within a single user-request (ie. HTTP request) are collapsed. No interaction with other user requests. 1 queue per user request.
-     * </li>
-     * <li>GLOBAL: Requests from any thread (ie. all HTTP requests) within the JVM will be collapsed. 1 queue for entire app.</li>
-     * </ul>
      */
-    public enum Scope implements RequestCollapserFactory.Scope { REQUEST, GLOBAL }
+    public enum Scope implements RequestCollapserFactory.Scope {
+        /** Requests within the scope of a {@link HystrixRequestContext} will be collapsed.
+         * <p>
+         * Typically this means that requests within a single user-request (ie. HTTP request) are collapsed. No interaction with other user requests. 1 queue per user request.
+         */
+        REQUEST,
+        /**
+         * Requests from any thread (ie. all HTTP requests) within the JVM will be collapsed. 1 queue for entire app.
+         */
+        GLOBAL
+    }
 
     /**
      * Collapser with default {@link HystrixCollapserKey} derived from the implementing class name and scoped to {@link Scope#REQUEST} and default configuration.

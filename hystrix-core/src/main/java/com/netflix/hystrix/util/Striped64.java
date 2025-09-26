@@ -26,6 +26,8 @@ package com.netflix.hystrix.util;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Random;
 
@@ -322,10 +324,8 @@ abstract class Striped64 extends Number {
         try {
             UNSAFE = getUnsafe();
             Class<?> sk = Striped64.class;
-            baseOffset = UNSAFE.objectFieldOffset
-                (sk.getDeclaredField("base"));
-            busyOffset = UNSAFE.objectFieldOffset
-                (sk.getDeclaredField("busy"));
+            baseOffset = UNSAFE.objectFieldOffset(sk.getDeclaredField("base"));
+            busyOffset = UNSAFE.objectFieldOffset(sk.getDeclaredField("busy"));
         } catch (Exception e) {
             throw new Error(e);
         }
@@ -338,18 +338,18 @@ abstract class Striped64 extends Number {
      *
      * @return a sun.misc.Unsafe
      */
-    private static sun.misc.Unsafe getUnsafe() {
+    private static Unsafe getUnsafe() {
         try {
-            return sun.misc.Unsafe.getUnsafe();
+            return Unsafe.getUnsafe();
         } catch (SecurityException se) {
             try {
-                return java.security.AccessController.doPrivileged
+                return AccessController.doPrivileged
                     ((PrivilegedExceptionAction<Unsafe>) () -> {
                         Field f = Unsafe.class.getDeclaredField("theUnsafe");
                         f.setAccessible(true);
                         return (Unsafe) f.get(null);
                     });
-            } catch (java.security.PrivilegedActionException e) {
+            } catch (PrivilegedActionException e) {
                 throw new RuntimeException("Could not initialize intrinsics",
                                            e.getCause());
             }

@@ -42,6 +42,7 @@ public class HystrixCollapserMetrics extends HystrixMetrics {
 
     // String is HystrixCollapserKey.name() (we can't use HystrixCollapserKey directly as we can't guarantee it implements hashcode/equals correctly)
     private static final ConcurrentMap<String, HystrixCollapserMetrics> metrics = new ConcurrentHashMap<>();
+    private static final HystrixEventType.Collapser[] ALL_EVENT_TYPES = HystrixEventType.Collapser.values();
 
     /**
      * Get or create the {@link HystrixCollapserMetrics} instance for a given {@link HystrixCollapserKey}.
@@ -80,7 +81,6 @@ public class HystrixCollapserMetrics extends HystrixMetrics {
         return Collections.unmodifiableCollection(metrics.values());
     }
 
-    private static final HystrixEventType.Collapser[] ALL_EVENT_TYPES = HystrixEventType.Collapser.values();
 
     public static final Func2<long[], HystrixCollapserEvent, long[]> appendEventToBucket = (initialCountArray, collapserEvent) -> {
         var eventType = collapserEvent.getEventType();

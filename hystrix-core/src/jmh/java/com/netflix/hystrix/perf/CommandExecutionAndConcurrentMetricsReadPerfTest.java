@@ -46,7 +46,7 @@ public class CommandExecutionAndConcurrentMetricsReadPerfTest {
 
         @Setup(Level.Invocation)
         public void setUp() {
-            command = new HystrixCommand<Integer>(
+            command = new HystrixCommand<>(
                     HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("PERF"))
                             .andCommandPropertiesDefaults(
                                     HystrixCommandProperties.Setter()

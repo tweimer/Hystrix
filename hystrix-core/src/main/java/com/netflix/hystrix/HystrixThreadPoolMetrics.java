@@ -346,6 +346,6 @@ public class HystrixThreadPoolMetrics extends HystrixMetrics {
     }
 
     public static Func0<Integer> getCurrentConcurrencyThunk(final HystrixThreadPoolKey threadPoolKey) {
-        return () -> HystrixThreadPoolMetrics.getInstance(threadPoolKey).concurrentExecutionCount.get();
+        return HystrixThreadPoolMetrics.getInstance(threadPoolKey).concurrentExecutionCount::get;
     }
 }

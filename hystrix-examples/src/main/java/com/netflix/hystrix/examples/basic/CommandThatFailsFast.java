@@ -22,11 +22,14 @@ import org.junit.Test;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
 /**
  * Sample {@link HystrixCommand} that does not have a fallback implemented
  * so will "fail fast" when failures, rejections, short-circuiting etc occur.
  */
+@RunWith(Enclosed.class)
 public class CommandThatFailsFast extends HystrixCommand<String> {
 
     private final boolean throwException;

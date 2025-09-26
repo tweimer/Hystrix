@@ -50,7 +50,7 @@ public class ConfigurableCodaHaleMetricFilter implements MetricFilter{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurableCodaHaleMetricFilter.class);
 
-    private DynamicPropertyFactory archaiusPropertyFactory;
+    private final DynamicPropertyFactory archaiusPropertyFactory;
 
 
     public ConfigurableCodaHaleMetricFilter(DynamicPropertyFactory archaiusPropertyFactory)

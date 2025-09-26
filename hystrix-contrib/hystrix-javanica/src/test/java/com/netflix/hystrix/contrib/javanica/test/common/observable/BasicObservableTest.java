@@ -60,7 +60,7 @@ public abstract class BasicObservableTest extends BasicHystrixTest {
         // non-blocking
         // - this is a verbose anonymous inner-class approach and doesn't do assertions
         Observable<User> fUser = userService.getUser("1", "name: ");
-        fUser.subscribe(new Observer<User>() {
+        fUser.subscribe(new Observer<>() {
 
             @Override
             public void onCompleted() {
@@ -80,13 +80,7 @@ public abstract class BasicObservableTest extends BasicHystrixTest {
         });
 
         Observable<User> fs = userService.getUser("1", "name: ");
-        fs.subscribe(new Action1<User>() {
-
-            @Override
-            public void call(User user) {
-                assertEquals("name: 1", user.getName());
-            }
-        });
+        fs.subscribe(user -> assertEquals("name: 1", user.getName()));
         assertEquals(3, HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size());
         com.netflix.hystrix.HystrixInvokableInfo getUserCommand = getHystrixCommandByKey("getUser");
         assertTrue(getUserCommand.getExecutionEvents().contains(HystrixEventType.SUCCESS));
@@ -102,12 +96,7 @@ public abstract class BasicObservableTest extends BasicHystrixTest {
     @Test
     public void testGetCompletableUserWithRegularFallback() {
         Completable completable = userService.getCompletableUserWithRegularFallback(null, "name: ");
-        completable.<User>toObservable().subscribe(new Action1<User>() {
-            @Override
-            public void call(User user) {
-                assertEquals("default_id", user.getId());
-            }
-        });
+        completable.<User>toObservable().subscribe(user -> assertEquals("default_id", user.getId()));
         com.netflix.hystrix.HystrixInvokableInfo getUserCommand = getHystrixCommandByKey("getCompletableUserWithRegularFallback");
         assertTrue(getUserCommand.getExecutionEvents().contains(HystrixEventType.FAILURE));
         assertTrue(getUserCommand.getExecutionEvents().contains(HystrixEventType.FALLBACK_SUCCESS));
@@ -116,12 +105,7 @@ public abstract class BasicObservableTest extends BasicHystrixTest {
     @Test
     public void testGetCompletableUserWithRxFallback() {
         Completable completable = userService.getCompletableUserWithRxFallback(null, "name: ");
-        completable.<User>toObservable().subscribe(new Action1<User>() {
-            @Override
-            public void call(User user) {
-                assertEquals("default_id", user.getId());
-            }
-        });
+        completable.<User>toObservable().subscribe(user -> assertEquals("default_id", user.getId()));
         com.netflix.hystrix.HystrixInvokableInfo getUserCommand = getHystrixCommandByKey("getCompletableUserWithRxFallback");
         assertTrue(getUserCommand.getExecutionEvents().contains(HystrixEventType.FAILURE));
         assertTrue(getUserCommand.getExecutionEvents().contains(HystrixEventType.FALLBACK_SUCCESS));
@@ -262,12 +246,7 @@ public abstract class BasicObservableTest extends BasicHystrixTest {
         }
 
         public Completable completableUserRxFallback(final String id, final String name) {
-            return Completable.fromCallable(new Func0<User>() {
-                @Override
-                public User call() {
-                    return new User("default_id", "default_name");
-                }
-            });
+            return Completable.fromCallable(() -> new User("default_id", "default_name"));
         }
 
         @HystrixCommand

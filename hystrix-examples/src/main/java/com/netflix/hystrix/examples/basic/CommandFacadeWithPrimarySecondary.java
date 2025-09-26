@@ -29,11 +29,14 @@ import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixCommandProperties.ExecutionIsolationStrategy;
 import com.netflix.hystrix.HystrixThreadPoolKey;
 import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
 /**
  * Sample {@link HystrixCommand} pattern using a semaphore-isolated command
  * that conditionally invokes thread-isolated commands.
  */
+@RunWith(Enclosed.class)
 public class CommandFacadeWithPrimarySecondary extends HystrixCommand<String> {
 
     private final static DynamicBooleanProperty usePrimary = DynamicPropertyFactory.getInstance().getBooleanProperty("primarySecondary.usePrimary", true);

@@ -34,7 +34,7 @@ public abstract class HystrixCollapserProperties {
     private static final Integer default_maxRequestsInBatch = Integer.MAX_VALUE;
     private static final Integer default_timerDelayInMilliseconds = 10;
     private static final Boolean default_requestCacheEnabled = true;
-    /* package */ static final Integer default_metricsRollingStatisticalWindow = 10000;// default => statisticalWindow: 10000 = 10 seconds (and default of 10 buckets so each bucket is 1 second)
+    static final Integer default_metricsRollingStatisticalWindow = 10000;// default => statisticalWindow: 10000 = 10 seconds (and default of 10 buckets so each bucket is 1 second)
     private static final Integer default_metricsRollingStatisticalWindowBuckets = 10;// default => statisticalWindowBuckets: 10 = 10 buckets in a 10 second window so each bucket is 1 second
     private static final Boolean default_metricsRollingPercentileEnabled = true;
     private static final Integer default_metricsRollingPercentileWindow = 60000; // default to 1 minute for RollingPercentile
@@ -212,16 +212,16 @@ public abstract class HystrixCollapserProperties {
      * @NotThreadSafe
      */
     public static class Setter {
-        @Deprecated private Boolean collapsingEnabled = null;
-        private Integer maxRequestsInBatch = null;
-        private Integer timerDelayInMilliseconds = null;
-        private Boolean requestCacheEnabled = null;
-        private Integer metricsRollingStatisticalWindowInMilliseconds = null;
-        private Integer metricsRollingStatisticalWindowBuckets = null;
-        private Integer metricsRollingPercentileBucketSize = null;
-        private Boolean metricsRollingPercentileEnabled = null;
-        private Integer metricsRollingPercentileWindowInMilliseconds = null;
-        private Integer metricsRollingPercentileWindowBuckets = null;
+        @Deprecated private Boolean collapsingEnabled;
+        private Integer maxRequestsInBatch;
+        private Integer timerDelayInMilliseconds;
+        private Boolean requestCacheEnabled;
+        private Integer metricsRollingStatisticalWindowInMilliseconds;
+        private Integer metricsRollingStatisticalWindowBuckets;
+        private Integer metricsRollingPercentileBucketSize;
+        private Boolean metricsRollingPercentileEnabled;
+        private Integer metricsRollingPercentileWindowInMilliseconds;
+        private Integer metricsRollingPercentileWindowBuckets;
 
         private Setter() {
         }

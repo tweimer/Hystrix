@@ -64,7 +64,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
 
     @Override
     public void initialize() {
-        metricsRegistry.newGauge(createMetricName("isCircuitBreakerOpen"), new Gauge<Boolean>() {
+        metricsRegistry.newGauge(createMetricName("isCircuitBreakerOpen"), new Gauge<>() {
             @Override
             public Boolean value() {
                 return circuitBreaker.isOpen();
@@ -72,7 +72,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
         });
 
         // allow monitor to know exactly at what point in time these stats are for so they can be plotted accurately
-        metricsRegistry.newGauge(createMetricName("currentTime"), new Gauge<Long>() {
+        metricsRegistry.newGauge(createMetricName("currentTime"), new Gauge<>() {
             @Override
             public Long value() {
                 return System.currentTimeMillis();
@@ -80,188 +80,38 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
         });
 
         // cumulative counts
-        safelyCreateCumulativeGauge("countBadRequests", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.BAD_REQUEST;
-            }
-        });
-        safelyCreateCumulativeGauge("countCollapsedRequests", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.COLLAPSED;
-            }
-        });
-        safelyCreateCumulativeGauge("countEmit", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.EMIT;
-            }
-        });
-        safelyCreateCumulativeGauge("countExceptionsThrown", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.EXCEPTION_THROWN;
-            }
-        });
-        safelyCreateCumulativeGauge("countFailure", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FAILURE;
-            }
-        });
-        safelyCreateCumulativeGauge("countFallbackEmit", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FALLBACK_EMIT;
-            }
-        });
-        safelyCreateCumulativeGauge("countFallbackFailure", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FALLBACK_FAILURE;
-            }
-        });
-        safelyCreateCumulativeGauge("countFallbackMissing", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FALLBACK_MISSING;
-            }
-        });
-        safelyCreateCumulativeGauge("countFallbackRejection", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FALLBACK_REJECTION;
-            }
-        });
-        safelyCreateCumulativeGauge("countFallbackSuccess", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FALLBACK_SUCCESS;
-            }
-        });
-        safelyCreateCumulativeGauge("countResponsesFromCache", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.RESPONSE_FROM_CACHE;
-            }
-        });
-        safelyCreateCumulativeGauge("countSemaphoreRejected", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.SEMAPHORE_REJECTED;
-            }
-        });
-        safelyCreateCumulativeGauge("countShortCircuited", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.SHORT_CIRCUITED;
-            }
-        });
-        safelyCreateCumulativeGauge("countSuccess", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.SUCCESS;
-            }
-        });
-        safelyCreateCumulativeGauge("countThreadPoolRejected", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.THREAD_POOL_REJECTED;
-            }
-        });
-        safelyCreateCumulativeGauge("countTimeout", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.TIMEOUT;
-            }
-        });
+        safelyCreateCumulativeGauge("countBadRequests", () -> HystrixEventType.BAD_REQUEST);
+        safelyCreateCumulativeGauge("countCollapsedRequests", () -> HystrixEventType.COLLAPSED);
+        safelyCreateCumulativeGauge("countEmit", () -> HystrixEventType.EMIT);
+        safelyCreateCumulativeGauge("countExceptionsThrown", () -> HystrixEventType.EXCEPTION_THROWN);
+        safelyCreateCumulativeGauge("countFailure", () -> HystrixEventType.FAILURE);
+        safelyCreateCumulativeGauge("countFallbackEmit", () -> HystrixEventType.FALLBACK_EMIT);
+        safelyCreateCumulativeGauge("countFallbackFailure", () -> HystrixEventType.FALLBACK_FAILURE);
+        safelyCreateCumulativeGauge("countFallbackMissing", () -> HystrixEventType.FALLBACK_MISSING);
+        safelyCreateCumulativeGauge("countFallbackRejection", () -> HystrixEventType.FALLBACK_REJECTION);
+        safelyCreateCumulativeGauge("countFallbackSuccess", () -> HystrixEventType.FALLBACK_SUCCESS);
+        safelyCreateCumulativeGauge("countResponsesFromCache", () -> HystrixEventType.RESPONSE_FROM_CACHE);
+        safelyCreateCumulativeGauge("countSemaphoreRejected", () -> HystrixEventType.SEMAPHORE_REJECTED);
+        safelyCreateCumulativeGauge("countShortCircuited", () -> HystrixEventType.SHORT_CIRCUITED);
+        safelyCreateCumulativeGauge("countSuccess", () -> HystrixEventType.SUCCESS);
+        safelyCreateCumulativeGauge("countThreadPoolRejected", () -> HystrixEventType.THREAD_POOL_REJECTED);
+        safelyCreateCumulativeGauge("countTimeout", () -> HystrixEventType.TIMEOUT);
 
         // rolling counts
-        safelyCreateRollingGauge("rollingCountBadRequests", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.BAD_REQUEST;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountCollapsedRequests", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.COLLAPSED;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountExceptionsThrown", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.EXCEPTION_THROWN;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountFailure", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FAILURE;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountFallbackFailure", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FALLBACK_FAILURE;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountFallbackMissing", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FALLBACK_MISSING;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountFallbackRejection", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FALLBACK_REJECTION;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountFallbackSuccess", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.FALLBACK_SUCCESS;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountResponsesFromCache", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.RESPONSE_FROM_CACHE;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountSemaphoreRejected", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.SEMAPHORE_REJECTED;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountShortCircuited", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.SHORT_CIRCUITED;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountSuccess", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.SUCCESS;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountThreadPoolRejected", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.THREAD_POOL_REJECTED;
-            }
-        });
-        safelyCreateRollingGauge("rollingCountTimeout", new Func0<HystrixEventType>() {
-            @Override
-            public HystrixEventType call() {
-                return HystrixEventType.TIMEOUT;
-            }
-        });
+        safelyCreateRollingGauge("rollingCountBadRequests", () -> HystrixEventType.BAD_REQUEST);
+        safelyCreateRollingGauge("rollingCountCollapsedRequests", () -> HystrixEventType.COLLAPSED);
+        safelyCreateRollingGauge("rollingCountExceptionsThrown", () -> HystrixEventType.EXCEPTION_THROWN);
+        safelyCreateRollingGauge("rollingCountFailure", () -> HystrixEventType.FAILURE);
+        safelyCreateRollingGauge("rollingCountFallbackFailure", () -> HystrixEventType.FALLBACK_FAILURE);
+        safelyCreateRollingGauge("rollingCountFallbackMissing", () -> HystrixEventType.FALLBACK_MISSING);
+        safelyCreateRollingGauge("rollingCountFallbackRejection", () -> HystrixEventType.FALLBACK_REJECTION);
+        safelyCreateRollingGauge("rollingCountFallbackSuccess", () -> HystrixEventType.FALLBACK_SUCCESS);
+        safelyCreateRollingGauge("rollingCountResponsesFromCache", () -> HystrixEventType.RESPONSE_FROM_CACHE);
+        safelyCreateRollingGauge("rollingCountSemaphoreRejected", () -> HystrixEventType.SEMAPHORE_REJECTED);
+        safelyCreateRollingGauge("rollingCountShortCircuited", () -> HystrixEventType.SHORT_CIRCUITED);
+        safelyCreateRollingGauge("rollingCountSuccess", () -> HystrixEventType.SUCCESS);
+        safelyCreateRollingGauge("rollingCountThreadPoolRejected", () -> HystrixEventType.THREAD_POOL_REJECTED);
+        safelyCreateRollingGauge("rollingCountTimeout", () -> HystrixEventType.TIMEOUT);
 
         // the number of executionSemaphorePermits in use right now 
         createCurrentValueGauge("executionSemaphorePermitsInUse", currentConcurrentExecutionCountThunk);
@@ -291,7 +141,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
         createTotalLatencyPercentileGauge("latencyTotal_percentile_995", 99.5);
 
         // group
-        metricsRegistry.newGauge(createMetricName("commandGroup"), new Gauge<String>() {
+        metricsRegistry.newGauge(createMetricName("commandGroup"), new Gauge<>() {
             @Override
             public String value() {
                 return commandGroupKey != null ? commandGroupKey.name() : null;
@@ -299,85 +149,85 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
         });
 
         // properties (so the values can be inspected and monitored)
-        metricsRegistry.newGauge(createMetricName("propertyValue_rollingStatisticalWindowInMilliseconds"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_rollingStatisticalWindowInMilliseconds"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.metricsRollingStatisticalWindowInMilliseconds().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerRequestVolumeThreshold"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerRequestVolumeThreshold"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.circuitBreakerRequestVolumeThreshold().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerSleepWindowInMilliseconds"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerSleepWindowInMilliseconds"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.circuitBreakerSleepWindowInMilliseconds().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerErrorThresholdPercentage"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerErrorThresholdPercentage"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.circuitBreakerErrorThresholdPercentage().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerForceOpen"), new Gauge<Boolean>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerForceOpen"), new Gauge<>() {
             @Override
             public Boolean value() {
                 return properties.circuitBreakerForceOpen().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerForceClosed"), new Gauge<Boolean>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_circuitBreakerForceClosed"), new Gauge<>() {
             @Override
             public Boolean value() {
                 return properties.circuitBreakerForceClosed().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_executionTimeoutInMilliseconds"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_executionTimeoutInMilliseconds"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.executionTimeoutInMilliseconds().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_executionIsolationThreadTimeoutInMilliseconds"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_executionIsolationThreadTimeoutInMilliseconds"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.executionTimeoutInMilliseconds().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_executionIsolationStrategy"), new Gauge<String>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_executionIsolationStrategy"), new Gauge<>() {
             @Override
             public String value() {
                 return properties.executionIsolationStrategy().get().name();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_metricsRollingPercentileEnabled"), new Gauge<Boolean>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_metricsRollingPercentileEnabled"), new Gauge<>() {
             @Override
             public Boolean value() {
                 return properties.metricsRollingPercentileEnabled().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_requestCacheEnabled"), new Gauge<Boolean>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_requestCacheEnabled"), new Gauge<>() {
             @Override
             public Boolean value() {
                 return properties.requestCacheEnabled().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_requestLogEnabled"), new Gauge<Boolean>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_requestLogEnabled"), new Gauge<>() {
             @Override
             public Boolean value() {
                 return properties.requestLogEnabled().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_executionIsolationSemaphoreMaxConcurrentRequests"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_executionIsolationSemaphoreMaxConcurrentRequests"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.executionIsolationSemaphoreMaxConcurrentRequests().get();
             }
         });
-        metricsRegistry.newGauge(createMetricName("propertyValue_fallbackIsolationSemaphoreMaxConcurrentRequests"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_fallbackIsolationSemaphoreMaxConcurrentRequests"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.fallbackIsolationSemaphoreMaxConcurrentRequests().get();
@@ -391,7 +241,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
 
     @Deprecated
     protected void createCumulativeCountForEvent(String name, final HystrixRollingNumberEvent event) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Long>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Long value() {
                 return metrics.getCumulativeCount(event);
@@ -400,7 +250,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
     }
 
     protected void createCumulativeGauge(final String name, final HystrixEventType eventType) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Long>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Long value() {
                 return metrics.getCumulativeCount(HystrixRollingNumberEvent.from(eventType));
@@ -409,7 +259,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
     }
 
     protected void safelyCreateCumulativeGauge(final String name, final Func0<HystrixEventType> eventThunk) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Long>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Long value() {
                 try {
@@ -425,7 +275,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
 
     @Deprecated
     protected void createRollingGauge(String name, final HystrixRollingNumberEvent event) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Long>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Long value() {
                 return metrics.getRollingCount(event);
@@ -434,7 +284,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
     }
 
     protected void createRollingGauge(final String name, final HystrixEventType eventType) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Long>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Long value() {
                 return metrics.getRollingCount(HystrixRollingNumberEvent.from(eventType));
@@ -443,7 +293,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
     }
 
     protected void safelyCreateRollingGauge(final String name, final Func0<HystrixEventType> eventThunk) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Long>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Long value() {
                 try {
@@ -458,7 +308,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
     }
 
     protected void createExecutionLatencyMeanGauge(final String name) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Integer>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Integer value() {
                 return metrics.getExecutionTimeMean();
@@ -467,7 +317,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
     }
 
     protected void createExecutionLatencyPercentileGauge(final String name, final double percentile) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Integer>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Integer value() {
                 return metrics.getExecutionTimePercentile(percentile);
@@ -476,7 +326,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
     }
 
     protected void createTotalLatencyMeanGauge(final String name) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Integer>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Integer value() {
                 return metrics.getTotalTimeMean();
@@ -485,7 +335,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
     }
 
     protected void createTotalLatencyPercentileGauge(final String name, final double percentile) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Integer>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Integer value() {
                 return metrics.getTotalTimePercentile(percentile);
@@ -493,21 +343,21 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
         });
     }
 
-    protected final Func0<Integer> currentConcurrentExecutionCountThunk = new Func0<Integer>() {
+    protected final Func0<Integer> currentConcurrentExecutionCountThunk = new Func0<>() {
         @Override
         public Integer call() {
             return metrics.getCurrentConcurrentExecutionCount();
         }
     };
 
-    protected final Func0<Long> rollingMaxConcurrentExecutionCountThunk = new Func0<Long>() {
+    protected final Func0<Long> rollingMaxConcurrentExecutionCountThunk = new Func0<>() {
         @Override
         public Long call() {
             return metrics.getRollingMaxConcurrentExecutions();
         }
     };
 
-    protected final Func0<Integer> errorPercentageThunk = new Func0<Integer>() {
+    protected final Func0<Integer> errorPercentageThunk = new Func0<>() {
         @Override
         public Integer call() {
             return metrics.getHealthCounts().getErrorPercentage();
@@ -515,7 +365,7 @@ public class HystrixYammerMetricsPublisherCommand implements HystrixMetricsPubli
     };
 
     protected void createCurrentValueGauge(final String name, final Func0<Integer> metricToEvaluate) {
-        metricsRegistry.newGauge(createMetricName(name), new Gauge<Integer>() {
+        metricsRegistry.newGauge(createMetricName(name), new Gauge<>() {
             @Override
             public Integer value() {
                 return metricToEvaluate.call();

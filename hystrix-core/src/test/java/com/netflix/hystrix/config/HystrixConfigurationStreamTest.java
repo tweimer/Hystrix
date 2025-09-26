@@ -98,8 +98,8 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
     public void testTwoSubscribersOneUnsubscribes() throws Exception {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
-        final AtomicInteger payloads1 = new AtomicInteger(0);
-        final AtomicInteger payloads2 = new AtomicInteger(0);
+        final AtomicInteger payloads1 = new AtomicInteger();
+        final AtomicInteger payloads2 = new AtomicInteger();
 
         Subscription s1 = stream
                 .observe()
@@ -169,8 +169,8 @@ public class HystrixConfigurationStreamTest extends CommandStreamTest {
     public void testTwoSubscribersBothUnsubscribe() throws Exception {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
-        final AtomicInteger payloads1 = new AtomicInteger(0);
-        final AtomicInteger payloads2 = new AtomicInteger(0);
+        final AtomicInteger payloads1 = new AtomicInteger();
+        final AtomicInteger payloads2 = new AtomicInteger();
 
         Subscription s1 = stream
                 .observe()

@@ -167,11 +167,7 @@ public class CreditCardCommand extends HystrixCommand<CreditCardAuthorizationRes
                 }
             }
 
-            if (Math.random() < 0.8) {
-                return new Result<Transaction>(true);
-            } else {
-                return new Result<Transaction>(false);
-            }
+            return new Result<>(Math.random() < 0.8);
 
         }
     }
@@ -230,8 +226,5 @@ public class CreditCardCommand extends HystrixCommand<CreditCardAuthorizationRes
 
     }
 
-    public static enum TransactionType {
-        AUTH_CAPTURE
-    }
-
+    public enum TransactionType { AUTH_CAPTURE }
 }

@@ -248,8 +248,8 @@ public class HystrixCommandTestWithCustomConcurrencyStrategy {
         }
 
         @Override
-        protected Boolean run() throws Exception {
-            return true;
+        protected Boolean run() {
+            return Boolean.TRUE;
         }
     }
 
@@ -282,10 +282,6 @@ public class HystrixCommandTestWithCustomConcurrencyStrategy {
             } else {
                 //this ignores the HystrixRequestContext
                 return new HystrixRequestVariableDefault<>() {
-                    @Override
-                    public T initialValue() {
-                        return null;
-                    }
 
                     @Override
                     public T get() {

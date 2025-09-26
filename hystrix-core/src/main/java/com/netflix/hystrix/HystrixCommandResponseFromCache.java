@@ -13,7 +13,7 @@ public class HystrixCommandResponseFromCache<R> extends HystrixCachedObservable<
     }
 
     public Observable<R> toObservableWithStateCopiedInto(final AbstractCommand<R> commandToCopyStateInto) {
-        final AtomicBoolean completionLogicRun = new AtomicBoolean(false);
+        final AtomicBoolean completionLogicRun = new AtomicBoolean();
 
         return cachedObservable
                 .doOnError(throwable -> {

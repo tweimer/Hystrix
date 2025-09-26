@@ -26,12 +26,15 @@ import org.junit.Test;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
 /**
  * Sample {@link HystrixCommand} that has a fallback implemented
  * that will "fail silent" when failures, rejections, short-circuiting etc occur
  * by returning an empty List.
  */
+@RunWith(Enclosed.class)
 public class CommandThatFailsSilently extends HystrixCommand<List<String>> {
 
     private final boolean throwException;
@@ -46,7 +49,7 @@ public class CommandThatFailsSilently extends HystrixCommand<List<String>> {
         if (throwException) {
             throw new RuntimeException("failure from CommandThatFailsFast");
         } else {
-            ArrayList<String> values = new ArrayList<String>();
+            ArrayList<String> values = new ArrayList<>();
             values.add("success");
             return values;
         }

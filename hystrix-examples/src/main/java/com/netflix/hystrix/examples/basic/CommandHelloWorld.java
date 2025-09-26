@@ -21,6 +21,8 @@ import java.util.concurrent.Future;
 
 import org.junit.Test;
 
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Action1;
@@ -31,6 +33,7 @@ import com.netflix.hystrix.HystrixCommandGroupKey;
 /**
  * The obligatory "Hello World!" showing a simple implementation of a {@link HystrixCommand}.
  */
+@RunWith(Enclosed.class)
 public class CommandHelloWorld extends HystrixCommand<String> {
 
     private final String name;
@@ -81,7 +84,7 @@ public class CommandHelloWorld extends HystrixCommand<String> {
 
             // non-blocking 
             // - this is a verbose anonymous inner-class approach and doesn't do assertions
-            fWorld.subscribe(new Observer<String>() {
+            fWorld.subscribe(new Observer<>() {
 
                 @Override
                 public void onCompleted() {
@@ -103,14 +106,7 @@ public class CommandHelloWorld extends HystrixCommand<String> {
             // non-blocking
             // - also verbose anonymous inner-class
             // - ignore errors and onCompleted signal
-            fBob.subscribe(new Action1<String>() {
-
-                @Override
-                public void call(String v) {
-                    System.out.println("onNext: " + v);
-                }
-
-            });
+            fBob.subscribe(v -> System.out.println("onNext: " + v));
 
             // non-blocking
             // - using closures in Java 8 would look like this:

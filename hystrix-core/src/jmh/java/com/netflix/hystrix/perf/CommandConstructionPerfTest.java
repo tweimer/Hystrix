@@ -31,10 +31,10 @@ public class CommandConstructionPerfTest {
     @Benchmark
     @BenchmarkMode({Mode.SingleShotTime})
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    public HystrixCommand constructHystrixCommandByGroupKeyOnly() {
-        return new HystrixCommand<Integer>(groupKey) {
+    public HystrixCommand<Integer> constructHystrixCommandByGroupKeyOnly() {
+        return new HystrixCommand<>(groupKey) {
             @Override
-            protected Integer run() throws Exception {
+            protected Integer run() {
                 return 1;
             }
         };

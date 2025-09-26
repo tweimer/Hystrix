@@ -88,15 +88,13 @@ public abstract class HystrixCommandProperties {
     private final HystrixProperty<Boolean> requestLogEnabled; // whether command request logging is enabled.
     private final HystrixProperty<Boolean> requestCacheEnabled; // Whether request caching is enabled.
 
-    /**
-     * Isolation strategy to use when executing a {@link HystrixCommand}.
-     * <p>
-     * <ul>
-     * <li>THREAD: Execute the {@link HystrixCommand#run()} method on a separate thread and restrict concurrent executions using the thread-pool size.</li>
-     * <li>SEMAPHORE: Execute the {@link HystrixCommand#run()} method on the calling thread and restrict concurrent executions using the semaphore permit count.</li>
-     * </ul>
-     */
-    public enum ExecutionIsolationStrategy { THREAD, SEMAPHORE }
+    /** Isolation strategy to use when executing a {@link HystrixCommand}. */
+    public enum ExecutionIsolationStrategy {
+        /** Execute the {@link HystrixCommand#run()} method on a separate thread and restrict concurrent executions using the thread-pool size. */
+        THREAD,
+        /** Execute the {@link HystrixCommand#run()} method on the calling thread and restrict concurrent executions using the semaphore permit count.  */
+        SEMAPHORE
+    }
 
     protected HystrixCommandProperties(HystrixCommandKey key) {
         this(key, new Setter(), "hystrix");

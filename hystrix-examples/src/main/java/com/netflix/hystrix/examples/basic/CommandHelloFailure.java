@@ -23,10 +23,13 @@ import org.junit.Test;
 
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
 /**
  * Sample {@link HystrixCommand} showing a basic fallback implementation.
  */
+@RunWith(Enclosed.class)
 public class CommandHelloFailure extends HystrixCommand<String> {
 
     private final String name;

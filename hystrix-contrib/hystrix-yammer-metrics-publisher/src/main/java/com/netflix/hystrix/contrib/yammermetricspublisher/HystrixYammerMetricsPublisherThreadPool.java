@@ -59,63 +59,63 @@ public class HystrixYammerMetricsPublisherThreadPool implements HystrixMetricsPu
         });
         
         // allow monitor to know exactly at what point in time these stats are for so they can be plotted accurately
-        metricsRegistry.newGauge(createMetricName("currentTime"), new Gauge<Long>() {
+        metricsRegistry.newGauge(createMetricName("currentTime"), new Gauge<>() {
             @Override
             public Long value() {
                 return System.currentTimeMillis();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("threadActiveCount"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("threadActiveCount"), new Gauge<>() {
             @Override
             public Number value() {
                 return metrics.getCurrentActiveCount();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("completedTaskCount"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("completedTaskCount"), new Gauge<>() {
             @Override
             public Number value() {
                 return metrics.getCurrentCompletedTaskCount();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("largestPoolSize"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("largestPoolSize"), new Gauge<>() {
             @Override
             public Number value() {
                 return metrics.getCurrentLargestPoolSize();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("totalTaskCount"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("totalTaskCount"), new Gauge<>() {
             @Override
             public Number value() {
                 return metrics.getCurrentTaskCount();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("queueSize"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("queueSize"), new Gauge<>() {
             @Override
             public Number value() {
                 return metrics.getCurrentQueueSize();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("rollingMaxActiveThreads"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("rollingMaxActiveThreads"), new Gauge<>() {
             @Override
             public Number value() {
                 return metrics.getRollingMaxActiveThreads();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("countThreadsExecuted"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("countThreadsExecuted"), new Gauge<>() {
             @Override
             public Number value() {
                 return metrics.getCumulativeCountThreadsExecuted();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("rollingCountCommandsRejected"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("rollingCountCommandsRejected"), new Gauge<>() {
             @Override
             public Number value() {
                 try {
@@ -127,7 +127,7 @@ public class HystrixYammerMetricsPublisherThreadPool implements HystrixMetricsPu
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("rollingCountThreadsExecuted"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("rollingCountThreadsExecuted"), new Gauge<>() {
             @Override
             public Number value() {
                 return metrics.getRollingCountThreadsExecuted();
@@ -135,42 +135,42 @@ public class HystrixYammerMetricsPublisherThreadPool implements HystrixMetricsPu
         });
 
         // properties
-        metricsRegistry.newGauge(createMetricName("propertyValue_corePoolSize"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_corePoolSize"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.coreSize().get();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("propertyValue_maximumSize"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_maximumSize"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.maximumSize().get();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("propertyValue_actualMaximumSize"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_actualMaximumSize"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.actualMaximumSize();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("propertyValue_keepAliveTimeInMinutes"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_keepAliveTimeInMinutes"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.keepAliveTimeMinutes().get();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("propertyValue_queueSizeRejectionThreshold"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_queueSizeRejectionThreshold"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.queueSizeRejectionThreshold().get();
             }
         });
 
-        metricsRegistry.newGauge(createMetricName("propertyValue_maxQueueSize"), new Gauge<Number>() {
+        metricsRegistry.newGauge(createMetricName("propertyValue_maxQueueSize"), new Gauge<>() {
             @Override
             public Number value() {
                 return properties.maxQueueSize().get();

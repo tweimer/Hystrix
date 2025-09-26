@@ -237,14 +237,14 @@ public abstract class HystrixThreadPoolProperties {
      * @NotThreadSafe
      */
     public static class Setter {
-        private Integer coreSize = null;
-        private Integer maximumSize = null;
-        private Integer keepAliveTimeMinutes = null;
-        private Integer maxQueueSize = null;
-        private Integer queueSizeRejectionThreshold = null;
-        private Boolean allowMaximumSizeToDivergeFromCoreSize = null;
-        private Integer rollingStatisticalWindowInMilliseconds = null;
-        private Integer rollingStatisticalWindowBuckets = null;
+        private Integer coreSize;
+        private Integer maximumSize;
+        private Integer keepAliveTimeMinutes;
+        private Integer maxQueueSize;
+        private Integer queueSizeRejectionThreshold;
+        private Boolean allowMaximumSizeToDivergeFromCoreSize;
+        private Integer rollingStatisticalWindowInMilliseconds;
+        private Integer rollingStatisticalWindowBuckets;
 
         private Setter() {
         }

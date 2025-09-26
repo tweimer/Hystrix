@@ -63,58 +63,17 @@ public class HystrixCodaHaleMetricsPublisherCollapser implements HystrixMetricsP
         });
 
         // cumulative counts
-        safelyCreateCumulativeCountForEvent("countRequestsBatched", new Func0<HystrixRollingNumberEvent>() {
-
-            @Override
-            public HystrixRollingNumberEvent call() {
-                return HystrixRollingNumberEvent.COLLAPSER_REQUEST_BATCHED;
-            }
-        });
-        safelyCreateCumulativeCountForEvent("countBatches", new Func0<HystrixRollingNumberEvent>() {
-
-            @Override
-            public HystrixRollingNumberEvent call() {
-                return HystrixRollingNumberEvent.COLLAPSER_BATCH;
-            }
-        });
-        safelyCreateCumulativeCountForEvent("countResponsesFromCache", new Func0<HystrixRollingNumberEvent>() {
-
-            @Override
-            public HystrixRollingNumberEvent call() {
-                return HystrixRollingNumberEvent.RESPONSE_FROM_CACHE;
-            }
-        });
+        safelyCreateCumulativeCountForEvent("countRequestsBatched", () -> HystrixRollingNumberEvent.COLLAPSER_REQUEST_BATCHED);
+        safelyCreateCumulativeCountForEvent("countBatches", () -> HystrixRollingNumberEvent.COLLAPSER_BATCH);
+        safelyCreateCumulativeCountForEvent("countResponsesFromCache", () -> HystrixRollingNumberEvent.RESPONSE_FROM_CACHE);
 
         // rolling counts
-        safelyCreateRollingCountForEvent("rollingRequestsBatched", new Func0<HystrixRollingNumberEvent>() {
-
-            @Override
-            public HystrixRollingNumberEvent call() {
-                return HystrixRollingNumberEvent.COLLAPSER_REQUEST_BATCHED;
-            }
-        });
-        safelyCreateRollingCountForEvent("rollingBatches", new Func0<HystrixRollingNumberEvent>() {
-
-            @Override
-            public HystrixRollingNumberEvent call() {
-                return HystrixRollingNumberEvent.COLLAPSER_BATCH;
-            }
-        });
-        safelyCreateRollingCountForEvent("rollingCountResponsesFromCache", new Func0<HystrixRollingNumberEvent>() {
-
-            @Override
-            public HystrixRollingNumberEvent call() {
-                return HystrixRollingNumberEvent.RESPONSE_FROM_CACHE;
-            }
-        });
+        safelyCreateRollingCountForEvent("rollingRequestsBatched", () -> HystrixRollingNumberEvent.COLLAPSER_REQUEST_BATCHED);
+        safelyCreateRollingCountForEvent("rollingBatches", () -> HystrixRollingNumberEvent.COLLAPSER_BATCH);
+        safelyCreateRollingCountForEvent("rollingCountResponsesFromCache", () -> HystrixRollingNumberEvent.RESPONSE_FROM_CACHE);
 
         // batch size metrics
-        metricRegistry.register(createMetricName("batchSize_mean"), new Gauge<Integer>() {
-            @Override
-            public Integer getValue() {
-                return metrics.getBatchSizeMean();
-            }
-        });
+        metricRegistry.register(createMetricName("batchSize_mean"), (Gauge<Integer>) metrics::getBatchSizeMean);
         metricRegistry.register(createMetricName("batchSize_percentile_25"), new Gauge<Integer>() {
             @Override
             public Integer getValue() {
