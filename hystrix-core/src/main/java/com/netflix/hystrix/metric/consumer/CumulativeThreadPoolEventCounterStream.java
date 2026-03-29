@@ -48,20 +48,20 @@ public class CumulativeThreadPoolEventCounterStream extends BucketedCumulativeCo
     public static CumulativeThreadPoolEventCounterStream getInstance(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolProperties properties) {
         final int counterMetricWindow = properties.metricsRollingStatisticalWindowInMilliseconds().get();
         final int numCounterBuckets = properties.metricsRollingStatisticalWindowBuckets().get();
-        final int counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
+        final var counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
 
         return getInstance(threadPoolKey, numCounterBuckets, counterBucketSizeInMs);
     }
 
     public static CumulativeThreadPoolEventCounterStream getInstance(HystrixThreadPoolKey threadPoolKey, int numBuckets, int bucketSizeInMs) {
-        CumulativeThreadPoolEventCounterStream initialStream = streams.get(threadPoolKey.name());
+        var initialStream = streams.get(threadPoolKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {
             synchronized (CumulativeThreadPoolEventCounterStream.class) {
                 var existingStream = streams.get(threadPoolKey.name());
                 if (existingStream == null) {
-                    CumulativeThreadPoolEventCounterStream newStream =
+                    var newStream =
                             new CumulativeThreadPoolEventCounterStream(threadPoolKey, numBuckets, bucketSizeInMs,
                                     HystrixThreadPoolMetrics.appendEventToBucket, HystrixThreadPoolMetrics.counterAggregator);
                     streams.putIfAbsent(threadPoolKey.name(), newStream);

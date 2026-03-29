@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class HystrixDashboardStream {
     final int delayInMs;
     final Observable<DashboardData> singleSource;
-    final AtomicBoolean isSourceCurrentlySubscribed = new AtomicBoolean(false);
+    final AtomicBoolean isSourceCurrentlySubscribed = new AtomicBoolean();
 
     private static final DynamicIntProperty dataEmissionIntervalInMs =
             DynamicPropertyFactory.getInstance().getIntProperty("hystrix.stream.dashboard.intervalInMilliseconds", 500);
@@ -49,8 +49,7 @@ public class HystrixDashboardStream {
     }
 
     //The data emission interval is looked up on startup only
-    private static final HystrixDashboardStream INSTANCE =
-            new HystrixDashboardStream(dataEmissionIntervalInMs.get());
+    private static final HystrixDashboardStream INSTANCE = new HystrixDashboardStream(dataEmissionIntervalInMs.get());
 
     public static HystrixDashboardStream getInstance() {
         return INSTANCE;

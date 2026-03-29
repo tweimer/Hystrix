@@ -41,7 +41,7 @@ public class RollingCommandMaxConcurrencyStream extends RollingConcurrencyStream
     public static RollingCommandMaxConcurrencyStream getInstance(HystrixCommandKey commandKey, HystrixCommandProperties properties) {
         final int counterMetricWindow = properties.metricsRollingStatisticalWindowInMilliseconds().get();
         final int numCounterBuckets = properties.metricsRollingStatisticalWindowBuckets().get();
-        final int counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
+        final var counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
 
         return getInstance(commandKey, numCounterBuckets, counterBucketSizeInMs);
     }
@@ -54,7 +54,7 @@ public class RollingCommandMaxConcurrencyStream extends RollingConcurrencyStream
             synchronized (RollingCommandMaxConcurrencyStream.class) {
                 var existingStream = streams.get(commandKey.name());
                 if (existingStream == null) {
-                    RollingCommandMaxConcurrencyStream newStream = new RollingCommandMaxConcurrencyStream(commandKey, numBuckets, bucketSizeInMs);
+                    var newStream = new RollingCommandMaxConcurrencyStream(commandKey, numBuckets, bucketSizeInMs);
                     streams.putIfAbsent(commandKey.name(), newStream);
                     return newStream;
                 } else {

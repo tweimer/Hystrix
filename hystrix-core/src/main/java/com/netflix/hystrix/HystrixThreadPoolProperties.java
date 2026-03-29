@@ -136,8 +136,8 @@ public abstract class HystrixThreadPoolProperties {
      * @return actually configured maximum size of threadpool
      */
     public Integer actualMaximumSize() {
-        final int coreSize = coreSize().get();
-        final int maximumSize = maximumSize().get();
+        final var coreSize = coreSize().get();
+        final var maximumSize = maximumSize().get();
         if (getAllowMaximumSizeToDivergeFromCoreSize().get()) {
             if (coreSize > maximumSize) {
                 return coreSize;

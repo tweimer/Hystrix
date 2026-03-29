@@ -10,7 +10,7 @@ public class HystrixCachedObservable<R> {
     private volatile int outstandingSubscriptions;
 
     protected HystrixCachedObservable(final Observable<R> originalObservable) {
-        ReplaySubject<R> replaySubject = ReplaySubject.create();
+        var replaySubject = ReplaySubject.<R>create();
         this.originalSubscription = originalObservable.subscribe(replaySubject);
 
         this.cachedObservable = replaySubject

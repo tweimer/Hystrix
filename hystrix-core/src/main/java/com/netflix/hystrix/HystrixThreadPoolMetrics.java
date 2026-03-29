@@ -65,11 +65,11 @@ public class HystrixThreadPoolMetrics extends HystrixMetrics {
             return threadPoolMetrics;
         } else {
             synchronized (HystrixThreadPoolMetrics.class) {
-                HystrixThreadPoolMetrics existingMetrics = metrics.get(key.name());
+                var existingMetrics = metrics.get(key.name());
                 if (existingMetrics != null) {
                     return existingMetrics;
                 } else {
-                    HystrixThreadPoolMetrics newThreadPoolMetrics = new HystrixThreadPoolMetrics(key, threadPool, properties);
+                    var newThreadPoolMetrics = new HystrixThreadPoolMetrics(key, threadPool, properties);
                     metrics.putIfAbsent(key.name(), newThreadPoolMetrics);
                     return newThreadPoolMetrics;
                 }
@@ -94,8 +94,8 @@ public class HystrixThreadPoolMetrics extends HystrixMetrics {
      * @return {@code Collection<HystrixThreadPoolMetrics>}
      */
     public static Collection<HystrixThreadPoolMetrics> getInstances() {
-        List<HystrixThreadPoolMetrics> threadPoolMetrics = new ArrayList<>();
-        for (HystrixThreadPoolMetrics tpm: metrics.values()) {
+        var threadPoolMetrics = new ArrayList<HystrixThreadPoolMetrics>();
+        for (var tpm: metrics.values()) {
             if (hasExecutedCommandsOnThread(tpm)) {
                 threadPoolMetrics.add(tpm);
             }
@@ -109,10 +109,10 @@ public class HystrixThreadPoolMetrics extends HystrixMetrics {
     }
 
     public static final Func2<long[], HystrixCommandCompletion, long[]> appendEventToBucket = (initialCountArray, execution) -> {
-        ExecutionResult.EventCounts eventCounts = execution.getEventCounts();
-        for (HystrixEventType eventType: ALL_COMMAND_EVENT_TYPES) {
-            long eventCount = eventCounts.getCount(eventType);
-            HystrixEventType.ThreadPool threadPoolEventType = HystrixEventType.ThreadPool.from(eventType);
+        var eventCounts = execution.getEventCounts();
+        for (var eventType: ALL_COMMAND_EVENT_TYPES) {
+            var eventCount = eventCounts.getCount(eventType);
+            var threadPoolEventType = HystrixEventType.ThreadPool.from(eventType);
             if (threadPoolEventType != null) {
                 initialCountArray[threadPoolEventType.ordinal()] += eventCount;
             }
@@ -121,7 +121,7 @@ public class HystrixThreadPoolMetrics extends HystrixMetrics {
     };
 
     public static final Func2<long[], long[], long[]> counterAggregator = (cumulativeEvents, bucketEventCounts) -> {
-        for (int i = 0; i < NUMBER_THREADPOOL_EVENT_TYPES; i++) {
+        for (var i = 0; i < NUMBER_THREADPOOL_EVENT_TYPES; i++) {
             cumulativeEvents[i] += bucketEventCounts[i];
         }
         return cumulativeEvents;

@@ -32,6 +32,7 @@ import rx.functions.Func2;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,12 +50,9 @@ public class HystrixCommandMetrics extends HystrixMetrics {
     public static final Func2<long[], HystrixCommandCompletion, long[]> appendEventToBucket = (initialCountArray, execution) -> {
         ExecutionResult.EventCounts eventCounts = execution.getEventCounts();
         for (HystrixEventType eventType : ALL_EVENT_TYPES) {
-            switch (eventType) {
-                case EXCEPTION_THROWN:
-                    break; //this is just a sum of other anyway - don't do the work here
-                default:
-                    initialCountArray[eventType.ordinal()] += eventCounts.getCount(eventType);
-                    break;
+            if (Objects.requireNonNull(eventType) != HystrixEventType.EXCEPTION_THROWN) {//this is just a sum of other anyway - don't do the work here
+
+                initialCountArray[eventType.ordinal()] += eventCounts.getCount(eventType);
             }
         }
         return initialCountArray;
@@ -62,15 +60,12 @@ public class HystrixCommandMetrics extends HystrixMetrics {
 
     public static final Func2<long[], long[], long[]> bucketAggregator = (cumulativeEvents, bucketEventCounts) -> {
         for (HystrixEventType eventType : ALL_EVENT_TYPES) {
-            switch (eventType) {
-                case EXCEPTION_THROWN:
-                    for (HystrixEventType exceptionEventType : HystrixEventType.EXCEPTION_PRODUCING_EVENT_TYPES) {
-                        cumulativeEvents[eventType.ordinal()] += bucketEventCounts[exceptionEventType.ordinal()];
-                    }
-                    break;
-                default:
-                    cumulativeEvents[eventType.ordinal()] += bucketEventCounts[eventType.ordinal()];
-                    break;
+            if (Objects.requireNonNull(eventType) == HystrixEventType.EXCEPTION_THROWN) {
+                for (HystrixEventType exceptionEventType : HystrixEventType.EXCEPTION_PRODUCING_EVENT_TYPES) {
+                    cumulativeEvents[eventType.ordinal()] += bucketEventCounts[exceptionEventType.ordinal()];
+                }
+            } else {
+                cumulativeEvents[eventType.ordinal()] += bucketEventCounts[eventType.ordinal()];
             }
         }
         return cumulativeEvents;

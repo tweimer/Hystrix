@@ -44,7 +44,7 @@ public class HystrixCommandStartStream implements HystrixEventStream<HystrixComm
             synchronized (HystrixCommandStartStream.class) {
                 var existingStream = streams.get(commandKey.name());
                 if (existingStream == null) {
-                    HystrixCommandStartStream newStream = new HystrixCommandStartStream(commandKey);
+                    var newStream = new HystrixCommandStartStream(commandKey);
                     streams.putIfAbsent(commandKey.name(), newStream);
                     return newStream;
                 } else {
@@ -57,8 +57,8 @@ public class HystrixCommandStartStream implements HystrixEventStream<HystrixComm
     HystrixCommandStartStream(final HystrixCommandKey commandKey) {
         this.commandKey = commandKey;
 
-        this.writeOnlySubject = new SerializedSubject<>(PublishSubject.create());
-        this.readOnlyStream = writeOnlySubject.share();
+        writeOnlySubject = new SerializedSubject<>(PublishSubject.create());
+        readOnlyStream = writeOnlySubject.share();
     }
 
     public static void reset() {

@@ -78,7 +78,7 @@ public interface HystrixProperty<T> {
          */
         public static <T> HystrixProperty<T> asProperty(final HystrixProperty<T> value, final T defaultValue) {
             return () -> {
-                T v = value.get();
+                var v = value.get();
                 if (v == null) {
                     return defaultValue;
                 } else {
@@ -95,7 +95,7 @@ public interface HystrixProperty<T> {
          */
         public static <T> HystrixProperty<T> asProperty(final HystrixProperty<T>... values) {
             return () -> {
-                for (HystrixProperty<T> v : values) {
+                for (var v : values) {
                     // return the first one that doesn't return null
                     if (v.get() != null) {
                         return v.get();

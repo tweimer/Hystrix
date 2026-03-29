@@ -49,20 +49,20 @@ public class CumulativeCollapserEventCounterStream extends BucketedCumulativeCou
     public static CumulativeCollapserEventCounterStream getInstance(HystrixCollapserKey collapserKey, HystrixCollapserProperties properties) {
         final int counterMetricWindow = properties.metricsRollingStatisticalWindowInMilliseconds().get();
         final int numCounterBuckets = properties.metricsRollingStatisticalWindowBuckets().get();
-        final int counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
+        final var counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
 
         return getInstance(collapserKey, numCounterBuckets, counterBucketSizeInMs);
     }
 
     public static CumulativeCollapserEventCounterStream getInstance(HystrixCollapserKey collapserKey, int numBuckets, int bucketSizeInMs) {
-        CumulativeCollapserEventCounterStream initialStream = streams.get(collapserKey.name());
+        var initialStream = streams.get(collapserKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {
             synchronized (CumulativeCollapserEventCounterStream.class) {
-                CumulativeCollapserEventCounterStream existingStream = streams.get(collapserKey.name());
+                var existingStream = streams.get(collapserKey.name());
                 if (existingStream == null) {
-                    CumulativeCollapserEventCounterStream newStream = new CumulativeCollapserEventCounterStream(collapserKey, numBuckets, bucketSizeInMs, HystrixCollapserMetrics.appendEventToBucket, HystrixCollapserMetrics.bucketAggregator);
+                    var newStream = new CumulativeCollapserEventCounterStream(collapserKey, numBuckets, bucketSizeInMs, HystrixCollapserMetrics.appendEventToBucket, HystrixCollapserMetrics.bucketAggregator);
                     streams.putIfAbsent(collapserKey.name(), newStream);
                     return newStream;
                 } else {

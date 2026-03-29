@@ -58,7 +58,7 @@ public class HystrixTimer {
      * </p>
      */
     public static void reset() {
-        ScheduledExecutor ex = INSTANCE.executor.getAndSet(null);
+        var ex = INSTANCE.executor.getAndSet(null);
         if (ex != null && ex.getThreadPool() != null) {
             ex.getThreadPool().shutdownNow();
         }
@@ -91,15 +91,13 @@ public class HystrixTimer {
         startThreadIfNeeded();
         // add the listener
 
-        Runnable r = () -> {
+        var f = executor.get().getThreadPool().scheduleAtFixedRate(() -> {
             try {
                 listener.tick();
             } catch (Exception e) {
                 logger.error("Failed while ticking TimerListener", e);
             }
-        };
-
-        ScheduledFuture<?> f = executor.get().getThreadPool().scheduleAtFixedRate(r, listener.getIntervalTimeInMilliseconds(), listener.getIntervalTimeInMilliseconds(), TimeUnit.MILLISECONDS);
+        }, listener.getIntervalTimeInMilliseconds(), listener.getIntervalTimeInMilliseconds(), TimeUnit.MILLISECONDS);
         return new TimerReference(listener, f);
     }
 
@@ -145,7 +143,7 @@ public class HystrixTimer {
          */
         public void initialize() {
 
-            HystrixPropertiesStrategy propertiesStrategy = HystrixPlugins.getInstance().getPropertiesStrategy();
+            var propertiesStrategy = HystrixPlugins.getInstance().getPropertiesStrategy();
             int coreSize = propertiesStrategy.getTimerThreadPoolProperties().getCorePoolSize().get();
 
             final ThreadFactory threadFactory;
@@ -155,7 +153,7 @@ public class HystrixTimer {
 
                     @Override
                     public Thread newThread(Runnable r) {
-                        Thread thread = new Thread(r, "HystrixTimer-" + counter.incrementAndGet());
+                        var thread = new Thread(r, "HystrixTimer-" + counter.incrementAndGet());
                         thread.setDaemon(true);
                         return thread;
                     }

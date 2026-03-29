@@ -38,13 +38,13 @@ public class HystrixRequestEvents {
     }
 
     public Map<ExecutionSignature, List<Integer>> getExecutionsMappedToLatencies() {
-        Map<CommandAndCacheKey, Integer> cachingDetector = new HashMap<>();
-        List<HystrixInvokableInfo> nonCachedExecutions = new ArrayList<>(executions.size());
-        for (HystrixInvokableInfo execution: executions) {
+        var cachingDetector = new HashMap<CommandAndCacheKey, Integer>();
+        var nonCachedExecutions = new ArrayList<HystrixInvokableInfo>(executions.size());
+        for (var execution: executions) {
             if (execution.getPublicCacheKey() != null) {
                 //eligible for caching - might be the initial, or might be from cache
-                CommandAndCacheKey key = new CommandAndCacheKey(execution.getCommandKey().name(), execution.getPublicCacheKey());
-                Integer count = cachingDetector.get(key);
+                var key = new CommandAndCacheKey(execution.getCommandKey().name(), execution.getPublicCacheKey());
+                var count = cachingDetector.get(key);
                 if (count != null) {
                     //key already seen
                     cachingDetector.put(key, count + 1);
@@ -58,12 +58,12 @@ public class HystrixRequestEvents {
             }
         }
 
-        Map<ExecutionSignature, List<Integer>> commandDeduper = new HashMap<>();
-        for (HystrixInvokableInfo execution: nonCachedExecutions) {
-            int cachedCount = 0;
-            String cacheKey = execution.getPublicCacheKey();
+        var commandDeduper = new HashMap<ExecutionSignature, List<Integer>>();
+        for (var execution: nonCachedExecutions) {
+            var cachedCount = 0;
+            var cacheKey = execution.getPublicCacheKey();
             if (cacheKey != null) {
-                CommandAndCacheKey key = new CommandAndCacheKey(execution.getCommandKey().name(), cacheKey);
+                var key = new CommandAndCacheKey(execution.getCommandKey().name(), cacheKey);
                 cachedCount = cachingDetector.get(key);
             }
             ExecutionSignature signature;
@@ -74,7 +74,7 @@ public class HystrixRequestEvents {
                 //nothing cached from this, can collapse further
                 signature = ExecutionSignature.from(execution);
             }
-            List<Integer> currentLatencyList = commandDeduper.get(signature);
+            var currentLatencyList = commandDeduper.get(signature);
             if (currentLatencyList != null) {
                 currentLatencyList.add(execution.getExecutionTimeInMilliseconds());
             } else {
@@ -101,7 +101,7 @@ public class HystrixRequestEvents {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            CommandAndCacheKey that = (CommandAndCacheKey) o;
+            var that = (CommandAndCacheKey) o;
 
             if (!commandName.equals(that.commandName)) return false;
             return cacheKey.equals(that.cacheKey);
@@ -110,7 +110,7 @@ public class HystrixRequestEvents {
 
         @Override
         public int hashCode() {
-            int result = commandName.hashCode();
+            var result = commandName.hashCode();
             result = 31 * result + cacheKey.hashCode();
             return result;
         }
@@ -154,7 +154,7 @@ public class HystrixRequestEvents {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            ExecutionSignature that = (ExecutionSignature) o;
+            var that = (ExecutionSignature) o;
 
             if (!commandName.equals(that.commandName)) return false;
             if (!eventCounts.equals(that.eventCounts)) return false;
@@ -164,7 +164,7 @@ public class HystrixRequestEvents {
 
         @Override
         public int hashCode() {
-            int result = commandName.hashCode();
+            var result = commandName.hashCode();
             result = 31 * result + eventCounts.hashCode();
             result = 31 * result + (cacheKey != null ? cacheKey.hashCode() : 0);
             return result;

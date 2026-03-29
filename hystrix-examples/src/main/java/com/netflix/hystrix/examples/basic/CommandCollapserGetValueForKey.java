@@ -57,8 +57,8 @@ public class CommandCollapserGetValueForKey extends HystrixCollapser<List<String
 
     @Override
     protected void mapResponseToRequests(List<String> batchResponse, Collection<CollapsedRequest<String, Integer>> requests) {
-        int count = 0;
-        for (CollapsedRequest<String, Integer> request : requests) {
+        var count = 0;
+        for (var request : requests) {
             request.setResponse(batchResponse.get(count++));
         }
     }
@@ -74,8 +74,8 @@ public class CommandCollapserGetValueForKey extends HystrixCollapser<List<String
 
         @Override
         protected List<String> run() {
-            ArrayList<String> response = new ArrayList<>();
-            for (CollapsedRequest<String, Integer> request : requests) {
+            var response = new ArrayList<String>();
+            for (var request : requests) {
                 // artificial response for each argument received in the batch
                 response.add("ValueForKey: " + request.getArgument());
             }
@@ -87,19 +87,19 @@ public class CommandCollapserGetValueForKey extends HystrixCollapser<List<String
 
         @Test
         public void testCollapser() throws Exception {
-            HystrixRequestContext context = HystrixRequestContext.initializeContext();
+            var context = HystrixRequestContext.initializeContext();
             try {
-                Future<String> f1 = new CommandCollapserGetValueForKey(1).queue();
-                Future<String> f2 = new CommandCollapserGetValueForKey(2).queue();
-                Future<String> f3 = new CommandCollapserGetValueForKey(3).queue();
-                Future<String> f4 = new CommandCollapserGetValueForKey(4).queue();
+                var f1 = new CommandCollapserGetValueForKey(1).queue();
+                var f2 = new CommandCollapserGetValueForKey(2).queue();
+                var f3 = new CommandCollapserGetValueForKey(3).queue();
+                var f4 = new CommandCollapserGetValueForKey(4).queue();
 
                 assertEquals("ValueForKey: 1", f1.get());
                 assertEquals("ValueForKey: 2", f2.get());
                 assertEquals("ValueForKey: 3", f3.get());
                 assertEquals("ValueForKey: 4", f4.get());
 
-                int numExecuted = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size();
+                var numExecuted = HystrixRequestLog.getCurrentRequest().getAllExecutedCommands().size();
 
                 System.err.println("num executed: " + numExecuted);
 
@@ -111,8 +111,8 @@ public class CommandCollapserGetValueForKey extends HystrixCollapser<List<String
 
                 System.err.println("HystrixRequestLog.getCurrentRequest().getAllExecutedCommands(): " + HystrixRequestLog.getCurrentRequest().getAllExecutedCommands());
 
-                int numLogs = 0;
-                for (HystrixInvokableInfo command : HystrixRequestLog.getCurrentRequest().getAllExecutedCommands()) {
+                var numLogs = 0;
+                for (var command : HystrixRequestLog.getCurrentRequest().getAllExecutedCommands()) {
                     numLogs++;
                     
                     // assert the command is the one we're expecting

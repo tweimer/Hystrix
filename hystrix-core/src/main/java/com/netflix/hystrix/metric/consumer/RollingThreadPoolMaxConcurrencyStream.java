@@ -47,15 +47,14 @@ public class RollingThreadPoolMaxConcurrencyStream extends RollingConcurrencyStr
     }
 
     public static RollingThreadPoolMaxConcurrencyStream getInstance(HystrixThreadPoolKey threadPoolKey, int numBuckets, int bucketSizeInMs) {
-        RollingThreadPoolMaxConcurrencyStream initialStream = streams.get(threadPoolKey.name());
+        var initialStream = streams.get(threadPoolKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {
             synchronized (RollingThreadPoolMaxConcurrencyStream.class) {
-                RollingThreadPoolMaxConcurrencyStream existingStream = streams.get(threadPoolKey.name());
+                var existingStream = streams.get(threadPoolKey.name());
                 if (existingStream == null) {
-                    RollingThreadPoolMaxConcurrencyStream newStream =
-                            new RollingThreadPoolMaxConcurrencyStream(threadPoolKey, numBuckets, bucketSizeInMs);
+                    var newStream = new RollingThreadPoolMaxConcurrencyStream(threadPoolKey, numBuckets, bucketSizeInMs);
                     streams.putIfAbsent(threadPoolKey.name(), newStream);
                     return newStream;
                 } else {

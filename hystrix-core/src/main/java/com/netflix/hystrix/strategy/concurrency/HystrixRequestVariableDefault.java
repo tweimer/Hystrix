@@ -75,10 +75,10 @@ public class HystrixRequestVariableDefault<T> implements HystrixRequestVariable<
         if (HystrixRequestContext.getContextForCurrentThread() == null) {
             throw new IllegalStateException(HystrixRequestContext.class.getSimpleName() + ".initializeContext() must be called at the beginning of each request before RequestVariable functionality can be used.");
         }
-        ConcurrentMap<HystrixRequestVariableDefault<?>, LazyInitializer<?>> variableMap = HystrixRequestContext.getContextForCurrentThread().state;
+        var variableMap = HystrixRequestContext.getContextForCurrentThread().state;
 
         // short-circuit the synchronized path below if we already have the value in the ConcurrentHashMap
-        LazyInitializer<?> v = variableMap.get(this);
+        var v = variableMap.get(this);
         if (v != null) {
             return (T) v.get();
         }
@@ -93,8 +93,8 @@ public class HystrixRequestVariableDefault<T> implements HystrixRequestVariable<
          * Whichever instance of LazyInitializer succeeds will then have get() invoked which will call
          * the initialValue() method once-and-only-once.
          */
-        LazyInitializer<T> l = new LazyInitializer<>(this);
-        LazyInitializer<?> existing = variableMap.putIfAbsent(this, l);
+        var l = new LazyInitializer<>(this);
+        var existing = variableMap.putIfAbsent(this, l);
         if (existing == null) {
             /*
              * We won the thread-race so can use 'l' that we just created.
@@ -151,7 +151,7 @@ public class HystrixRequestVariableDefault<T> implements HystrixRequestVariable<
     @SuppressWarnings("unchecked")
     static <T> void remove(HystrixRequestContext context, HystrixRequestVariableDefault<T> v) {
         // remove first so no other threads get it
-        LazyInitializer<?> o = context.state.remove(v);
+        var o = context.state.remove(v);
         if (o != null) {
             // this thread removed it so let's execute shutdown
             v.shutdown((T) o.get());

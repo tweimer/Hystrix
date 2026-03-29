@@ -117,16 +117,11 @@ public abstract class HystrixConcurrencyStrategy {
 
     private static ThreadFactory getThreadFactory(final HystrixThreadPoolKey threadPoolKey) {
         if (!PlatformSpecific.isAppEngineStandardEnvironment()) {
-            return new ThreadFactory() {
-                private final AtomicInteger threadNumber = new AtomicInteger();
-
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r, "hystrix-" + threadPoolKey.name() + "-" + threadNumber.incrementAndGet());
-                    thread.setDaemon(true);
-                    return thread;
-                }
-
+            var threadNumber = new AtomicInteger();
+            return r -> {
+                var thread = new Thread(r, "hystrix-" + threadPoolKey.name() + "-" + threadNumber.incrementAndGet());
+                thread.setDaemon(true);
+                return thread;
             };
         } else {
             return PlatformSpecific.getAppEngineThreadFactory();

@@ -47,11 +47,7 @@ public interface HystrixCollapserKey {
          * @return HystrixCollapserKey instance that is interned (cached) so a given name will always retrieve the same instance.
          */
         public static HystrixCollapserKey asKey(String name) {
-            HystrixCollapserKey k = intern.get(name);
-            if (k == null) {
-                intern.putIfAbsent(name, new HystrixCollapserKeyDefault(name));
-            }
-            return intern.get(name);
+            return intern.computeIfAbsent(name, HystrixCollapserKeyDefault::new);
         }
 
         private static class HystrixCollapserKeyDefault implements HystrixCollapserKey {

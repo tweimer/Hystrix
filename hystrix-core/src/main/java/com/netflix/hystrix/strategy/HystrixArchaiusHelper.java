@@ -38,7 +38,7 @@ class HystrixArchaiusHelper {
         static {
             Method load = null;
             try {
-                Class<?> configManager = Class.forName(CONFIG_MANAGER_CLASS);
+                var configManager = Class.forName(CONFIG_MANAGER_CLASS);
                 load = configManager.getMethod("loadCascadedPropertiesFromResources", String.class);
             } catch (Exception e) {
             }

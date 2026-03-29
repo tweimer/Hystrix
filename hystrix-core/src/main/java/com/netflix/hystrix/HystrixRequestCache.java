@@ -73,19 +73,7 @@ public class HystrixRequestCache {
     }
 
     private static HystrixRequestCache getInstance(RequestCacheKey rcKey, HystrixConcurrencyStrategy concurrencyStrategy) {
-        HystrixRequestCache c = caches.get(rcKey);
-        if (c == null) {
-            HystrixRequestCache newRequestCache = new HystrixRequestCache(rcKey, concurrencyStrategy);
-            HystrixRequestCache existing = caches.putIfAbsent(rcKey, newRequestCache);
-            if (existing == null) {
-                // we won so use the new one
-                c = newRequestCache;
-            } else {
-                // we lost so use the existing
-                c = existing;
-            }
-        }
-        return c;
+        return caches.computeIfAbsent(rcKey, rcKey2 -> new HystrixRequestCache(rcKey, concurrencyStrategy));
     }
 
     /**
@@ -96,7 +84,7 @@ public class HystrixRequestCache {
     // suppressing warnings because we are using a raw Future since it's in a heterogeneous ConcurrentHashMap cache
     @SuppressWarnings({ "unchecked" })
     <T> HystrixCachedObservable<T> get(String cacheKey) {
-        ValueCacheKey key = getRequestCacheKey(cacheKey);
+        var key = getRequestCacheKey(cacheKey);
         if (key != null) {
             var cacheInstance = requestVariableForCache.get(concurrencyStrategy);
             if (cacheInstance == null) {
@@ -123,7 +111,7 @@ public class HystrixRequestCache {
     // suppressing warnings because we are using a raw Future since it's in a heterogeneous ConcurrentHashMap cache
     @SuppressWarnings({ "unchecked" })
     <T> HystrixCachedObservable<T> putIfAbsent(String cacheKey, HystrixCachedObservable<T> f) {
-        ValueCacheKey key = getRequestCacheKey(cacheKey);
+        var key = getRequestCacheKey(cacheKey);
         if (key != null) {
             /* look for the stored value */
             var cacheInstance = requestVariableForCache.get(concurrencyStrategy);
@@ -144,7 +132,7 @@ public class HystrixRequestCache {
      *            key as defined by {@link HystrixCommand#getCacheKey()}
      */
     public void clear(String cacheKey) {
-        ValueCacheKey key = getRequestCacheKey(cacheKey);
+        var key = getRequestCacheKey(cacheKey);
         if (key != null) {
             var cacheInstance = requestVariableForCache.get(concurrencyStrategy);
             if (cacheInstance == null) {

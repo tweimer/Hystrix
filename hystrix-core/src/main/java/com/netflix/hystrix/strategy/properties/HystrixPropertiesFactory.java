@@ -66,10 +66,10 @@ public class HystrixPropertiesFactory {
      * @return {@link HystrixCommandProperties} instance
      */
     public static HystrixCommandProperties getCommandProperties(HystrixCommandKey key, HystrixCommandProperties.Setter builder) {
-        HystrixPropertiesStrategy hystrixPropertiesStrategy = HystrixPlugins.getInstance().getPropertiesStrategy();
-        String cacheKey = hystrixPropertiesStrategy.getCommandPropertiesCacheKey(key, builder);
+        var hystrixPropertiesStrategy = HystrixPlugins.getInstance().getPropertiesStrategy();
+        var cacheKey = hystrixPropertiesStrategy.getCommandPropertiesCacheKey(key, builder);
         if (cacheKey != null) {
-            HystrixCommandProperties properties = commandProperties.get(cacheKey);
+            var properties = commandProperties.get(cacheKey);
             if (properties != null) {
                 return properties;
             } else {
@@ -79,7 +79,7 @@ public class HystrixPropertiesFactory {
                 // create new instance
                 properties = hystrixPropertiesStrategy.getCommandProperties(key, builder);
                 // cache and return
-                HystrixCommandProperties existing = commandProperties.putIfAbsent(cacheKey, properties);
+                var existing = commandProperties.putIfAbsent(cacheKey, properties);
                 if (existing == null) {
                     return properties;
                 } else {
@@ -102,10 +102,10 @@ public class HystrixPropertiesFactory {
      * @return {@link HystrixThreadPoolProperties} instance
      */
     public static HystrixThreadPoolProperties getThreadPoolProperties(HystrixThreadPoolKey key, HystrixThreadPoolProperties.Setter builder) {
-        HystrixPropertiesStrategy hystrixPropertiesStrategy = HystrixPlugins.getInstance().getPropertiesStrategy();
-        String cacheKey = hystrixPropertiesStrategy.getThreadPoolPropertiesCacheKey(key, builder);
+        var hystrixPropertiesStrategy = HystrixPlugins.getInstance().getPropertiesStrategy();
+        var cacheKey = hystrixPropertiesStrategy.getThreadPoolPropertiesCacheKey(key, builder);
         if (cacheKey != null) {
-            HystrixThreadPoolProperties properties = threadPoolProperties.get(cacheKey);
+            var properties = threadPoolProperties.get(cacheKey);
             if (properties != null) {
                 return properties;
             } else {
@@ -115,7 +115,7 @@ public class HystrixPropertiesFactory {
                 // create new instance
                 properties = hystrixPropertiesStrategy.getThreadPoolProperties(key, builder);
                 // cache and return
-                HystrixThreadPoolProperties existing = threadPoolProperties.putIfAbsent(cacheKey, properties);
+                var existing = threadPoolProperties.putIfAbsent(cacheKey, properties);
                 if (existing == null) {
                     return properties;
                 } else {
@@ -138,10 +138,10 @@ public class HystrixPropertiesFactory {
      * @return {@link HystrixCollapserProperties} instance
      */
     public static HystrixCollapserProperties getCollapserProperties(HystrixCollapserKey key, HystrixCollapserProperties.Setter builder) {
-        HystrixPropertiesStrategy hystrixPropertiesStrategy = HystrixPlugins.getInstance().getPropertiesStrategy();
-        String cacheKey = hystrixPropertiesStrategy.getCollapserPropertiesCacheKey(key, builder);
+        var hystrixPropertiesStrategy = HystrixPlugins.getInstance().getPropertiesStrategy();
+        var cacheKey = hystrixPropertiesStrategy.getCollapserPropertiesCacheKey(key, builder);
         if (cacheKey != null) {
-            HystrixCollapserProperties properties = collapserProperties.get(cacheKey);
+            var properties = collapserProperties.get(cacheKey);
             if (properties != null) {
                 return properties;
             } else {
@@ -151,7 +151,7 @@ public class HystrixPropertiesFactory {
                 // create new instance
                 properties = hystrixPropertiesStrategy.getCollapserProperties(key, builder);
                 // cache and return
-                HystrixCollapserProperties existing = collapserProperties.putIfAbsent(cacheKey, properties);
+                var existing = collapserProperties.putIfAbsent(cacheKey, properties);
                 if (existing == null) {
                     return properties;
                 } else {

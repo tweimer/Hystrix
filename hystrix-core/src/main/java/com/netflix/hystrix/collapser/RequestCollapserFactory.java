@@ -103,7 +103,7 @@ public class RequestCollapserFactory<BatchReturnType, ResponseType, RequestArgum
             return (RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType>) collapser;
         }
         // create new collapser using 'this' first instance as the one that will get cached for future executions ('this' is stateless so we can do that)
-        RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType> newCollapser = new RequestCollapser<>(commandCollapser, properties, timer, concurrencyStrategy);
+        var newCollapser = new RequestCollapser<>(commandCollapser, properties, timer, concurrencyStrategy);
         var existing = globalScopedCollapsers.putIfAbsent(collapserKey.name(), newCollapser);
         if (existing == null) {
             // we won
@@ -137,10 +137,10 @@ public class RequestCollapserFactory<BatchReturnType, ResponseType, RequestArgum
      */
     @SuppressWarnings("unchecked")
     private HystrixRequestVariableHolder<RequestCollapser<?, ?, ?>> getRequestVariableForCommand(final HystrixCollapserBridge<BatchReturnType, ResponseType, RequestArgumentType> commandCollapser) {
-        HystrixRequestVariableHolder<RequestCollapser<?, ?, ?>> requestVariable = requestScopedCollapsers.get(commandCollapser.getCollapserKey().name());
+        var requestVariable = requestScopedCollapsers.get(commandCollapser.getCollapserKey().name());
         if (requestVariable == null) {
             // create new collapser using 'this' first instance as the one that will get cached for future executions ('this' is stateless so we can do that)
-            @SuppressWarnings({ "rawtypes" })
+
             HystrixRequestVariableHolder newCollapser = new RequestCollapserRequestVariable(commandCollapser, properties, timer, concurrencyStrategy);
             var existing = requestScopedCollapsers.putIfAbsent(commandCollapser.getCollapserKey().name(), newCollapser);
             if (existing == null) {

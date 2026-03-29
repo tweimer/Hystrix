@@ -103,7 +103,7 @@ public class Hystrix {
      * @return Action0 to perform the same work as `endCurrentThreadExecutingCommand()` but can be done from any thread
      */
     static Action0 startCurrentThreadExecutingCommand(HystrixCommandKey key) {
-        final ConcurrentStack<HystrixCommandKey> list = currentCommand.get();
+        final var list = currentCommand.get();
         try {
             list.push(key);
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class Hystrix {
         AtomicReference<Node<E>> top = new AtomicReference<>();
 
         public void push(E item) {
-            Node<E> newHead = new Node<>(item);
+            var newHead = new Node<>(item);
             Node<E> oldHead;
             do {
                 oldHead = top.get();

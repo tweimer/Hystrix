@@ -71,8 +71,8 @@ public class LongMaxUpdater extends Striped64 implements Serializable {
         Cell[] as; long b, v; HashCode hc; Cell a; int n;
         if ((as = cells) != null ||
             (b = base) < x && !casBase(b, x)) {
-            boolean uncontended = true;
-            int h = (hc = threadHashCode.get()).code;
+            var uncontended = true;
+            var h = (hc = threadHashCode.get()).code;
             if (as == null || (n = as.length) < 1 ||
                 (a = as[(n - 1) & h]) == null ||
                 ((v = a.value) < x && !(uncontended = a.cas(v, x))))
@@ -90,11 +90,11 @@ public class LongMaxUpdater extends Striped64 implements Serializable {
      * @return the maximum
      */
     public long max() {
-        Cell[] as = cells;
-        long max = base;
+        var as = cells;
+        var max = base;
         if (as != null) {
             long v;
-            for (Cell a : as) {
+            for (var a : as) {
                 if (a != null && (v = a.value) > max)
                     max = v;
             }
@@ -125,13 +125,13 @@ public class LongMaxUpdater extends Striped64 implements Serializable {
      * @return the maximum
      */
     public long maxThenReset() {
-        Cell[] as = cells;
-        long max = base;
+        var as = cells;
+        var max = base;
         base = Long.MIN_VALUE;
         if (as != null) {
-            for (Cell a : as) {
+            for (var a : as) {
                 if (a != null) {
-                    long v = a.value;
+                    var v = a.value;
                     a.value = Long.MIN_VALUE;
                     if (v > max)
                         max = v;

@@ -69,7 +69,7 @@ public abstract class HystrixObservableCommand<R> extends AbstractCommand<R> imp
 
     @Override
     protected boolean isFallbackUserDefined() {
-        Boolean containsFromMap = commandContainsFallback.get(commandKey);
+        var containsFromMap = commandContainsFallback.get(commandKey);
         if (containsFromMap != null) {
             return containsFromMap;
         } else {

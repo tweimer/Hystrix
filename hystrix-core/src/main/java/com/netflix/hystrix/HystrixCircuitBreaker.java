@@ -30,7 +30,7 @@ import rx.Subscription;
  * The default (and only) implementation  will then allow a single retry after a defined sleepWindow until the execution
  * succeeds at which point it will again close the circuit and allow executions again.
  */
-public interface HystrixCircuitBreaker {
+public interface  HystrixCircuitBreaker {
 
     /**
      * Every {@link HystrixCommand} requests asks this if it is allowed to proceed or not.  It is idempotent and does

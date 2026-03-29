@@ -97,10 +97,10 @@ public interface HystrixThreadPool {
          */
         static HystrixThreadPool getInstance(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolProperties.Setter propertiesBuilder) {
             // get the key to use instead of using the object itself so that if people forget to implement equals/hashcode things will still work
-            String key = threadPoolKey.name();
+            var key = threadPoolKey.name();
 
             // this should find it for all but the first time
-            HystrixThreadPool previouslyCached = threadPools.get(key);
+            var previouslyCached = threadPools.get(key);
             if (previouslyCached != null) {
                 return previouslyCached;
             }
@@ -120,7 +120,7 @@ public interface HystrixThreadPool {
          * </p>
          */
         static synchronized void shutdown() {
-            for (HystrixThreadPool pool : threadPools.values()) {
+            for (var pool : threadPools.values()) {
                 pool.getExecutor().shutdown();
             }
             threadPools.clear();
@@ -134,10 +134,10 @@ public interface HystrixThreadPool {
          * </p>
          */
         static synchronized void shutdown(long timeout, TimeUnit unit) {
-            for (HystrixThreadPool pool : threadPools.values()) {
+            for (var pool : threadPools.values()) {
                 pool.getExecutor().shutdown();
             }
-            for (HystrixThreadPool pool : threadPools.values()) {
+            for (var pool : threadPools.values()) {
                 try {
                     while (! pool.getExecutor().awaitTermination(timeout, unit)) {
                     }
@@ -164,7 +164,7 @@ public interface HystrixThreadPool {
 
         public HystrixThreadPoolDefault(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolProperties.Setter propertiesDefaults) {
             this.properties = HystrixPropertiesFactory.getThreadPoolProperties(threadPoolKey, propertiesDefaults);
-            HystrixConcurrencyStrategy concurrencyStrategy = HystrixPlugins.getInstance().getConcurrencyStrategy();
+            var concurrencyStrategy = HystrixPlugins.getInstance().getConcurrencyStrategy();
             this.queueSize = properties.maxQueueSize().get();
 
             this.metrics = HystrixThreadPoolMetrics.getInstance(threadPoolKey,
@@ -197,11 +197,11 @@ public interface HystrixThreadPool {
 
         // allow us to change things via fast-properties by setting it each time
         private void touchConfig() {
-            final int dynamicCoreSize = properties.coreSize().get();
-            final int configuredMaximumSize = properties.maximumSize().get();
-            int dynamicMaximumSize = properties.actualMaximumSize();
-            final boolean allowSizesToDiverge = properties.getAllowMaximumSizeToDivergeFromCoreSize().get();
-            boolean maxTooLow = false;
+            final var dynamicCoreSize = properties.coreSize().get();
+            final var configuredMaximumSize = properties.maximumSize().get();
+            var dynamicMaximumSize = properties.actualMaximumSize();
+            final var allowSizesToDiverge = properties.getAllowMaximumSizeToDivergeFromCoreSize().get();
+            var maxTooLow = false;
 
             if (allowSizesToDiverge && configuredMaximumSize < dynamicCoreSize) {
                 //if user sets maximum < core (or defaults get us there), we need to maintain invariant of core <= maximum

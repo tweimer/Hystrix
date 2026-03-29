@@ -243,7 +243,7 @@ public class HystrixRequestLog {
             builder.setLength(0);
             builder.ensureCapacity(estimatedLength);
             for (String displayString : aggregatedCommandsExecuted.keySet()) {
-                if (builder.length() > 0) {
+                if (!builder.isEmpty()) {
                     builder.append(", ");
                 }
                 builder.append(displayString);

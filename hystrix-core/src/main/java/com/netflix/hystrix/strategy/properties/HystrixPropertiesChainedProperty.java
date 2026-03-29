@@ -84,7 +84,7 @@ public abstract class HystrixPropertiesChainedProperty {
                 return;
             }
 
-            if (this.isValueAcceptable()) {
+            if (isValueAcceptable()) {
                 logger.debug("Flipping property: {} to use its current value: {}", getName(), getValue());
                 pReference.set(this);
             } else {
@@ -92,7 +92,7 @@ public abstract class HystrixPropertiesChainedProperty {
                 pReference.set(next);
             }
 
-            for (Runnable r : callbacks) {
+            for (var r : callbacks) {
                 r.run();
             }
         }
@@ -144,10 +144,10 @@ public abstract class HystrixPropertiesChainedProperty {
         public HystrixDynamicProperty<T> build() {
             if (properties.isEmpty()) throw new IllegalArgumentException();
             if (properties.size() == 1) return properties.get(0);
-            List<HystrixDynamicProperty<T>> reversed = new ArrayList<>(properties);
+            var reversed = new ArrayList<>(properties);
             Collections.reverse(reversed);
             ChainProperty<T> current = null;
-            for (HystrixDynamicProperty<T> p : reversed) {
+            for (var p : reversed) {
                 if (current == null) {
                     current = new ChainProperty<>(p);
                 }
@@ -249,10 +249,8 @@ public abstract class HystrixPropertiesChainedProperty {
     
     private static <T> HystrixDynamicProperty<T> 
         getDynamicProperty(String propName, T defaultValue, Class<T> type) {
-        HystrixDynamicProperties properties = HystrixPlugins.getInstance().getDynamicProperties();
-        HystrixDynamicProperty<T> p = 
-                HystrixDynamicProperties.Util.getProperty(properties, propName, defaultValue, type);
-        return p;
+        var properties = HystrixPlugins.getInstance().getDynamicProperties();
+        return HystrixDynamicProperties.Util.getProperty(properties, propName, defaultValue, type);
     }
 
 }

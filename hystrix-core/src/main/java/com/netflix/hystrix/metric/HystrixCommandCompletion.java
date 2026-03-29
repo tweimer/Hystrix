@@ -91,19 +91,19 @@ public class HystrixCommandCompletion extends HystrixCommandEvent {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        List<HystrixEventType> foundEventTypes = new ArrayList<>();
+        var sb = new StringBuilder();
+        var foundEventTypes = new ArrayList<HystrixEventType>();
 
         sb.append(getCommandKey().name()).append("[");
-        for (HystrixEventType eventType: ALL_EVENT_TYPES) {
+        for (var eventType: ALL_EVENT_TYPES) {
             if (executionResult.getEventCounts().contains(eventType)) {
                 foundEventTypes.add(eventType);
             }
         }
-        int i = 0;
+        var i = 0;
         for (HystrixEventType eventType: foundEventTypes) {
             sb.append(eventType.name());
-            int eventCount = executionResult.getEventCounts().getCount(eventType);
+            var eventCount = executionResult.getEventCounts().getCount(eventType);
             if (eventCount > 1) {
                 sb.append("x").append(eventCount);
 

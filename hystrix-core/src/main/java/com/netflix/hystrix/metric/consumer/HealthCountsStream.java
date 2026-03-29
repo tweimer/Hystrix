@@ -49,25 +49,25 @@ public class HealthCountsStream extends BucketedRollingCounterStream<HystrixComm
 
 
     public static HealthCountsStream getInstance(HystrixCommandKey commandKey, HystrixCommandProperties properties) {
-        final int healthCountBucketSizeInMs = properties.metricsHealthSnapshotIntervalInMilliseconds().get();
+        final var healthCountBucketSizeInMs = properties.metricsHealthSnapshotIntervalInMilliseconds().get();
         if (healthCountBucketSizeInMs == 0) {
             throw new RuntimeException("You have set the bucket size to 0ms.  Please set a positive number, so that the metric stream can be properly consumed");
         }
-        final int numHealthCountBuckets = properties.metricsRollingStatisticalWindowInMilliseconds().get() / healthCountBucketSizeInMs;
+        final var numHealthCountBuckets = properties.metricsRollingStatisticalWindowInMilliseconds().get() / healthCountBucketSizeInMs;
 
         return getInstance(commandKey, numHealthCountBuckets, healthCountBucketSizeInMs);
     }
 
     public static HealthCountsStream getInstance(HystrixCommandKey commandKey, int numBuckets, int bucketSizeInMs) {
-        HealthCountsStream initialStream = streams.get(commandKey.name());
+        var initialStream = streams.get(commandKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {
             final HealthCountsStream healthStream;
             synchronized (HealthCountsStream.class) {
-                HealthCountsStream existingStream = streams.get(commandKey.name());
+                var existingStream = streams.get(commandKey.name());
                 if (existingStream == null) {
-                    HealthCountsStream newStream = new HealthCountsStream(commandKey, numBuckets, bucketSizeInMs,
+                    var newStream = new HealthCountsStream(commandKey, numBuckets, bucketSizeInMs,
                             HystrixCommandMetrics.appendEventToBucket);
 
                     streams.putIfAbsent(commandKey.name(), newStream);

@@ -158,13 +158,13 @@ public class HystrixContextScheduler extends Scheduler {
             }
 
             // This is internal RxJava API but it is too useful.
-            ScheduledAction sa = new ScheduledAction(action);
+            var sa = new ScheduledAction(action);
 
             subscription.add(sa);
             sa.addParent(subscription);
 
-            ThreadPoolExecutor executor = (ThreadPoolExecutor) threadPool.getExecutor();
-            FutureTask<?> f = (FutureTask<?>) executor.submit(sa);
+            var executor = (ThreadPoolExecutor) threadPool.getExecutor();
+            var f = (FutureTask<?>) executor.submit(sa);
             sa.add(new FutureCompleterWithConfigurableInterrupt(f, shouldInterruptThread, executor));
 
             return sa;

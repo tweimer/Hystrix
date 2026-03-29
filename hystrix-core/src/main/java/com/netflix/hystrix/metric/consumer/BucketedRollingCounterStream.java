@@ -18,7 +18,6 @@ package com.netflix.hystrix.metric.consumer;
 import com.netflix.hystrix.metric.HystrixEvent;
 import com.netflix.hystrix.metric.HystrixEventStream;
 import rx.Observable;
-import rx.functions.Func1;
 import rx.functions.Func2;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,10 +37,9 @@ public abstract class BucketedRollingCounterStream<Event extends HystrixEvent, B
                                            final Func2<Bucket, Event, Bucket> appendRawEventToBucket,
                                            final Func2<Output, Bucket, Output> reduceBucket) {
         super(stream, numBuckets, bucketSizeInMs, appendRawEventToBucket);
-        Func1<Observable<Bucket>, Observable<Output>> reduceWindowToSummary = window -> window.scan(getEmptyOutputValue(), reduceBucket).skip(numBuckets);
         this.sourceStream = bucketedStream      //stream broken up into buckets
                 .window(numBuckets, 1)          //emit overlapping windows of buckets
-                .flatMap(reduceWindowToSummary) //convert a window of bucket-summaries into a single summary
+                .flatMap(window -> window.scan(getEmptyOutputValue(), reduceBucket).skip(numBuckets)) //convert a window of bucket-summaries into a single summary
                 .doOnSubscribe(() -> isSourceCurrentlySubscribed.set(true))
                 .doOnUnsubscribe(() -> isSourceCurrentlySubscribed.set(false))
                 .share()                        //multiple subscribers should get same data

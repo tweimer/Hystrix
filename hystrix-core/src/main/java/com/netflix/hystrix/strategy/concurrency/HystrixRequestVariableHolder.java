@@ -52,8 +52,8 @@ public class HystrixRequestVariableHolder<T> {
          * 2) If no implementation is found in cache then construct from factory.
          * 3) Cache implementation from factory as each object instance needs to be statically cached to be relevant across threads.
          */
-        RVCacheKey key = new RVCacheKey(this, concurrencyStrategy);
-        HystrixRequestVariable<?> rvInstance = requestVariableInstance.get(key);
+        var key = new RVCacheKey(this, concurrencyStrategy);
+        var rvInstance = requestVariableInstance.get(key);
         if (rvInstance == null) {
             requestVariableInstance.putIfAbsent(key, concurrencyStrategy.getRequestVariable(lifeCycleMethods));
             /*
@@ -81,8 +81,8 @@ public class HystrixRequestVariableHolder<T> {
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
+            final var prime = 31;
+            var result = 1;
             result = prime * result + ((concurrencyStrategy == null) ? 0 : concurrencyStrategy.hashCode());
             result = prime * result + ((rvHolder == null) ? 0 : rvHolder.hashCode());
             return result;
@@ -96,7 +96,7 @@ public class HystrixRequestVariableHolder<T> {
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            RVCacheKey other = (RVCacheKey) obj;
+            var other = (RVCacheKey) obj;
             if (concurrencyStrategy == null) {
                 if (other.concurrencyStrategy != null)
                     return false;

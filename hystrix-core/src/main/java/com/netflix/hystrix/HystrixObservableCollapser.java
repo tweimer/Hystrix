@@ -122,11 +122,11 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
 
     HystrixObservableCollapser(HystrixCollapserKey collapserKey, Scope scope, CollapserTimer timer, HystrixCollapserProperties.Setter propertiesBuilder, HystrixCollapserMetrics metrics) {
         if (collapserKey == null || collapserKey.name().isBlank()) {
-            String defaultKeyName = getDefaultNameFromClass(getClass());
+            var defaultKeyName = getDefaultNameFromClass(getClass());
             collapserKey = HystrixCollapserKey.Factory.asKey(defaultKeyName);
         }
 
-        HystrixCollapserProperties properties = HystrixPropertiesFactory.getCollapserProperties(collapserKey, propertiesBuilder);
+        var properties = HystrixPropertiesFactory.getCollapserProperties(collapserKey, propertiesBuilder);
         this.collapserFactory = new RequestCollapserFactory<>(collapserKey, scope, timer, properties);
         this.requestCache = HystrixRequestCache.getInstance(collapserKey, HystrixPlugins.getInstance().getConcurrencyStrategy());
 
@@ -136,9 +136,7 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
             this.metrics = metrics;
         }
 
-        final HystrixObservableCollapser<K, BatchReturnType, ResponseType, RequestArgumentType> self = this;
-
-           /* strategy: HystrixMetricsPublisherCollapser */
+        /* strategy: HystrixMetricsPublisherCollapser */
         HystrixMetricsPublisherFactory.createOrRetrievePublisherForCollapser(collapserKey, this.metrics, properties);
 
 
@@ -149,26 +147,26 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
 
             @Override
             public Collection<Collection<CollapsedRequest<ResponseType, RequestArgumentType>>> shardRequests(Collection<CollapsedRequest<ResponseType, RequestArgumentType>> requests) {
-                var shards = self.shardRequests(requests);
-                self.metrics.markShards(shards.size());
+                var shards = shardRequests(requests);
+                metrics.markShards(shards.size());
                 return shards;
             }
 
             @Override
             public Observable<BatchReturnType> createObservableCommand(Collection<CollapsedRequest<ResponseType, RequestArgumentType>> requests) {
-                var command = self.createCommand(requests);
+                var command = createCommand(requests);
 
                 // mark the number of requests being collapsed together
                 command.markAsCollapsedCommand(this.getCollapserKey(), requests.size());
-                self.metrics.markBatch(requests.size());
+                metrics.markBatch(requests.size());
                 return command.toObservable();
             }
 
             @Override
             public Observable<Void> mapResponseToRequests(Observable<BatchReturnType> batchResponse, Collection<CollapsedRequest<ResponseType, RequestArgumentType>> requests) {
-                Func1<RequestArgumentType, K> requestKeySelector = self.getRequestArgumentKeySelector();
-                final Func1<BatchReturnType, K> batchResponseKeySelector = self.getBatchReturnTypeKeySelector();
-                final Func1<BatchReturnType, ResponseType> mapBatchTypeToResponseType = self.getBatchReturnTypeToResponseTypeMapper();
+                var requestKeySelector = getRequestArgumentKeySelector();
+                final var batchResponseKeySelector = getBatchReturnTypeKeySelector();
+                final var mapBatchTypeToResponseType = getBatchReturnTypeToResponseTypeMapper();
 
                 // index the requests by key
                 final var requestsByKey = new HashMap<K, CollapsedRequest<ResponseType, RequestArgumentType>>(requests.size());
@@ -220,7 +218,7 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
 
             @Override
             public HystrixCollapserKey getCollapserKey() {
-                return self.getCollapserKey();
+                return getCollapserKey();
             }
 
         };
@@ -384,9 +382,9 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
      */
     public Observable<ResponseType> observe() {
         // use a ReplaySubject to buffer the eagerly subscribed-to Observable
-        ReplaySubject<ResponseType> subject = ReplaySubject.create();
+        final var subject = ReplaySubject.<ResponseType>create();
         // eagerly kick off subscription
-        final Subscription underlyingSubscription = toObservable().subscribe(subject);
+        final var underlyingSubscription = toObservable().subscribe(subject);
         // return the subject that can be subscribed to later while the execution has already started
         return subject.doOnUnsubscribe(underlyingSubscription::unsubscribe);
     }
@@ -484,13 +482,13 @@ public abstract class HystrixObservableCollapser<K, BatchReturnType, ResponseTyp
     }
 
     private static String getDefaultNameFromClass(@SuppressWarnings("rawtypes") Class<? extends HystrixObservableCollapser> cls) {
-        String fromCache = defaultNameCache.get(cls);
+        var fromCache = defaultNameCache.get(cls);
         if (fromCache != null) {
             return fromCache;
         }
         // generate the default
         // default HystrixCommandKey to use if the method is not overridden
-        String name = cls.getSimpleName();
+        var name = cls.getSimpleName();
         if (name.isEmpty()) {
             // we don't have a SimpleName (anonymous inner class) so use the full class name
             name = cls.getName();

@@ -55,7 +55,7 @@ public class HystrixCollapserMetrics extends HystrixMetrics {
      */
     public static HystrixCollapserMetrics getInstance(HystrixCollapserKey key, HystrixCollapserProperties properties) {
         // attempt to retrieve from cache first
-        HystrixCollapserMetrics collapserMetrics = metrics.get(key.name());
+        var collapserMetrics = metrics.get(key.name());
         if (collapserMetrics != null) {
             return collapserMetrics;
         }
@@ -90,7 +90,7 @@ public class HystrixCollapserMetrics extends HystrixMetrics {
     };
 
     public static final Func2<long[], long[], long[]> bucketAggregator = (cumulativeEvents, bucketEventCounts) -> {
-        for (HystrixEventType.Collapser eventType: ALL_EVENT_TYPES) {
+        for (var eventType: ALL_EVENT_TYPES) {
             cumulativeEvents[eventType.ordinal()] += bucketEventCounts[eventType.ordinal()];
         }
         return cumulativeEvents;

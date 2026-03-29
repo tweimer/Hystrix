@@ -44,11 +44,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 class CollapsedRequestSubject<T, R> implements CollapsedRequest<T, R> {
     private final R argument;
 
-    private final AtomicBoolean valueSet = new AtomicBoolean(false);
+    private final AtomicBoolean valueSet = new AtomicBoolean();
     private final ReplaySubject<T> subject = ReplaySubject.create();
     private final Observable<T> subjectWithAccounting;
 
-    private volatile int outstandingSubscriptions = 0;
+    private volatile int outstandingSubscriptions;
 
     public CollapsedRequestSubject(final R arg, final RequestBatch<?, T, R> containingBatch) {
         if (arg == RequestCollapser.NULL_SENTINEL) {

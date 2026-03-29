@@ -61,20 +61,20 @@ public class RollingCommandUserLatencyDistributionStream extends RollingDistribu
     public static RollingCommandUserLatencyDistributionStream getInstance(HystrixCommandKey commandKey, HystrixCommandProperties properties) {
         final int percentileMetricWindow = properties.metricsRollingPercentileWindowInMilliseconds().get();
         final int numPercentileBuckets = properties.metricsRollingPercentileWindowBuckets().get();
-        final int percentileBucketSizeInMs = percentileMetricWindow / numPercentileBuckets;
+        final var percentileBucketSizeInMs = percentileMetricWindow / numPercentileBuckets;
 
         return getInstance(commandKey, numPercentileBuckets, percentileBucketSizeInMs);
     }
 
     public static RollingCommandUserLatencyDistributionStream getInstance(HystrixCommandKey commandKey, int numBuckets, int bucketSizeInMs) {
-        RollingCommandUserLatencyDistributionStream initialStream = streams.get(commandKey.name());
+        var initialStream = streams.get(commandKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {
             synchronized (RollingCommandUserLatencyDistributionStream.class) {
                 var existingStream = streams.get(commandKey.name());
                 if (existingStream == null) {
-                    RollingCommandUserLatencyDistributionStream newStream = new RollingCommandUserLatencyDistributionStream(commandKey, numBuckets, bucketSizeInMs);
+                    var newStream = new RollingCommandUserLatencyDistributionStream(commandKey, numBuckets, bucketSizeInMs);
                     streams.putIfAbsent(commandKey.name(), newStream);
                     return newStream;
                 } else {

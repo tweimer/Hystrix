@@ -46,9 +46,7 @@ public abstract class RollingConcurrencyStream {
     private final BehaviorSubject<Integer> rollingMax = BehaviorSubject.create(0);
     private final Observable<Integer> rollingMaxStream;
 
-    private static final Func2<Integer, Integer, Integer> reduceToMax = Math::max;
-
-    private static final Func1<Observable<Integer>, Observable<Integer>> reduceStreamToMax = observedConcurrency -> observedConcurrency.reduce(0, reduceToMax);
+    private static final Func1<Observable<Integer>, Observable<Integer>> reduceStreamToMax = observedConcurrency -> observedConcurrency.reduce(0, Math::max);
 
     private static final Func1<HystrixCommandExecutionStarted, Integer> getConcurrencyCountFromEvent = HystrixCommandExecutionStarted::getCurrentConcurrency;
 

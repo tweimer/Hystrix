@@ -18,11 +18,13 @@ package com.netflix.hystrix.metric.consumer;
 
 import com.netflix.hystrix.HystrixCollapserKey;
 import com.netflix.hystrix.HystrixCollapserProperties;
+import com.netflix.hystrix.HystrixEventType;
 import com.netflix.hystrix.metric.HystrixCollapserEvent;
 import com.netflix.hystrix.metric.HystrixCollapserEventStream;
 import org.HdrHistogram.Histogram;
 import rx.functions.Func2;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -42,15 +44,11 @@ public class RollingCollapserBatchSizeDistributionStream extends RollingDistribu
     private static final ConcurrentMap<String, RollingCollapserBatchSizeDistributionStream> streams = new ConcurrentHashMap<>();
 
     private static final Func2<Histogram, HystrixCollapserEvent, Histogram> addValuesToBucket = (initialDistribution, event) -> {
-        switch (event.getEventType()) {
-            case ADDED_TO_BATCH:
-                if (event.getCount() > -1) {
-                    initialDistribution.recordValue(event.getCount());
-                }
-                break;
-            default:
-                //do nothing
-                break;
+        //do nothing
+        if (Objects.requireNonNull(event.getEventType()) == HystrixEventType.Collapser.ADDED_TO_BATCH) {
+            if (event.getCount() > -1) {
+                initialDistribution.recordValue(event.getCount());
+            }
         }
         return initialDistribution;
     };

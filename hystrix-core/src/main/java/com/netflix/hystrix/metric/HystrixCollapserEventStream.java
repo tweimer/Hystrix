@@ -37,7 +37,7 @@ public class HystrixCollapserEventStream implements HystrixEventStream<HystrixCo
     private static final ConcurrentMap<String, HystrixCollapserEventStream> streams = new ConcurrentHashMap<>();
 
     public static HystrixCollapserEventStream getInstance(HystrixCollapserKey collapserKey) {
-        HystrixCollapserEventStream initialStream = streams.get(collapserKey.name());
+        var initialStream = streams.get(collapserKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {

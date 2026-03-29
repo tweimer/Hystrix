@@ -115,21 +115,19 @@ public class ExecutionResult {
             int localNumFallbackEmits =  numFallbackEmissions;
             int localNumCollapsed = numCollapsed;
             switch (eventType) {
-                case EMIT:
+                case EMIT -> {
                     newBitSet.set(HystrixEventType.EMIT.ordinal());
                     localNumEmits += count;
-                    break;
-                case FALLBACK_EMIT:
+                }
+                case FALLBACK_EMIT -> {
                     newBitSet.set(HystrixEventType.FALLBACK_EMIT.ordinal());
                     localNumFallbackEmits += count;
-                    break;
-                case COLLAPSED:
+                }
+                case COLLAPSED -> {
                     newBitSet.set(HystrixEventType.COLLAPSED.ordinal());
                     localNumCollapsed += count;
-                    break;
-                default:
-                    newBitSet.set(eventType.ordinal());
-                    break;
+                }
+                default -> newBitSet.set(eventType.ordinal());
             }
             return new EventCounts(newBitSet, localNumEmits, localNumFallbackEmits, localNumCollapsed);
         }
@@ -143,13 +141,13 @@ public class ExecutionResult {
         }
 
         public int getCount(HystrixEventType eventType) {
-            switch (eventType) {
-                case EMIT: return numEmissions;
-                case FALLBACK_EMIT: return numFallbackEmissions;
-                case EXCEPTION_THROWN: return containsAnyOf(EXCEPTION_PRODUCING_EVENTS) ? 1 : 0;
-                case COLLAPSED: return numCollapsed;
-                default: return contains(eventType) ? 1 : 0;
-            }
+            return switch (eventType) {
+                case EMIT -> numEmissions;
+                case FALLBACK_EMIT -> numFallbackEmissions;
+                case EXCEPTION_THROWN -> containsAnyOf(EXCEPTION_PRODUCING_EVENTS) ? 1 : 0;
+                case COLLAPSED -> numCollapsed;
+                default -> contains(eventType) ? 1 : 0;
+            };
         }
 
         @Override

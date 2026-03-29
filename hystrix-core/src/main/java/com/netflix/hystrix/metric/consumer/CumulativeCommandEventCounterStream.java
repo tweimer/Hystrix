@@ -49,13 +49,13 @@ public class CumulativeCommandEventCounterStream extends BucketedCumulativeCount
     public static CumulativeCommandEventCounterStream getInstance(HystrixCommandKey commandKey, HystrixCommandProperties properties) {
         final int counterMetricWindow = properties.metricsRollingStatisticalWindowInMilliseconds().get();
         final int numCounterBuckets = properties.metricsRollingStatisticalWindowBuckets().get();
-        final int counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
+        final var counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
 
         return getInstance(commandKey, numCounterBuckets, counterBucketSizeInMs);
     }
 
     public static CumulativeCommandEventCounterStream getInstance(HystrixCommandKey commandKey, int numBuckets, int bucketSizeInMs) {
-        CumulativeCommandEventCounterStream initialStream = streams.get(commandKey.name());
+        var initialStream = streams.get(commandKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {

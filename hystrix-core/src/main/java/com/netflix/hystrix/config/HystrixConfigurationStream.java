@@ -116,29 +116,29 @@ public class HystrixConfigurationStream {
     }
 
     private static final Func1<Long, Map<HystrixCommandKey, HystrixCommandConfiguration>> getAllCommandConfig = timestamp -> {
-        Map<HystrixCommandKey, HystrixCommandConfiguration> commandConfigPerKey = new HashMap<>();
-        for (HystrixCommandMetrics commandMetrics : HystrixCommandMetrics.getInstances()) {
-            HystrixCommandKey commandKey = commandMetrics.getCommandKey();
-            HystrixThreadPoolKey threadPoolKey = commandMetrics.getThreadPoolKey();
-            HystrixCommandGroupKey groupKey = commandMetrics.getCommandGroup();
+        var commandConfigPerKey = new HashMap<HystrixCommandKey, HystrixCommandConfiguration>();
+        for (var commandMetrics : HystrixCommandMetrics.getInstances()) {
+            var commandKey = commandMetrics.getCommandKey();
+            var threadPoolKey = commandMetrics.getThreadPoolKey();
+            var groupKey = commandMetrics.getCommandGroup();
             commandConfigPerKey.put(commandKey, sampleCommandConfiguration(commandKey, threadPoolKey, groupKey, commandMetrics.getProperties()));
         }
         return commandConfigPerKey;
     };
 
     private static final Func1<Long, Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration>> getAllThreadPoolConfig = timestamp -> {
-        Map<HystrixThreadPoolKey, HystrixThreadPoolConfiguration> threadPoolConfigPerKey = new HashMap<>();
-        for (HystrixThreadPoolMetrics threadPoolMetrics : HystrixThreadPoolMetrics.getInstances()) {
-            HystrixThreadPoolKey threadPoolKey = threadPoolMetrics.getThreadPoolKey();
+        var threadPoolConfigPerKey = new HashMap<HystrixThreadPoolKey, HystrixThreadPoolConfiguration>();
+        for (var threadPoolMetrics : HystrixThreadPoolMetrics.getInstances()) {
+            var threadPoolKey = threadPoolMetrics.getThreadPoolKey();
             threadPoolConfigPerKey.put(threadPoolKey, sampleThreadPoolConfiguration(threadPoolKey, threadPoolMetrics.getProperties()));
         }
         return threadPoolConfigPerKey;
     };
 
     private static final Func1<Long, Map<HystrixCollapserKey, HystrixCollapserConfiguration>> getAllCollapserConfig = timestamp -> {
-        Map<HystrixCollapserKey, HystrixCollapserConfiguration> collapserConfigPerKey = new HashMap<>();
-        for (HystrixCollapserMetrics collapserMetrics: HystrixCollapserMetrics.getInstances()) {
-            HystrixCollapserKey collapserKey = collapserMetrics.getCollapserKey();
+        var collapserConfigPerKey = new HashMap<HystrixCollapserKey, HystrixCollapserConfiguration>();
+        for (var collapserMetrics: HystrixCollapserMetrics.getInstances()) {
+            var collapserKey = collapserMetrics.getCollapserKey();
             collapserConfigPerKey.put(collapserKey, sampleCollapserConfiguration(collapserKey, collapserMetrics.getProperties()));
         }
         return collapserConfigPerKey;

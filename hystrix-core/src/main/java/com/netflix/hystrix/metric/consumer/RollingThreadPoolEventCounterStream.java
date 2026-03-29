@@ -46,9 +46,9 @@ public class RollingThreadPoolEventCounterStream extends BucketedRollingCounterS
     private static final int ALL_EVENT_TYPES_SIZE = HystrixEventType.ThreadPool.values().length;
 
     public static RollingThreadPoolEventCounterStream getInstance(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolProperties properties) {
-        final int counterMetricWindow = properties.metricsRollingStatisticalWindowInMilliseconds().get();
-        final int numCounterBuckets = properties.metricsRollingStatisticalWindowBuckets().get();
-        final int counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
+        final var counterMetricWindow = properties.metricsRollingStatisticalWindowInMilliseconds().get();
+        final var numCounterBuckets = properties.metricsRollingStatisticalWindowBuckets().get();
+        final var counterBucketSizeInMs = counterMetricWindow / numCounterBuckets;
 
         return getInstance(threadPoolKey, numCounterBuckets, counterBucketSizeInMs);
     }

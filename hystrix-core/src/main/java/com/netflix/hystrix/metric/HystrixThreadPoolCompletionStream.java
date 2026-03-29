@@ -38,14 +38,14 @@ public class HystrixThreadPoolCompletionStream implements HystrixEventStream<Hys
     private static final ConcurrentMap<String, HystrixThreadPoolCompletionStream> streams = new ConcurrentHashMap<>();
 
     public static HystrixThreadPoolCompletionStream getInstance(HystrixThreadPoolKey threadPoolKey) {
-        HystrixThreadPoolCompletionStream initialStream = streams.get(threadPoolKey.name());
+        var initialStream = streams.get(threadPoolKey.name());
         if (initialStream != null) {
             return initialStream;
         } else {
             synchronized (HystrixThreadPoolCompletionStream.class) {
-                HystrixThreadPoolCompletionStream existingStream = streams.get(threadPoolKey.name());
+                var existingStream = streams.get(threadPoolKey.name());
                 if (existingStream == null) {
-                    HystrixThreadPoolCompletionStream newStream = new HystrixThreadPoolCompletionStream(threadPoolKey);
+                    var newStream = new HystrixThreadPoolCompletionStream(threadPoolKey);
                     streams.putIfAbsent(threadPoolKey.name(), newStream);
                     return newStream;
                 } else {

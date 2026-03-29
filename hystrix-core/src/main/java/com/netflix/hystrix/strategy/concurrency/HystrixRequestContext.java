@@ -77,12 +77,12 @@ public class HystrixRequestContext implements Closeable {
     private static final ThreadLocal<HystrixRequestContext> requestVariables = new ThreadLocal<>();
 
     public static boolean isCurrentThreadInitialized() {
-        HystrixRequestContext context = requestVariables.get();
+        var context = requestVariables.get();
         return context != null && context.state != null;
     }
 
     public static HystrixRequestContext getContextForCurrentThread() {
-        HystrixRequestContext context = requestVariables.get();
+        var context = requestVariables.get();
         if (context != null && context.state != null) {
             // context.state can be null when context is not null
             // if a thread is being re-used and held a context previously, the context was shut down
@@ -107,7 +107,7 @@ public class HystrixRequestContext implements Closeable {
      * See class header JavaDoc for example Servlet Filter implementation that initializes and shuts down the context.
      */
     public static HystrixRequestContext initializeContext() {
-        HystrixRequestContext state = new HystrixRequestContext();
+        var state = new HystrixRequestContext();
         requestVariables.set(state);
         return state;
     }
@@ -131,7 +131,7 @@ public class HystrixRequestContext implements Closeable {
      */
     public void shutdown() {
         if (state != null) {
-            for (HystrixRequestVariableDefault<?> v : state.keySet()) {
+            for (var v : state.keySet()) {
                 // for each RequestVariable we call 'remove' which performs the shutdown logic
                 try {
                     HystrixRequestVariableDefault.remove(this, v);

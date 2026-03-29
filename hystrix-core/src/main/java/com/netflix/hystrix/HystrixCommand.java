@@ -424,17 +424,13 @@ public abstract class HystrixCommand<R> extends AbstractCommand<R> implements Hy
                 Throwable t = decomposeException(e);
                 if (t instanceof HystrixBadRequestException) {
                     return f;
-                } else if (t instanceof HystrixRuntimeException) {
-                    HystrixRuntimeException hre = (HystrixRuntimeException) t;
-                    switch (hre.getFailureType()) {
-					case COMMAND_EXCEPTION:
-					case TIMEOUT:
-						// we don't throw these types from queue() only from queue().get() as they are execution errors
-						return f;
-					default:
-						// these are errors we throw from queue() as they as rejection type errors
-						throw hre;
-					}
+                } else if (t instanceof HystrixRuntimeException hre) {
+                    // these are errors we throw from queue() as they as rejection type errors
+                    return switch (hre.getFailureType()) {
+                        // we don't throw these types from queue() only from queue().get() as they are execution errors
+                        case COMMAND_EXCEPTION, TIMEOUT -> f;
+                        default -> throw hre;
+                    };
                 } else {
                     throw Exceptions.sneakyThrow(t);
                 }

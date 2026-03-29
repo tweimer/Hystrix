@@ -61,8 +61,8 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
 
     protected RollingDistributionStream(final HystrixEventStream<Event> stream, final int numBuckets, final int bucketSizeInMs,
                                         final Func2<Histogram, Event, Histogram> addValuesToBucket) {
-        final List<Histogram> emptyDistributionsToStart = new ArrayList<>();
-        for (int i = 0; i < numBuckets; i++) {
+        final var emptyDistributionsToStart = new ArrayList<Histogram>();
+        for (var i = 0; i < numBuckets; i++) {
             emptyDistributionsToStart.add(CachedValuesHistogram.getNewHistogram());
         }
 
@@ -83,7 +83,7 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
     }
 
     public int getLatestMean() {
-        CachedValuesHistogram latest = getLatest();
+        var latest = getLatest();
         if (latest != null) {
             return latest.getMean();
         } else {
@@ -92,7 +92,7 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
     }
 
     public int getLatestPercentile(double percentile) {
-        CachedValuesHistogram latest = getLatest();
+        var latest = getLatest();
         if (latest != null) {
             return latest.getValueAtPercentile(percentile);
         } else {
@@ -103,7 +103,7 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
     public void startCachingStreamValuesIfUnstarted() {
         if (rollingDistributionSubscription.get() == null) {
             //the stream is not yet started
-            Subscription candidateSubscription = observe().subscribe(rollingDistribution);
+            var candidateSubscription = observe().subscribe(rollingDistribution);
             if (rollingDistributionSubscription.compareAndSet(null, candidateSubscription)) {
                 //won the race to set the subscription
             } else {
@@ -123,7 +123,7 @@ public class RollingDistributionStream<Event extends HystrixEvent> {
     }
 
     public void unsubscribe() {
-        Subscription s = rollingDistributionSubscription.get();
+        var s = rollingDistributionSubscription.get();
         if (s != null) {
             s.unsubscribe();
             rollingDistributionSubscription.compareAndSet(s, null);

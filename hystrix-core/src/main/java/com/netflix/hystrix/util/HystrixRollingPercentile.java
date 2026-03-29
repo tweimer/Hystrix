@@ -141,7 +141,7 @@ public class HystrixRollingPercentile {
         if (!enabled.get())
             return;
 
-        for (int v : value) {
+        for (var v : value) {
             try {
                 getCurrentBucket().data.addValue(v);
             } catch (Exception e) {
@@ -202,7 +202,7 @@ public class HystrixRollingPercentile {
     private final ReentrantLock newBucketLock = new ReentrantLock();
 
     private Bucket getCurrentBucket() {
-        long currentTime = time.getCurrentTimeInMillis();
+        var currentTime = time.getCurrentTimeInMillis();
 
         /* a shortcut to try and get the most common result of immediately finding the current bucket */
 
@@ -211,7 +211,7 @@ public class HystrixRollingPercentile {
          * 
          * NOTE: This is thread-safe because it's accessing 'buckets' which is a LinkedBlockingDeque
          */
-        Bucket currentBucket = buckets.peekLast();
+        var currentBucket = buckets.peekLast();
         if (currentBucket != null && currentTime < currentBucket.windowStart + this.bucketSizeInMilliseconds) {
             // if we're within the bucket 'window of time' return the current one
             // NOTE: We do not worry if we are BEFORE the window in a weird case of where thread scheduling causes that to occur,
@@ -247,15 +247,15 @@ public class HystrixRollingPercentile {
             try {
                 if (buckets.peekLast() == null) {
                     // the list is empty so create the first bucket
-                    Bucket newBucket = new Bucket(currentTime, bucketDataLength);
+                    var newBucket = new Bucket(currentTime, bucketDataLength);
                     buckets.addLast(newBucket);
                     return newBucket;
                 } else {
                     // We go into a loop so that it will create as many buckets as needed to catch up to the current time
                     // as we want the buckets complete even if we don't have transactions during a period of time.
-                    for (int i = 0; i < numberOfBuckets; i++) {
+                    for (var i = 0; i < numberOfBuckets; i++) {
                         // we have at least 1 bucket so retrieve it
-                        Bucket lastBucket = buckets.peekLast();
+                        var lastBucket = buckets.peekLast();
                         if (currentTime < lastBucket.windowStart + this.bucketSizeInMilliseconds) {
                             // if we're within the bucket 'window of time' return the current one
                             // NOTE: We do not worry if we are BEFORE the window in a weird case of where thread scheduling causes that to occur,
@@ -267,7 +267,7 @@ public class HystrixRollingPercentile {
                             // recursively call getCurrentBucket which will create a new bucket and return it
                             return getCurrentBucket();
                         } else { // we're past the window so we need to create a new bucket
-                            Bucket[] allBuckets = buckets.getArray();
+                            var allBuckets = buckets.getArray();
                             // create a new bucket and add it as the new 'last' (once this is done other threads will start using it on subsequent retrievals)
                             buckets.addLast(new Bucket(lastBucket.windowStart + this.bucketSizeInMilliseconds, bucketDataLength));
                             // we created a new bucket so let's re-generate the PercentileSnapshot (not including the new bucket)
@@ -324,7 +324,7 @@ public class HystrixRollingPercentile {
         }
 
         public void addValue(int... latency) {
-            for (int l : latency) {
+            for (var l : latency) {
                 /* We just wrap around the beginning and over-write if we go past 'dataLength' as that will effectively cause us to "sample" the most recent data */
                 list.set(index.getAndIncrement() % length, l);
                 // TODO Alternative to AtomicInteger? The getAndIncrement may be a source of contention on high throughput circuits on large multi-core systems.
@@ -352,20 +352,20 @@ public class HystrixRollingPercentile {
         private final int mean;
 
         PercentileSnapshot(Bucket[] buckets) {
-            int lengthFromBuckets = 0;
+            var lengthFromBuckets = 0;
             // we need to calculate it dynamically as it could have been changed by properties (rare, but possible)
             // also this way we capture the actual index size rather than the max so size the int[] to only what we need
-            for (Bucket bd : buckets) {
+            for (var bd : buckets) {
                 lengthFromBuckets += bd.data.length;
             }
             data = new int[lengthFromBuckets];
-            int index = 0;
-            int sum = 0;
-            for (Bucket bd : buckets) {
-                PercentileBucketData pbd = bd.data;
-                int length = pbd.length();
-                for (int i = 0; i < length; i++) {
-                    int v = pbd.list.get(i);
+            var index = 0;
+            var sum = 0;
+            for (var bd : buckets) {
+                var pbd = bd.data;
+                var length = pbd.length();
+                for (var i = 0; i < length; i++) {
+                    var v = pbd.list.get(i);
                     this.data[index++] = v;
                     sum += v;
                 }
@@ -384,8 +384,8 @@ public class HystrixRollingPercentile {
             this.data = data;
             this.length = data.length;
 
-            int sum = 0;
-            for (int v : data) {
+            var sum = 0;
+            for (var v : data) {
                 sum += v;
             }
             this.mean = sum / this.length;
@@ -425,11 +425,11 @@ public class HystrixRollingPercentile {
             }
 
             // ranking (http://en.wikipedia.org/wiki/Percentile#Alternative_methods)
-            double rank = (percent / 100.0) * length;
+            var rank = (percent / 100.0) * length;
 
             // linear interpolation between closest ranks
-            int iLow = (int) Math.floor(rank);
-            int iHigh = (int) Math.ceil(rank);
+            var iLow = (int) Math.floor(rank);
+            var iHigh = (int) Math.ceil(rank);
             assert 0 <= iLow && iLow <= rank && rank <= iHigh && iHigh <= length;
             assert (iHigh - iLow) <= 1;
             if (iHigh >= length) {
@@ -503,8 +503,8 @@ public class HystrixRollingPercentile {
                  * but since we never clear the data directly, only increment/decrement head/tail we would never get a NULL
                  * just potentially return stale data which we are okay with doing
                  */
-                ArrayList<Bucket> array = new ArrayList<>();
-                for (int i = 0; i < size; i++) {
+                var array = new ArrayList<Bucket>();
+                for (var i = 0; i < size; i++) {
                     array.add(data.get(convert(i)));
                 }
                 return array.toArray(new Bucket[array.size()]);
@@ -549,7 +549,7 @@ public class HystrixRollingPercentile {
         }
 
         BucketCircularArray(int size) {
-            AtomicReferenceArray<Bucket> _buckets = new AtomicReferenceArray<>(size + 1); // + 1 as extra room for the add/remove;
+            var _buckets = new AtomicReferenceArray<Bucket>(size + 1); // + 1 as extra room for the add/remove;
             state = new AtomicReference<>(new ListState(_buckets, 0, 0));
             dataLength = _buckets.length();
             numBuckets = size;
@@ -570,8 +570,8 @@ public class HystrixRollingPercentile {
                  * The rare scenario in which that would occur, we'll accept the possible data loss while clearing it
                  * since the code has stated its desire to clear() anyways.
                  */
-                ListState current = state.get();
-                ListState newState = current.clear();
+                var current = state.get();
+                var newState = current.clear();
                 if (state.compareAndSet(current, newState)) {
                     return;
                 }
@@ -586,9 +586,9 @@ public class HystrixRollingPercentile {
         }
 
         public void addLast(Bucket o) {
-            ListState currentState = state.get();
+            var currentState = state.get();
             // create new version of state (what we want it to become)
-            ListState newState = currentState.addBucket(o);
+            var newState = currentState.addBucket(o);
 
             /*
              * use compareAndSet to set in case multiple threads are attempting (which shouldn't be the case because since addLast will ONLY be called by a single thread at a time due to protection

@@ -326,7 +326,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
         // us a ReplaySubject to buffer the eagerly subscribed-to Observable
         ReplaySubject<R> subject = ReplaySubject.create();
         // eagerly kick off subscription
-        final Subscription sourceSubscription = toObservable().subscribe(subject);
+        final var sourceSubscription = toObservable().subscribe(subject);
         // return the subject that can be subscribed to later while the execution has already started
         return subject.doOnUnsubscribe(sourceSubscription::unsubscribe);
     }
@@ -358,7 +358,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
      *             if invoked more than once
      */
     public Observable<R> toObservable() {
-        final AbstractCommand<R> _cmd = this;
+        final var _cmd = this;
 
         //doOnCompleted handler already did all of the SUCCESS work
         //doOnError handler already did all of the FAILURE/TIMEOUT/REJECTION/BAD_REQUEST work
@@ -408,7 +408,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
         };
 
         final Func1<R, R> wrapWithAllOnNextHooks = r -> {
-            R afterFirstApplication = r;
+            var afterFirstApplication = r;
 
             try {
                 afterFirstApplication = executionHook.onComplete(_cmd, r);
@@ -435,7 +435,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
         return Observable.defer(() -> {
              /* this is a stateful object so can only be used once */
             if (!commandState.compareAndSet(CommandState.NOT_STARTED, CommandState.OBSERVABLE_CHAIN_CREATED)) {
-                IllegalStateException ex = new IllegalStateException("This instance can only be executed once. Please instantiate a new instance.");
+                var ex = new IllegalStateException("This instance can only be executed once. Please instantiate a new instance.");
                 //TODO make a new error type for this
                 throw new HystrixRuntimeException(FailureType.BAD_REQUEST_EXCEPTION, _cmd.getClass(), getLogMessagePrefix() + " command executed multiple times - this is not permitted.", ex, null);
             }
@@ -449,19 +449,19 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
                 }
             }
 
-            final boolean requestCacheEnabled = isRequestCachingEnabled();
-            final String cacheKey = getCacheKey();
+            final var requestCacheEnabled = isRequestCachingEnabled();
+            final var cacheKey = getCacheKey();
 
             /* try from cache first */
             if (requestCacheEnabled) {
-                HystrixCommandResponseFromCache<R> fromCache = (HystrixCommandResponseFromCache<R>) requestCache.get(cacheKey);
+                var fromCache = (HystrixCommandResponseFromCache<R>) requestCache.get(cacheKey);
                 if (fromCache != null) {
                     isResponseFromCache = true;
                     return handleRequestCacheHitAndEmitValues(fromCache, _cmd);
                 }
             }
 
-            Observable<R> hystrixObservable =
+            var hystrixObservable =
                     Observable.defer(applyHystrixSemantics)
                             .map(wrapWithAllOnNextHooks);
 
@@ -470,8 +470,8 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
             // put in cache
             if (requestCacheEnabled && cacheKey != null) {
                 // wrap it for caching
-                HystrixCachedObservable<R> toCache = HystrixCachedObservable.from(hystrixObservable, _cmd);
-                HystrixCommandResponseFromCache<R> fromCache = (HystrixCommandResponseFromCache<R>) requestCache.putIfAbsent(cacheKey, toCache);
+                var toCache = HystrixCachedObservable.from(hystrixObservable, _cmd);
+                var fromCache = (HystrixCommandResponseFromCache<R>) requestCache.putIfAbsent(cacheKey, toCache);
                 if (fromCache != null) {
                     // another thread beat us so we'll use the cached value instead
                     toCache.unsubscribe();
@@ -499,8 +499,8 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         /* determine if we're allowed to execute */
         if (circuitBreaker.attemptExecution()) {
-            final TryableSemaphore executionSemaphore = getExecutionSemaphore();
-            final AtomicBoolean semaphoreHasBeenReleased = new AtomicBoolean(false);
+            final var executionSemaphore = getExecutionSemaphore();
+            final var semaphoreHasBeenReleased = new AtomicBoolean(false);
             final Action0 singleSemaphoreRelease = () -> {
                 if (semaphoreHasBeenReleased.compareAndSet(false, true)) {
                     executionSemaphore.release();
@@ -536,7 +536,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
      * @return R
      */
     private Observable<R> executeCommandAndObserve(final AbstractCommand<R> _cmd) {
-        final HystrixRequestContext currentRequestContext = HystrixRequestContext.getContextForCurrentThread();
+        final var currentRequestContext = HystrixRequestContext.getContextForCurrentThread();
 
         final Action1<R> markEmits = r -> {
             if (shouldOutputOnNextEvents()) {
@@ -544,7 +544,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
                 eventNotifier.markEvent(HystrixEventType.EMIT, commandKey);
             }
             if (commandIsScalar()) {
-                long latency = System.currentTimeMillis() - executionResult.getStartTimestamp();
+                var latency = System.currentTimeMillis() - executionResult.getStartTimestamp();
                 eventNotifier.markEvent(HystrixEventType.SUCCESS, commandKey);
                 executionResult = executionResult.addEvent((int) latency, HystrixEventType.SUCCESS);
                 eventNotifier.markCommandExecution(getCommandKey(), properties.executionIsolationStrategy().get(), (int) latency, executionResult.getOrderedList());
@@ -554,7 +554,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         final Action0 markOnCompleted = () -> {
             if (!commandIsScalar()) {
-                long latency = System.currentTimeMillis() - executionResult.getStartTimestamp();
+                var latency = System.currentTimeMillis() - executionResult.getStartTimestamp();
                 eventNotifier.markEvent(HystrixEventType.SUCCESS, commandKey);
                 executionResult = executionResult.addEvent((int) latency, HystrixEventType.SUCCESS);
                 eventNotifier.markCommandExecution(getCommandKey(), properties.executionIsolationStrategy().get(), (int) latency, executionResult.getOrderedList());
@@ -564,7 +564,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         final Func1<Throwable, Observable<R>> handleFallback = t -> {
             circuitBreaker.markNonSuccess();
-            Exception e = getExceptionFromThrowable(t);
+            var e = getExceptionFromThrowable(t);
             executionResult = executionResult.setExecutionException(e);
             if (e instanceof RejectedExecutionException) {
                 return handleThreadPoolRejectionViaFallback(e);
@@ -694,8 +694,8 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
      *             if getFallback() fails (throws an Exception) or is rejected by the semaphore
      */
     private Observable<R> getFallbackOrThrowException(final AbstractCommand<R> _cmd, final HystrixEventType eventType, final FailureType failureType, final String message, final Exception originalException) {
-        final HystrixRequestContext requestContext = HystrixRequestContext.getContextForCurrentThread();
-        long latency = System.currentTimeMillis() - executionResult.getStartTimestamp();
+        final var requestContext = HystrixRequestContext.getContextForCurrentThread();
+        var latency = System.currentTimeMillis() - executionResult.getStartTimestamp();
         // record the executionResult
         // do this before executing fallback so it can be queried from within getFallback (see See https://github.com/Netflix/Hystrix/pull/144)
         executionResult = executionResult.addEvent((int) latency, eventType);
@@ -704,7 +704,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
             logger.error("Unrecoverable Error for HystrixCommand so will throw HystrixRuntimeException and not apply fallback. ", originalException);
 
             /* executionHook for all errors */
-            Exception e = wrapWithOnErrorHook(failureType, originalException);
+            var e = wrapWithOnErrorHook(failureType, originalException);
             return Observable.error(new HystrixRuntimeException(failureType, this.getClass(), getLogMessagePrefix() + " " + message + " and encountered unrecoverable error.", e, null));
         } else {
             if (isRecoverableError(originalException)) {
@@ -724,17 +724,17 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
                 };
 
                 final Action0 markFallbackCompleted = () -> {
-                    long latency1 = System.currentTimeMillis() - executionResult.getStartTimestamp();
+                    var latency1 = System.currentTimeMillis() - executionResult.getStartTimestamp();
                     eventNotifier.markEvent(HystrixEventType.FALLBACK_SUCCESS, commandKey);
                     executionResult = executionResult.addEvent((int) latency1, HystrixEventType.FALLBACK_SUCCESS);
                 };
 
                 final Func1<Throwable, Observable<R>> handleFallbackError = t -> {
                     /* executionHook for all errors */
-                    Exception e = wrapWithOnErrorHook(failureType, originalException);
-                    Exception fe = getExceptionFromThrowable(t);
+                    var e = wrapWithOnErrorHook(failureType, originalException);
+                    var fe = getExceptionFromThrowable(t);
 
-                    long latency2 = System.currentTimeMillis() - executionResult.getStartTimestamp();
+                    var latency2 = System.currentTimeMillis() - executionResult.getStartTimestamp();
                     Exception toEmit;
 
                     if (fe instanceof UnsupportedOperationException) {
@@ -759,8 +759,8 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
                     return Observable.error(toEmit);
                 };
 
-                final TryableSemaphore fallbackSemaphore = getFallbackSemaphore();
-                final AtomicBoolean semaphoreHasBeenReleased = new AtomicBoolean(false);
+                final var fallbackSemaphore = getFallbackSemaphore();
+                final var semaphoreHasBeenReleased = new AtomicBoolean(false);
                 final Action0 singleSemaphoreRelease = () -> {
                     if (semaphoreHasBeenReleased.compareAndSet(false, true)) {
                         fallbackSemaphore.release();
@@ -843,29 +843,29 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
     }
 
     private void cleanUpAfterResponseFromCache(boolean commandExecutionStarted) {
-        Reference<TimerListener> tl = timeoutTimer.get();
+        var tl = timeoutTimer.get();
         if (tl != null) {
             tl.clear();
         }
 
-        final long latency = System.currentTimeMillis() - commandStartTimestamp;
+        final var latency = System.currentTimeMillis() - commandStartTimestamp;
         executionResult = executionResult
                 .addEvent(-1, HystrixEventType.RESPONSE_FROM_CACHE)
                 .markUserThreadCompletion(latency)
                 .setNotExecutedInThread();
-        ExecutionResult cacheOnlyForMetrics = ExecutionResult.from(HystrixEventType.RESPONSE_FROM_CACHE)
+        var cacheOnlyForMetrics = ExecutionResult.from(HystrixEventType.RESPONSE_FROM_CACHE)
                 .markUserThreadCompletion(latency);
         metrics.markCommandDone(cacheOnlyForMetrics, commandKey, threadPoolKey, commandExecutionStarted);
         eventNotifier.markEvent(HystrixEventType.RESPONSE_FROM_CACHE, commandKey);
     }
 
     private void handleCommandEnd(boolean commandExecutionStarted) {
-        Reference<TimerListener> tl = timeoutTimer.get();
+        var tl = timeoutTimer.get();
         if (tl != null) {
             tl.clear();
         }
 
-        long userThreadLatency = System.currentTimeMillis() - commandStartTimestamp;
+        var userThreadLatency = System.currentTimeMillis() - commandStartTimestamp;
         executionResult = executionResult.markUserThreadCompletion((int) userThreadLatency);
         if (executionResultAtTimeOfCancellation == null) {
             metrics.markCommandDone(executionResult, commandKey, threadPoolKey, commandExecutionStarted);
@@ -914,13 +914,13 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
     }
 
     private Observable<R> handleBadRequestByEmittingError(Exception underlying) {
-        Exception toEmit = underlying;
+        var toEmit = underlying;
 
         try {
-            long executionLatency = System.currentTimeMillis() - executionResult.getStartTimestamp();
+            var executionLatency = System.currentTimeMillis() - executionResult.getStartTimestamp();
             eventNotifier.markEvent(HystrixEventType.BAD_REQUEST, commandKey);
             executionResult = executionResult.addEvent((int) executionLatency, HystrixEventType.BAD_REQUEST);
-            Exception decorated = executionHook.onError(this, FailureType.BAD_REQUEST_EXCEPTION, underlying);
+            var decorated = executionHook.onError(this, FailureType.BAD_REQUEST_EXCEPTION, underlying);
 
             if (decorated instanceof HystrixBadRequestException) {
                 toEmit = decorated;
@@ -951,7 +951,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
     }
 
     private Observable<R> handleFallbackRejectionByEmittingError() {
-        long latencyWithFallback = System.currentTimeMillis() - executionResult.getStartTimestamp();
+        var latencyWithFallback = System.currentTimeMillis() - executionResult.getStartTimestamp();
         eventNotifier.markEvent(HystrixEventType.FALLBACK_REJECTION, commandKey);
         executionResult = executionResult.addEvent((int) latencyWithFallback, HystrixEventType.FALLBACK_REJECTION);
         logger.debug("HystrixCommand Fallback Rejection."); // debug only since we're throwing the exception and someone higher will do something with it
@@ -965,7 +965,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
         eventNotifier.markEvent(HystrixEventType.FALLBACK_DISABLED, commandKey);
 
         /* executionHook for all errors */
-        Exception wrapped = wrapWithOnErrorHook(failureType, underlying);
+        var wrapped = wrapWithOnErrorHook(failureType, underlying);
         return Observable.error(new HystrixRuntimeException(failureType, this.getClass(), getLogMessagePrefix() + " " + message + " and fallback disabled.", wrapped, null));
     }
 
@@ -991,7 +991,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
      */
     private boolean isUnrecoverable(Throwable t) {
         if (t != null && t.getCause() != null) {
-            Throwable cause = t.getCause();
+            var cause = t.getCause();
             if (cause instanceof StackOverflowError) {
                 return true;
             } else if (cause instanceof VirtualMachineError) {
@@ -1007,7 +1007,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
     private boolean isRecoverableError(Throwable t) {
         if (t != null && t.getCause() != null) {
-            Throwable cause = t.getCause();
+            var cause = t.getCause();
             if (cause instanceof java.lang.Error) {
                 return !isUnrecoverable(t);
             }
@@ -1044,14 +1044,14 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @Override
         public Subscriber<? super R> call(final Subscriber<? super R> child) {
-            final CompositeSubscription s = new CompositeSubscription();
+            final var s = new CompositeSubscription();
             // if the child unsubscribes we unsubscribe our parent as well
             child.add(s);
 
             //capture the HystrixRequestContext upfront so that we can use it in the timeout thread later
-            final HystrixRequestContext hystrixRequestContext = HystrixRequestContext.getContextForCurrentThread();
+            final var hystrixRequestContext = HystrixRequestContext.getContextForCurrentThread();
 
-            TimerListener listener = new TimerListener() {
+            var listener = new TimerListener() {
 
                 @Override
                 public void tick() {
@@ -1064,7 +1064,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
                         // shut down the original request
                         s.unsubscribe();
 
-                        final HystrixContextRunnable timeoutRunnable = new HystrixContextRunnable(originalCommand.concurrencyStrategy, hystrixRequestContext, () -> child.onError(new HystrixTimeoutException()));
+                        final var timeoutRunnable = new HystrixContextRunnable(originalCommand.concurrencyStrategy, hystrixRequestContext, () -> child.onError(new HystrixTimeoutException()));
 
                         timeoutRunnable.run();
                         //if it did not start, then we need to mark a command start for concurrency metrics, and then issue the timeout
@@ -1077,7 +1077,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
                 }
             };
 
-            final Reference<TimerListener> tl = HystrixTimer.getInstance().addTimerListener(listener);
+            final var tl = HystrixTimer.getInstance().addTimerListener(listener);
 
             // set externally so execute/queue can see this
             originalCommand.timeoutTimer.set(tl);
@@ -1142,7 +1142,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
      */
     protected TryableSemaphore getFallbackSemaphore() {
         if (fallbackSemaphoreOverride == null) {
-            TryableSemaphore _s = fallbackSemaphorePerCircuit.get(commandKey.name());
+            var _s = fallbackSemaphorePerCircuit.get(commandKey.name());
             if (_s == null) {
                 // we didn't find one cache so setup
                 fallbackSemaphorePerCircuit.putIfAbsent(commandKey.name(), new TryableSemaphoreActual(properties.fallbackIsolationSemaphoreMaxConcurrentRequests()));
@@ -1164,7 +1164,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
     protected TryableSemaphore getExecutionSemaphore() {
         if (properties.executionIsolationStrategy().get() == ExecutionIsolationStrategy.SEMAPHORE) {
             if (executionSemaphoreOverride == null) {
-                TryableSemaphore _s = executionSemaphorePerCircuit.get(commandKey.name());
+                var _s = executionSemaphorePerCircuit.get(commandKey.name());
                 if (_s == null) {
                     // we didn't find one cache so setup
                     executionSemaphorePerCircuit.putIfAbsent(commandKey.name(), new TryableSemaphoreActual(properties.executionIsolationSemaphoreMaxConcurrentRequests()));
@@ -1268,13 +1268,13 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
                 @Override
                 public void onError(Throwable e) {
-                    Exception wrappedEx = wrapWithOnExecutionErrorHook(e);
+                    var wrappedEx = wrapWithOnExecutionErrorHook(e);
                     subscriber.onError(wrappedEx);
                 }
 
                 @Override
                 public void onNext(R r) {
-                    R wrappedValue = wrapWithOnExecutionEmitHook(r);
+                    var wrappedValue = wrapWithOnExecutionEmitHook(r);
                     subscriber.onNext(wrappedValue);
                 }
             };
@@ -1303,13 +1303,13 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
                 @Override
                 public void onError(Throwable e) {
-                    Exception wrappedEx = wrapWithOnFallbackErrorHook(e);
+                    var wrappedEx = wrapWithOnFallbackErrorHook(e);
                     subscriber.onError(wrappedEx);
                 }
 
                 @Override
                 public void onNext(R r) {
-                    R wrappedValue = wrapWithOnFallbackEmitHook(r);
+                    var wrappedValue = wrapWithOnFallbackEmitHook(r);
                     subscriber.onNext(wrappedValue);
                 }
             };
@@ -1335,9 +1335,9 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
                 @Override
                 public void onError(Throwable t) {
-                    Exception e = getExceptionFromThrowable(t);
+                    var e = getExceptionFromThrowable(t);
                     try {
-                        Exception wrappedEx = executionHook.onRunError(cmd, e);
+                        var wrappedEx = executionHook.onRunError(cmd, e);
                         subscriber.onError(wrappedEx);
                     } catch (Throwable hookEx) {
                         logger.warn("Error calling HystrixCommandExecutionHook.onRunError", hookEx);
@@ -1348,7 +1348,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
                 @Override
                 public void onNext(R r) {
                     try {
-                        R wrappedValue = executionHook.onRunSuccess(cmd, r);
+                        var wrappedValue = executionHook.onRunSuccess(cmd, r);
                         subscriber.onNext(wrappedValue);
                     } catch (Throwable hookEx) {
                         logger.warn("Error calling HystrixCommandExecutionHook.onRunSuccess", hookEx);
@@ -1385,7 +1385,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
                 @Override
                 public void onNext(R r) {
                     try {
-                        R wrappedValue = executionHook.onFallbackSuccess(cmd, r);
+                        var wrappedValue = executionHook.onFallbackSuccess(cmd, r);
                         subscriber.onNext(wrappedValue);
                     } catch (Throwable hookEx) {
                         logger.warn("Error calling HystrixCommandExecutionHook.onFallbackSuccess", hookEx);
@@ -1397,7 +1397,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
     }
 
     private Exception wrapWithOnExecutionErrorHook(Throwable t) {
-        Exception e = getExceptionFromThrowable(t);
+        var e = getExceptionFromThrowable(t);
         try {
             return executionHook.onExecutionError(this, e);
         } catch (Throwable hookEx) {
@@ -1407,7 +1407,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
     }
 
     private Exception wrapWithOnFallbackErrorHook(Throwable t) {
-        Exception e = getExceptionFromThrowable(t);
+        var e = getExceptionFromThrowable(t);
         try {
             if (isFallbackUserDefined()) {
                 return executionHook.onFallbackError(this, e);
@@ -1421,7 +1421,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
     }
 
     private Exception wrapWithOnErrorHook(FailureType failureType, Throwable t) {
-        Exception e = getExceptionFromThrowable(t);
+        var e = getExceptionFromThrowable(t);
         try {
             return executionHook.onError(this, failureType, e);
         } catch (Throwable hookEx) {
@@ -1496,7 +1496,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
             return e.getCause();
         }
         // we don't know what kind of exception this is so create a generic message and throw a new HystrixRuntimeException
-        String message = getLogMessagePrefix() + " failed while executing.";
+        var message = getLogMessagePrefix() + " failed while executing.";
         logger.debug(message, e); // debug only since we're throwing the exception and someone higher will do something with it
         return new HystrixRuntimeException(FailureType.COMMAND_EXCEPTION, this.getClass(), message, e, null);
 
@@ -1524,7 +1524,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @Override
         public boolean tryAcquire() {
-            int currentCount = count.incrementAndGet();
+            var currentCount = count.incrementAndGet();
             if (currentCount > numberOfPermits.get()) {
                 count.decrementAndGet();
                 return false;
@@ -1944,7 +1944,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @Override
         public <T> void onRunStart(HystrixInvokable<T> commandInstance) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 onRunStart(c);
             }
@@ -1960,7 +1960,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
         @Override
         @Deprecated
         public <T> T onRunSuccess(HystrixInvokable<T> commandInstance, T response) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 response = onRunSuccess(c, response);
             }
@@ -1976,7 +1976,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
         @Override
         @Deprecated
         public <T> Exception onRunError(HystrixInvokable<T> commandInstance, Exception e) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 e = onRunError(c, e);
             }
@@ -1991,7 +1991,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @Override
         public <T> void onFallbackStart(HystrixInvokable<T> commandInstance) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 onFallbackStart(c);
             }
@@ -2007,7 +2007,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
         @Override
         @Deprecated
         public <T> T onFallbackSuccess(HystrixInvokable<T> commandInstance, T fallbackResponse) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 fallbackResponse = onFallbackSuccess(c, fallbackResponse);
             }
@@ -2022,7 +2022,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @Override
         public <T> Exception onFallbackError(HystrixInvokable<T> commandInstance, Exception e) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 e = onFallbackError(c, e);
             }
@@ -2037,7 +2037,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @Override
         public <T> void onStart(HystrixInvokable<T> commandInstance) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 onStart(c);
             }
@@ -2053,7 +2053,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
         @Override
         @Deprecated
         public <T> T onComplete(HystrixInvokable<T> commandInstance, T response) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 response = onComplete(c, response);
             }
@@ -2068,7 +2068,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @Override
         public <T> Exception onError(HystrixInvokable<T> commandInstance, FailureType failureType, Exception e) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 e = onError(c, failureType, e);
             }
@@ -2083,7 +2083,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @Override
         public <T> void onThreadStart(HystrixInvokable<T> commandInstance) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 onThreadStart(c);
             }
@@ -2098,7 +2098,7 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @Override
         public <T> void onThreadComplete(HystrixInvokable<T> commandInstance) {
-            HystrixCommand<T> c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
+            var c = getHystrixCommandFromAbstractIfApplicable(commandInstance);
             if (c != null) {
                 onThreadComplete(c);
             }
@@ -2117,8 +2117,8 @@ abstract class AbstractCommand<R> implements HystrixInvokableInfo, HystrixObserv
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private <T> HystrixCommand<T> getHystrixCommandFromAbstractIfApplicable(HystrixInvokable<T> commandInstance) {
-            if (commandInstance instanceof HystrixCommand) {
-                return (HystrixCommand) commandInstance;
+            if (commandInstance instanceof HystrixCommand hc) {
+                return hc;
             } else {
                 return null;
             }

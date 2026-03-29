@@ -63,27 +63,27 @@ public class HystrixThreadEventStream {
     private static final ThreadLocal<HystrixThreadEventStream> threadLocalStreams = ThreadLocal.withInitial(() -> new HystrixThreadEventStream(Thread.currentThread()));
 
     private static final Action1<HystrixCommandExecutionStarted> writeCommandStartsToShardedStreams = event -> {
-        HystrixCommandStartStream commandStartStream = HystrixCommandStartStream.getInstance(event.getCommandKey());
+        var commandStartStream = HystrixCommandStartStream.getInstance(event.getCommandKey());
         commandStartStream.write(event);
 
         if (event.isExecutedInThread()) {
-            HystrixThreadPoolStartStream threadPoolStartStream = HystrixThreadPoolStartStream.getInstance(event.getThreadPoolKey());
+            var threadPoolStartStream = HystrixThreadPoolStartStream.getInstance(event.getThreadPoolKey());
             threadPoolStartStream.write(event);
         }
     };
 
     private static final Action1<HystrixCommandCompletion> writeCommandCompletionsToShardedStreams = commandCompletion -> {
-        HystrixCommandCompletionStream commandStream = HystrixCommandCompletionStream.getInstance(commandCompletion.getCommandKey());
+        var commandStream = HystrixCommandCompletionStream.getInstance(commandCompletion.getCommandKey());
         commandStream.write(commandCompletion);
 
         if (commandCompletion.isExecutedInThread() || commandCompletion.isResponseThreadPoolRejected()) {
-            HystrixThreadPoolCompletionStream threadPoolStream = HystrixThreadPoolCompletionStream.getInstance(commandCompletion.getThreadPoolKey());
+            var threadPoolStream = HystrixThreadPoolCompletionStream.getInstance(commandCompletion.getThreadPoolKey());
             threadPoolStream.write(commandCompletion);
         }
     };
 
     private static final Action1<HystrixCollapserEvent> writeCollapserExecutionsToShardedStreams = collapserEvent -> {
-        HystrixCollapserEventStream collapserStream = HystrixCollapserEventStream.getInstance(collapserEvent.getCollapserKey());
+        var collapserStream = HystrixCollapserEventStream.getInstance(collapserEvent.getCollapserKey());
         collapserStream.write(collapserEvent);
     };
 
@@ -122,23 +122,23 @@ public class HystrixThreadEventStream {
 
     public void commandExecutionStarted(HystrixCommandKey commandKey, HystrixThreadPoolKey threadPoolKey,
                                         HystrixCommandProperties.ExecutionIsolationStrategy isolationStrategy, int currentConcurrency) {
-        HystrixCommandExecutionStarted event = new HystrixCommandExecutionStarted(commandKey, threadPoolKey, isolationStrategy, currentConcurrency);
+        var event = new HystrixCommandExecutionStarted(commandKey, threadPoolKey, isolationStrategy, currentConcurrency);
         writeOnlyCommandStartSubject.onNext(event);
     }
 
     public void executionDone(ExecutionResult executionResult, HystrixCommandKey commandKey, HystrixThreadPoolKey threadPoolKey) {
-        HystrixCommandCompletion event = HystrixCommandCompletion.from(executionResult, commandKey, threadPoolKey);
+        var event = HystrixCommandCompletion.from(executionResult, commandKey, threadPoolKey);
         writeOnlyCommandCompletionSubject.onNext(event);
     }
 
     public void collapserResponseFromCache(HystrixCollapserKey collapserKey) {
-        HystrixCollapserEvent collapserEvent = HystrixCollapserEvent.from(collapserKey, HystrixEventType.Collapser.RESPONSE_FROM_CACHE, 1);
+        var collapserEvent = HystrixCollapserEvent.from(collapserKey, HystrixEventType.Collapser.RESPONSE_FROM_CACHE, 1);
         writeOnlyCollapserSubject.onNext(collapserEvent);
     }
 
     public void collapserBatchExecuted(HystrixCollapserKey collapserKey, int batchSize) {
-        HystrixCollapserEvent batchExecution = HystrixCollapserEvent.from(collapserKey, HystrixEventType.Collapser.BATCH_EXECUTED, 1);
-        HystrixCollapserEvent batchAdditions = HystrixCollapserEvent.from(collapserKey, HystrixEventType.Collapser.ADDED_TO_BATCH, batchSize);
+        var batchExecution = HystrixCollapserEvent.from(collapserKey, HystrixEventType.Collapser.BATCH_EXECUTED, 1);
+        var batchAdditions = HystrixCollapserEvent.from(collapserKey, HystrixEventType.Collapser.ADDED_TO_BATCH, batchSize);
         writeOnlyCollapserSubject.onNext(batchExecution);
         writeOnlyCollapserSubject.onNext(batchAdditions);
     }

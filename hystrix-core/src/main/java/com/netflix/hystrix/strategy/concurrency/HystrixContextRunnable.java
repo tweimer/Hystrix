@@ -47,7 +47,7 @@ public class HystrixContextRunnable implements Runnable {
 
     @Override
     public void run() {
-        HystrixRequestContext existingState = HystrixRequestContext.getContextForCurrentThread();
+        var existingState = HystrixRequestContext.getContextForCurrentThread();
         try {
             // set the state of this thread to that of its parent
             HystrixRequestContext.setContextOnCurrentThread(parentThreadState);

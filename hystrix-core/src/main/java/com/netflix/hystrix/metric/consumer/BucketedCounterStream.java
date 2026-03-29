@@ -24,7 +24,6 @@ import rx.functions.Func2;
 import rx.subjects.BehaviorSubject;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -49,8 +48,8 @@ public abstract class BucketedCounterStream<Event extends HystrixEvent, Bucket, 
         this.numBuckets = numBuckets;
         this.reduceBucketToSummary = eventBucket -> eventBucket.reduce(getEmptyBucketSummary(), appendRawEventToBucket);
 
-        final List<Bucket> emptyEventCountsToStart = new ArrayList<>();
-        for (int i = 0; i < numBuckets; i++) {
+        final var emptyEventCountsToStart = new ArrayList<Bucket>();
+        for (var i = 0; i < numBuckets; i++) {
             emptyEventCountsToStart.add(getEmptyBucketSummary());
         }
 
@@ -74,10 +73,8 @@ public abstract class BucketedCounterStream<Event extends HystrixEvent, Bucket, 
     public void startCachingStreamValuesIfUnstarted() {
         if (subscription.get() == null) {
             //the stream is not yet started
-            Subscription candidateSubscription = observe().subscribe(counterSubject);
-            if (subscription.compareAndSet(null, candidateSubscription)) {
-                //won the race to set the subscription
-            } else {
+            var candidateSubscription = observe().subscribe(counterSubject);
+            if (!subscription.compareAndSet(null, candidateSubscription)) {
                 //lost the race to set the subscription, so we need to cancel this one
                 candidateSubscription.unsubscribe();
             }
@@ -98,7 +95,7 @@ public abstract class BucketedCounterStream<Event extends HystrixEvent, Bucket, 
     }
 
     public void unsubscribe() {
-        Subscription s = subscription.get();
+        var s = subscription.get();
         if (s != null) {
             s.unsubscribe();
             subscription.compareAndSet(s, null);

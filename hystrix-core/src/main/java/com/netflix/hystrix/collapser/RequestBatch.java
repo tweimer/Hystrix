@@ -162,9 +162,9 @@ public class RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> {
 
             try {
                 // shard batches
-                Collection<Collection<CollapsedRequest<ResponseType, RequestArgumentType>>> shards = commandCollapser.shardRequests(argumentMap.values());
+                var shards = commandCollapser.shardRequests(argumentMap.values());
                 // for each shard execute its requests 
-                for (final Collection<CollapsedRequest<ResponseType, RequestArgumentType>> shardRequests : shards) {
+                for (final var shardRequests : shards) {
                     try {
                         // create a new command to handle this batch of requests
                         var o = commandCollapser.createObservableCommand(shardRequests);

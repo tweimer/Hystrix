@@ -115,7 +115,7 @@ public class RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType
      * Called from RequestVariable.shutdown() to unschedule the task.
      */
     public void shutdown() {
-        RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> currentBatch = batch.getAndSet(null);
+        var currentBatch = batch.getAndSet(null);
         if (currentBatch != null) {
             currentBatch.shutdown();
         }
@@ -140,7 +140,7 @@ public class RequestCollapser<BatchReturnType, ResponseType, RequestArgumentType
                 try {
                     // we fetch current so that when multiple threads race
                     // we can do compareAndSet with the expected/new to ensure only one happens
-                    RequestBatch<BatchReturnType, ResponseType, RequestArgumentType> currentBatch = batch.get();
+                    var currentBatch = batch.get();
                     // 1) it can be null if it got shutdown
                     // 2) we don't execute this batch if it has no requests and let it wait until next tick to be executed
                     if (currentBatch != null && currentBatch.getSize() > 0) {

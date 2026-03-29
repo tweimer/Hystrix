@@ -103,16 +103,16 @@ public class HystrixMetricsPublisherFactory {
 
     HystrixMetricsPublisherCommand getPublisherForCommand(HystrixCommandKey commandKey, HystrixCommandGroupKey commandOwner, HystrixCommandMetrics metrics, HystrixCircuitBreaker circuitBreaker, HystrixCommandProperties properties) {
         // attempt to retrieve from cache first
-        HystrixMetricsPublisherCommand publisher = commandPublishers.get(commandKey.name());
+        var publisher = commandPublishers.get(commandKey.name());
         if (publisher != null) {
             return publisher;
         } else {
             synchronized (this) {
-                HystrixMetricsPublisherCommand existingPublisher = commandPublishers.get(commandKey.name());
+                var existingPublisher = commandPublishers.get(commandKey.name());
                 if (existingPublisher != null) {
                     return existingPublisher;
                 } else {
-                    HystrixMetricsPublisherCommand newPublisher = HystrixPlugins.getInstance().getMetricsPublisher().getMetricsPublisherForCommand(commandKey, commandOwner, metrics, circuitBreaker, properties);
+                    var newPublisher = HystrixPlugins.getInstance().getMetricsPublisher().getMetricsPublisherForCommand(commandKey, commandOwner, metrics, circuitBreaker, properties);
                     commandPublishers.putIfAbsent(commandKey.name(), newPublisher);
                     newPublisher.initialize();
                     return newPublisher;
@@ -126,14 +126,14 @@ public class HystrixMetricsPublisherFactory {
 
     HystrixMetricsPublisherThreadPool getPublisherForThreadPool(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolMetrics metrics, HystrixThreadPoolProperties properties) {
         // attempt to retrieve from cache first
-        HystrixMetricsPublisherThreadPool publisher = threadPoolPublishers.get(threadPoolKey.name());
+        var publisher = threadPoolPublishers.get(threadPoolKey.name());
         if (publisher != null) {
             return publisher;
         }
         // it doesn't exist so we need to create it
         publisher = HystrixPlugins.getInstance().getMetricsPublisher().getMetricsPublisherForThreadPool(threadPoolKey, metrics, properties);
         // attempt to store it (race other threads)
-        HystrixMetricsPublisherThreadPool existing = threadPoolPublishers.putIfAbsent(threadPoolKey.name(), publisher);
+        var existing = threadPoolPublishers.putIfAbsent(threadPoolKey.name(), publisher);
         if (existing == null) {
             // we won the thread-race to store the instance we created so initialize it
             publisher.initialize();
@@ -164,16 +164,16 @@ public class HystrixMetricsPublisherFactory {
     // String is CollapserKey.name() (we can't use CollapserKey directly as we can't guarantee it implements hashcode/equals correctly)
     private final ConcurrentHashMap<String, HystrixMetricsPublisherCollapser> collapserPublishers = new ConcurrentHashMap<>();
 
-    /* package */ HystrixMetricsPublisherCollapser getPublisherForCollapser(HystrixCollapserKey collapserKey, HystrixCollapserMetrics metrics, HystrixCollapserProperties properties) {
+    HystrixMetricsPublisherCollapser getPublisherForCollapser(HystrixCollapserKey collapserKey, HystrixCollapserMetrics metrics, HystrixCollapserProperties properties) {
         // attempt to retrieve from cache first
-        HystrixMetricsPublisherCollapser publisher = collapserPublishers.get(collapserKey.name());
+        var publisher = collapserPublishers.get(collapserKey.name());
         if (publisher != null) {
             return publisher;
         }
         // it doesn't exist so we need to create it
         publisher = HystrixPlugins.getInstance().getMetricsPublisher().getMetricsPublisherForCollapser(collapserKey, metrics, properties);
         // attempt to store it (race other threads)
-        HystrixMetricsPublisherCollapser existing = collapserPublishers.putIfAbsent(collapserKey.name(), publisher);
+        var existing = collapserPublishers.putIfAbsent(collapserKey.name(), publisher);
         if (existing == null) {
             // we won the thread-race to store the instance we created so initialize it
             publisher.initialize();

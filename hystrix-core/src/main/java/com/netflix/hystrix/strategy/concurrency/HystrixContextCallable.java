@@ -43,7 +43,7 @@ public class HystrixContextCallable<K> implements Callable<K> {
 
     @Override
     public K call() throws Exception {
-        HystrixRequestContext existingState = HystrixRequestContext.getContextForCurrentThread();
+        var existingState = HystrixRequestContext.getContextForCurrentThread();
         try {
             // set the state of this thread to that of its parent
             HystrixRequestContext.setContextOnCurrentThread(parentThreadState);
